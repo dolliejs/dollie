@@ -1,0 +1,29 @@
+{
+  "name": "@dollie/core",
+  "version": "3.0.0",
+  "description": "Core of Dollie",
+  "author": "lenconda <i@lenconda.top>",
+  "homepage": "https://github.com/lenconda/dollie#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lenconda/dollie.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/lenconda/dollie/issues"
+  },
+  "dependencies": {
+    "@dollie/origins": "^3.0.0",
+    "diff": "^5.0.0",
+    "got": "^11.8.2",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/diff": "^5.0.0",
+    "@types/lodash": "^4.14.170"
+  }
+}

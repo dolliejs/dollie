@@ -1,0 +1,23 @@
+{
+  "name": "@dollie/origins",
+  "version": "3.0.0",
+  "description": "Dollie template origins",
+  "author": "lenconda <i@lenconda.top>",
+  "homepage": "https://github.com/lenconda/dollie#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lenconda/dollie.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/lenconda/dollie/issues"
+  },
+  "dependencies": {
+    "got": "^11.8.2",
+    "lodash": "^4.17.21"
+  }
+}
