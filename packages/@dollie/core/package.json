@@ -18,9 +18,11 @@
   },
   "dependencies": {
     "@dollie/origins": "^3.0.0",
+    "decompress": "^4.2.1",
     "diff": "^5.0.0",
     "got": "^11.8.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "memfs": "^3.2.2"
   },
   "devDependencies": {
     "@types/diff": "^5.0.0",
