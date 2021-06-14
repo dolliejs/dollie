@@ -22,7 +22,8 @@
     "diff": "^5.0.0",
     "got": "^11.8.2",
     "lodash": "^4.17.21",
-    "memfs": "^3.2.2"
+    "memfs": "^3.2.2",
+    "tunnel": "^0.0.6"
   },
   "devDependencies": {
     "@types/diff": "^5.0.0",

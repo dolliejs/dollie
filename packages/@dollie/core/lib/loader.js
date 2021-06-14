@@ -3,23 +3,29 @@ const _ = require('lodash');
 const path = require('path');
 const decompress = require('decompress');
 const { HTTPNotFoundError, HTTPTimeoutError } = require('./errors');
+const Url = require('url');
+const tunnel = require('tunnel');
+const fs = require('fs');
+const {
+  VIRTUAL_VOLUME_DESTINATION_PATHNAME,
+} = require('./constants');
 
 const downloadCompressedFile = async function(
   url,
   fileSystem,
-  destination,
   options = {},
 ) {
   const startTimestamp = Date.now();
+
   return new Promise((resolve, reject) => {
-    fileSystem.mkdirpSync(destination);
+    fileSystem.mkdirpSync(VIRTUAL_VOLUME_DESTINATION_PATHNAME);
 
     const getAbsolutePath = (filePath) => {
       const relativePathname = filePath.split('/').slice(1).join('/');
-      return path.resolve(destination, relativePathname);
+      return path.resolve(VIRTUAL_VOLUME_DESTINATION_PATHNAME, relativePathname);
     };
 
-    const downloaderOptions = _.merge({ timeout: 90000 }, options || {}, { isStream: true });
+    const downloaderOptions = _.merge(options || {}, { isStream: true });
 
     const downloader = got.stream(
       url,
@@ -65,6 +71,63 @@ const downloadCompressedFile = async function(
   });
 };
 
+const loadTemplate = async (
+  url,
+  fileSystem = fs,
+  options = {},
+) => {
+  const traverse = async function(
+    url,
+    fileSystem = fs,
+    retries = 0,
+    options = {},
+  ) {
+    const {
+      httpProxyUrl = '',
+      httpProxyAuth = '',
+      maximumRetryCount = 3,
+      ...originalOptions
+    } = options;
+    const gotOptions = _.clone(originalOptions);
+    if (httpProxyUrl) {
+      const { hostname: host, port } = Url.parse(httpProxyUrl);
+      const proxy = {
+        host,
+        port: parseInt(port, 10),
+      };
+      if (httpProxyAuth) { proxy.proxyAuth = httpProxyAuth; }
+      gotOptions.agent = {
+        http: tunnel.httpOverHttp({ proxy }),
+        https: tunnel.httpsOverHttp({ proxy }),
+      };
+    }
+    try {
+      return await downloadCompressedFile(
+        url,
+        fileSystem,
+        gotOptions,
+      );
+    } catch (error) {
+      if (error.code === 'E_SCAFFOLD_TIMEOUT' || error instanceof HTTPTimeoutError) {
+        if (retries < maximumRetryCount) {
+          return await traverse(
+            url,
+            fileSystem,
+            retries + 1,
+            options,
+          );
+        } else {
+          throw new Error(error?.message || 'download scaffold timed out');
+        }
+      } else {
+        throw error;
+      }
+    }
+  };
+  return await traverse(url, fileSystem, 0, options);
+};
+
 module.exports = {
   downloadCompressedFile,
+  loadTemplate,
 };
