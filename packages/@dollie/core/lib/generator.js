@@ -7,7 +7,7 @@ const { githubOrigin, gitlabOrigin } = require('@dollie/origins');
 const { Volume } = require('memfs');
 const { loadTemplate } = require('./loader');
 
-function Generator(name, config) {
+function Generator(name, config = {}) {
   this.templateName = '';
   this.templateOrigin = '';
 
@@ -21,7 +21,7 @@ function Generator(name, config) {
   };
 
   this.initialize = async function() {
-    const { customOrigins = [] } = config;
+    const { origins: customOrigins = [] } = config;
     origins = origins.concat(customOrigins);
     if (_.isString(name)) {
       [this.templateName, this.templateOrigin = 'github'] = name.split(':');
@@ -56,13 +56,15 @@ function Generator(name, config) {
       throw new ContextError(`origin \`${this.templateOrigin}\` url parsed with errors`);
     }
 
-    return await loadTemplate(url, virtualVolume, {
+    const duration = await loadTemplate(url, virtualVolume, {
       headers,
       ...({
         timeout: 90000,
       }),
       ...config.loader,
     });
+
+    return duration;
   };
 }
 
