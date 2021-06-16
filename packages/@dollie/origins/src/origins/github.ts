@@ -3,7 +3,7 @@ import createTemplateOrigin from '../create';
 
 export default createTemplateOrigin('github', {
   configPaths: ['token'],
-  getTemplateUrl: async function(name) {
+  getTemplateUrl: async (name) => {
     if (!_.isString(name)) {
       return '';
     }
