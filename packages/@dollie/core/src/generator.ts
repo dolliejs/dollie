@@ -1,4 +1,6 @@
-const _ = require('lodash');
+import { DollieConfig } from './interfaces';
+import _ from 'lodash';
+
 const {
   InvalidInputError,
   ContextError,
@@ -7,7 +9,7 @@ const { githubOrigin, gitlabOrigin } = require('@dollie/origins');
 const { Volume } = require('memfs');
 const { loadTemplate } = require('./loader');
 
-function Generator(name, config = {}) {
+function Generator(name, config: DollieConfig = {}) {
   this.templateName = '';
   this.templateOrigin = '';
 
@@ -65,6 +67,15 @@ function Generator(name, config = {}) {
     });
 
     return duration;
+  };
+
+  this.getScaffoldConfig = async function() {
+    const { getScaffoldConfig } = config;
+    if (!_.isFunction(getScaffoldConfig)) {
+      return {};
+    }
+    const dollieConfigFileContent = virtualVolume.readFileSync();
+    return await getScaffoldConfig();
   };
 }
 

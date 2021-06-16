@@ -1,5 +1,5 @@
 const VIRTUAL_VOLUME_DESTINATION_PATHNAME = '/template';
 
-module.exports = {
+export {
   VIRTUAL_VOLUME_DESTINATION_PATHNAME,
 };

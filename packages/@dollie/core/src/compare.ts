@@ -1,9 +1,10 @@
-const { diffLines } = require('diff');
-const _ = require('lodash');
+import { diffLines } from 'diff';
+import _ from 'lodash';
+import { DiffChange, PatchTable } from './interfaces';
 
-function diff(originalContent, currentContent) {
+const diff = (originalContent: string, currentContent: string): DiffChange[] => {
   const changes = diffLines(originalContent, currentContent || originalContent);
-  const result = [];
+  const result: DiffChange[] = [];
   let lineNumber = 0;
 
   const splitChanges = changes.reduce((result, currentItem) => {
@@ -26,7 +27,7 @@ function diff(originalContent, currentContent) {
   return result;
 };
 
-function merge(originalChanges, diffList) {
+const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffChange[] => {
   if (!originalChanges) {
     return [];
   }
@@ -36,7 +37,7 @@ function merge(originalChanges, diffList) {
   }
 
   const originalDiff = Array.from(originalChanges);
-  const patchTable = {};
+  const patchTable: PatchTable = {};
 
   for (const currentDiff of diffList) {
     for (const change of currentDiff) {
@@ -74,7 +75,7 @@ function merge(originalChanges, diffList) {
     }
   }
 
-  const blocks = [];
+  const blocks: Array<Array<DiffChange>> = [];
   const patches = Object.keys(patchTable).map(
     (patchIndex) => patchTable[patchIndex],
   );
@@ -103,7 +104,7 @@ function merge(originalChanges, diffList) {
   }, []);
 };
 
-module.exports = {
+export {
   diff,
   merge,
 };

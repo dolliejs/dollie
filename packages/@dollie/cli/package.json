@@ -1,27 +1,26 @@
 {
-  "name": "@dollie/origins",
+  "name": "@dollie/cli",
   "version": "3.0.0",
-  "description": "Dollie template origins",
+  "description": "Dollie CLI",
   "author": "lenconda <i@lenconda.top>",
   "homepage": "https://github.com/lenconda/dollie#readme",
   "license": "MIT",
-  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lenconda/dollie.git"
   },
+  "bin": {
+    "dollie": "bin/dollie.js"
+  },
   "scripts": {
-    "build": "tsc",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
     "url": "https://github.com/lenconda/dollie/issues"
   },
   "dependencies": {
-    "got": "^11.8.2",
-    "lodash": "^4.17.21"
+    "commander": "^7.2.0"
   },
-  "typings": "lib/index.d.ts",
   "devDependencies": {
     "@types/lodash": "^4.14.170",
     "@types/node": "^15.12.2",

@@ -1,24 +1,26 @@
-const _ = require('lodash');
-
-function createTemplateOrigin(name, metadata) {
-  if (!_.isString(name)) {
-    return null;
-  }
-
-  return {
-    name,
-    handler: async function(templateName, config) {
-      const { getTemplateUrl, getHeaders, configPaths } = metadata;
-      if (!_.isFunction(getTemplateUrl)) {
-        return null;
-      }
-      const originConfig = _.pick(_.get(config, name) || {}, configPaths || []);
-      return {
-        url: await getTemplateUrl(templateName, originConfig),
-        headers: _.isFunction(getHeaders) ? await getHeaders(templateName, originConfig) : {},
-      };
-    },
-  };
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-
-module.exports = createTemplateOrigin;
+Object.defineProperty(exports, "__esModule", { value: true });
+const lodash_1 = __importDefault(require("lodash"));
+const createTemplateOrigin = (name, metadata) => {
+    if (!lodash_1.default.isString(name)) {
+        return null;
+    }
+    return {
+        name,
+        handler: async (templateName, config) => {
+            const { getTemplateUrl, getHeaders, configPaths } = metadata;
+            if (!lodash_1.default.isFunction(getTemplateUrl)) {
+                return null;
+            }
+            const originConfig = lodash_1.default.pick(lodash_1.default.get(config, name) || {}, configPaths || []);
+            return {
+                url: await getTemplateUrl(templateName, originConfig),
+                headers: lodash_1.default.isFunction(getHeaders) ? await getHeaders(templateName, originConfig) : {},
+            };
+        },
+    };
+};
+exports.default = createTemplateOrigin;

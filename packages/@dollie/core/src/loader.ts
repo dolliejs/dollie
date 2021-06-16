@@ -1,24 +1,29 @@
-const got = require('got');
-const _ = require('lodash');
-const path = require('path');
-const decompress = require('decompress');
-const { HTTPNotFoundError, HTTPTimeoutError } = require('./errors');
-const Url = require('url');
-const tunnel = require('tunnel');
-const fs = require('fs');
-const {
+import got, { Options as GotOptions, RequestError } from 'got';
+import _ from 'lodash';
+import path from 'path';
+import decompress from 'decompress';
+import {
+  DollieError,
+  HTTPNotFoundError,
+  HTTPTimeoutError,
+} from './errors';
+import Url from 'url';
+import tunnel from 'tunnel';
+import fs from 'fs';
+import {
   VIRTUAL_VOLUME_DESTINATION_PATHNAME,
-} = require('./constants');
+} from './constants';
+import { FileSystem, LoaderConfig } from './interfaces';
 
-const downloadCompressedFile = async function(
-  url,
-  fileSystem,
-  options = {},
-) {
+const downloadCompressedFile = async (
+  url: string,
+  fileSystem: FileSystem,
+  options: GotOptions = {},
+) => {
   const startTimestamp = Date.now();
 
   return new Promise((resolve, reject) => {
-    fileSystem.mkdirpSync(VIRTUAL_VOLUME_DESTINATION_PATHNAME);
+    fileSystem.mkdirSync(VIRTUAL_VOLUME_DESTINATION_PATHNAME, { recursive: true });
 
     const getAbsolutePath = (filePath) => {
       const relativePathname = filePath.split('/').slice(1).join('/');
@@ -29,20 +34,20 @@ const downloadCompressedFile = async function(
 
     const downloader = got.stream(
       url,
-      downloaderOptions,
+      downloaderOptions as GotOptions & { isStream: true },
     );
 
     const fileBufferChunks = [];
 
-    downloader.on('error', (error) => {
+    downloader.on('error', (error: RequestError) => {
       const errorMessage = error.toString();
       if (errorMessage.indexOf('404') !== -1) {
         reject(new HTTPNotFoundError());
       }
       if (error.code === 'ETIMEDOUT') {
-        reject(new HTTPTimeoutError(downloaderOptions.timeout));
+        reject(new HTTPTimeoutError());
       }
-      const otherError = new Error(errorMessage);
+      const otherError = new DollieError(errorMessage);
       otherError.code = error.code || 'E_UNKNOWN';
       reject(new Error(errorMessage));
     });
@@ -58,7 +63,7 @@ const downloadCompressedFile = async function(
         for (const file of files) {
           const { type, path: filePath, data } = file;
           if (type === 'directory') {
-            fileSystem.mkdirpSync(getAbsolutePath(filePath));
+            fileSystem.mkdirSync(getAbsolutePath(filePath), { recursive: true });
           } else if (type === 'file') {
             fileSystem.writeFileSync(getAbsolutePath(filePath), data, { encoding: 'utf8' });
           }
@@ -72,15 +77,15 @@ const downloadCompressedFile = async function(
 };
 
 const loadTemplate = async (
-  url,
-  fileSystem = fs,
-  options = {},
+  url: string,
+  fileSystem: FileSystem = fs,
+  options: LoaderConfig = {},
 ) => {
   const traverse = async function(
-    url,
-    fileSystem = fs,
+    url: string,
+    fileSystem: FileSystem = fs,
     retries = 0,
-    options = {},
+    options: LoaderConfig = {},
   ) {
     const {
       httpProxyUrl = '',
@@ -88,10 +93,10 @@ const loadTemplate = async (
       maximumRetryCount = 3,
       ...originalOptions
     } = options;
-    const gotOptions = _.clone(originalOptions);
+    const gotOptions = _.clone(originalOptions) as GotOptions;
     if (httpProxyUrl) {
       const { hostname: host, port } = Url.parse(httpProxyUrl);
-      const proxy = {
+      const proxy: tunnel.ProxyOptions = {
         host,
         port: parseInt(port, 10),
       };
@@ -127,7 +132,12 @@ const loadTemplate = async (
   return await traverse(url, fileSystem, 0, options);
 };
 
-module.exports = {
+const readTemplateContent = (fileSystem = fs, pathname = '/template') => {
+  // const traverse = async function(fileSystem ) {};
+};
+
+export {
   downloadCompressedFile,
   loadTemplate,
+  readTemplateContent,
 };
