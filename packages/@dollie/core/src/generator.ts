@@ -1,45 +1,60 @@
-import { DollieConfig } from './interfaces';
+import { DollieConfig, DollieTemplateConfig, FileSystem } from './interfaces';
 import _ from 'lodash';
-
-const {
+import {
   InvalidInputError,
   ContextError,
-} = require('./errors');
-const { githubOrigin, gitlabOrigin } = require('@dollie/origins');
-const { Volume } = require('memfs');
-const { loadTemplate } = require('./loader');
+} from './errors';
+import {
+  DollieOrigin,
+  githubOrigin,
+  gitlabOrigin,
+} from '@dollie/origins';
+import { Volume } from 'memfs';
+import { loadTemplate } from './loader';
+import path from 'path';
+import { VIRTUAL_VOLUME_DESTINATION_PATHNAME } from './constants';
+import requireFromString from 'require-from-string';
 
-function Generator(name, config: DollieConfig = {}) {
-  this.templateName = '';
-  this.templateOrigin = '';
+class Generator {
+  public templateName: string;
+  public templateOrigin: string;
+  protected origins: DollieOrigin[];
+  protected volume: FileSystem;
 
-  let origins = [githubOrigin, gitlabOrigin];
-  const virtualVolume = new Volume();
+  public constructor(
+    private templateOriginName: string,
+    private config: DollieConfig = {},
+  ) {
+    this.templateName = '';
+    this.templateOrigin = '';
+    this.origins = [githubOrigin, gitlabOrigin];
+    this.volume = new Volume();
+  }
 
-  this.checkInputs = function() {
-    if (!name || !_.isString(name)) {
+  public checkInputs() {
+    if (!this.templateOriginName || !_.isString(this.templateOriginName)) {
       throw new InvalidInputError('name should be a string');
     }
   };
 
-  this.initialize = async function() {
-    const { origins: customOrigins = [] } = config;
-    origins = origins.concat(customOrigins);
-    if (_.isString(name)) {
-      [this.templateName, this.templateOrigin = 'github'] = name.split(':');
+  public async initialize() {
+    const { origins: customOrigins = [] } = this.config;
+    this.origins = this.origins.concat(customOrigins);
+    if (_.isString(this.templateOriginName)) {
+      [this.templateName, this.templateOrigin = 'github'] = this.templateOriginName.split(':');
     }
   };
 
-  this.checkContext = function() {
-    const originIds = origins.map((origin) => origin.name);
+  public checkContext() {
+    const originIds = this.origins.map((origin) => origin.name);
     const uniqueOriginIds = _.uniq(originIds);
     if (originIds.length > uniqueOriginIds.length) {
       throw new ContextError('duplicated origin names');
     }
   };
 
-  this.loadTemplate = async function() {
-    const origin = origins.find((origin) => origin.name === this.templateOrigin);
+  public async loadTemplate() {
+    const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
 
     if (!origin) {
       throw new ContextError(`origin name \`${this.templateOrigin}\` not found`);
@@ -51,32 +66,60 @@ function Generator(name, config: DollieConfig = {}) {
 
     const { url, headers } = await origin.handler(
       this.templateName,
-      _.get(config, `origins.${this.templateOrigin}`),
+      _.get(this.config, `origins.${this.templateOrigin}`),
     );
 
     if (!_.isString(url) || !url) {
       throw new ContextError(`origin \`${this.templateOrigin}\` url parsed with errors`);
     }
 
-    const duration = await loadTemplate(url, virtualVolume, {
+    return await loadTemplate(url, this.volume, {
       headers,
       ...({
         timeout: 90000,
       }),
-      ...config.loader,
+      ...this.config.loader,
     });
-
-    return duration;
   };
 
-  this.getScaffoldConfig = async function() {
-    const { getScaffoldConfig } = config;
-    if (!_.isFunction(getScaffoldConfig)) {
-      return {};
+  public getTemplateConfig() {
+    let configFileName: string;
+    if (this.checkFile('dollie.json')) {
+      configFileName = 'dollie.json';
+    } else if (this.checkFile('dollie.js')) {
+      configFileName = 'dollie.js';
     }
-    const dollieConfigFileContent = virtualVolume.readFileSync();
-    return await getScaffoldConfig();
+    if (!configFileName) {
+      return {} as DollieTemplateConfig;
+    }
+    const dollieConfigFileContent = this.readTemplateFile(configFileName).toString();
+    if (configFileName.endsWith('.json')) {
+      try {
+        return JSON.parse(dollieConfigFileContent) as DollieTemplateConfig;
+      } catch {
+        return {} as DollieTemplateConfig;
+      }
+    } else if (configFileName.endsWith('.js')) {
+      return (requireFromString(dollieConfigFileContent) || {}) as DollieTemplateConfig;
+    } else {
+      return {} as DollieTemplateConfig;
+    }
+  };
+
+  private readTemplateFile(pathname: string): Buffer {
+    return this.volume.readFileSync(path.resolve(
+      VIRTUAL_VOLUME_DESTINATION_PATHNAME,
+      pathname,
+    )) as Buffer;
+  }
+
+  private checkFile(pathname: string): boolean {
+    const absolutePathname = path.resolve(VIRTUAL_VOLUME_DESTINATION_PATHNAME, pathname);
+    return (
+      this.volume.existsSync(absolutePathname)
+      && this.volume.statSync(absolutePathname).isFile()
+    );
   };
 }
 
-module.exports = Generator;
+export default Generator;

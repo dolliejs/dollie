@@ -13,12 +13,14 @@
     "dollie": "bin/dollie.js"
   },
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
     "url": "https://github.com/lenconda/dollie/issues"
   },
   "dependencies": {
+    "@dollie/core": "^3.0.0",
     "commander": "^7.2.0"
   },
   "devDependencies": {

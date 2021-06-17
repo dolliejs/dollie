@@ -11,3 +11,4 @@ temp
 .changelog
 package-lock.json
 lib
+.idea

@@ -7,7 +7,7 @@ const lodash_1 = __importDefault(require("lodash"));
 const create_1 = __importDefault(require("../create"));
 exports.default = create_1.default('github', {
     configPaths: ['token'],
-    getTemplateUrl: async function (name) {
+    getTemplateUrl: async (name) => {
         if (!lodash_1.default.isString(name)) {
             return '';
         }

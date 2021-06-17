@@ -13,7 +13,8 @@ import fs from 'fs';
 import {
   VIRTUAL_VOLUME_DESTINATION_PATHNAME,
 } from './constants';
-import { FileSystem, LoaderConfig } from './interfaces';
+import { FileSystem, LoaderConfig, ReadTemplateCallbackData } from './interfaces';
+import { isBinaryFileSync } from 'isbinaryfile';
 
 const downloadCompressedFile = async (
   url: string,
@@ -113,7 +114,7 @@ const loadTemplate = async (
         gotOptions,
       );
     } catch (error) {
-      if (error.code === 'E_SCAFFOLD_TIMEOUT' || error instanceof HTTPTimeoutError) {
+      if (error.code === 'E_TEMPLATE_TIMEOUT' || error instanceof HTTPTimeoutError) {
         if (retries < maximumRetryCount) {
           return await traverse(
             url,
@@ -122,7 +123,7 @@ const loadTemplate = async (
             options,
           );
         } else {
-          throw new Error(error?.message || 'download scaffold timed out');
+          throw new Error(error?.message || 'download template timed out');
         }
       } else {
         throw error;
@@ -132,8 +133,35 @@ const loadTemplate = async (
   return await traverse(url, fileSystem, 0, options);
 };
 
-const readTemplateContent = (fileSystem = fs, pathname = '/template') => {
-  // const traverse = async function(fileSystem ) {};
+const readTemplateContent = (
+  fileSystem: FileSystem = fs,
+  pathname = VIRTUAL_VOLUME_DESTINATION_PATHNAME,
+) => {
+  const result: ReadTemplateCallbackData[] = [];
+
+  const traverse = async (fileSystem: FileSystem = fs, currentEntityPathname: string) => {
+    if (fileSystem.existsSync(currentEntityPathname)) {
+      const stat = fileSystem.statSync(currentEntityPathname);
+      if (stat.isFile()) {
+        const fileContent = fileSystem.readFileSync(currentEntityPathname, 'binary');
+        result.push({
+          absolutePathname: currentEntityPathname,
+          relativePathname: path.relative(pathname, currentEntityPathname),
+          entityName: currentEntityPathname.split('/').pop(),
+          isBinary: isBinaryFileSync(fileContent, fileContent.length),
+        });
+      } else if (stat.isDirectory()) {
+        const entities = fileSystem.readdirSync(currentEntityPathname);
+        for (const entity of entities) {
+          traverse(fileSystem, `${currentEntityPathname}/${entity}`);
+        }
+      }
+    }
+  };
+
+  traverse(fileSystem, pathname);
+
+  return result;
 };
 
 export {
