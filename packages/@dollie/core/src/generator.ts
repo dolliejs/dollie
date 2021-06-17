@@ -24,6 +24,7 @@ class Generator {
   public constructor(
     private templateOriginName: string,
     private config: DollieConfig = {},
+    protected projectName: string,
   ) {
     this.templateName = '';
     this.templateOrigin = '';
@@ -34,6 +35,9 @@ class Generator {
   public checkInputs() {
     if (!this.templateOriginName || !_.isString(this.templateOriginName)) {
       throw new InvalidInputError('name should be a string');
+    }
+    if (!this.projectName || !_.isString(this.projectName)) {
+      throw new InvalidInputError('projectName should be a string');
     }
   };
 
@@ -84,10 +88,10 @@ class Generator {
 
   public getTemplateConfig() {
     let configFileName: string;
-    if (this.checkFile('dollie.json')) {
-      configFileName = 'dollie.json';
-    } else if (this.checkFile('dollie.js')) {
-      configFileName = 'dollie.js';
+    if (this.checkFile('.dollie.json')) {
+      configFileName = '.dollie.json';
+    } else if (this.checkFile('.dollie.js')) {
+      configFileName = '.dollie.js';
     }
     if (!configFileName) {
       return {} as DollieTemplateConfig;

@@ -5,9 +5,9 @@ import { Change } from 'diff';
 import { Volume } from 'memfs';
 import fs from 'fs';
 import { Options as GotOptions } from 'got/dist/source';
-import { Answers as InquirerAnswers, DistinctQuestion } from 'inquirer';
+import { Answers as DollieAnswers, DistinctQuestion } from 'inquirer';
 
-export type DollieQuestion<T extends InquirerAnswers = InquirerAnswers> = DistinctQuestion<T>;
+export type DollieQuestion<T extends DollieAnswers = DollieAnswers> = DistinctQuestion<T>;
 
 export interface DiffChange extends Change {
   conflicted?: boolean;
@@ -26,6 +26,7 @@ export type LoaderConfig = LoaderOptions & GotOptions;
 export interface DollieConfig {
   origins?: DollieOrigin[];
   loader?: LoaderConfig;
+  getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
 }
 
 export interface PatchTableItem {
@@ -53,8 +54,7 @@ export interface DollieTemplateFileConfig {
 export interface DollieTemplateConfig {
   questions?: {
     main?: DollieQuestion[];
-    subTemplates?: Record<string, DollieQuestion[]>;
-    modules?: Record<string, DollieQuestion[]>;
+    extends?: Record<string, DollieQuestion[]>;
   };
   files?: DollieTemplateFileConfig;
 }
