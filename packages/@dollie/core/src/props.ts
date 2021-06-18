@@ -7,16 +7,16 @@ const answersParser = (answers: Answers) => {
     const currentProp = answers[currentKey];
     if (currentKey === '$EXTEND$') {
       if (_.isArray(currentProp)) {
-        result.extendedTemplates = _.uniq(result.extendedTemplates.concat(currentProp));
+        result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentProp));
       }
       if (_.isString(currentProp)) {
-        result.extendedTemplates = _.uniq(result.extendedTemplates.concat(currentProp));
+        result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentProp));
       }
     } else if (currentKey.startsWith('$EXTEND:')) {
       if (_.isBoolean(currentProp) && currentProp) {
         const currentExtend = /^\$EXTEND\:(.*)?\$$/.exec(currentKey)[1];
         if (currentExtend) {
-          result.extendedTemplates = _.uniq(result.extendedTemplates.concat(currentExtend));
+          result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentExtend));
         }
       }
     } else {
@@ -25,7 +25,7 @@ const answersParser = (answers: Answers) => {
     return result;
   }, {
     props: {},
-    extendedTemplates: [],
+    pendingExtendTemplateLabels: [],
   } as ParsedProps);
 };
 

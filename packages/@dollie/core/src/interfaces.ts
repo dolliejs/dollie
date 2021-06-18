@@ -43,6 +43,7 @@ export interface ReadTemplateCallbackData {
   relativePathname: string;
   entityName: string;
   isBinary: boolean;
+  isDirectory: boolean;
 }
 
 export interface DollieTemplateFileConfig {
@@ -61,5 +62,10 @@ export interface DollieTemplateConfig {
 
 export interface ParsedProps {
   props: Record<string, any>;
-  extendedTemplates: string[];
+  pendingExtendTemplateLabels: string[];
+}
+
+export interface TemplatePropsQueueItem {
+  label: string;
+  props: DollieAnswers;
 }

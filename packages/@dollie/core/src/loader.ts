@@ -142,15 +142,21 @@ const readTemplateContent = (
   const traverse = async (fileSystem: FileSystem = fs, currentEntityPathname: string) => {
     if (fileSystem.existsSync(currentEntityPathname)) {
       const stat = fileSystem.statSync(currentEntityPathname);
-      if (stat.isFile()) {
-        const fileContent = fileSystem.readFileSync(currentEntityPathname, 'binary');
-        result.push({
-          absolutePathname: currentEntityPathname,
-          relativePathname: path.relative(pathname, currentEntityPathname),
-          entityName: currentEntityPathname.split('/').pop(),
-          isBinary: isBinaryFileSync(fileContent, fileContent.length),
-        });
-      } else if (stat.isDirectory()) {
+      const fileContent = stat.isFile()
+        ? fileSystem.readFileSync(currentEntityPathname, 'binary')
+        : null;
+
+      result.push({
+        absolutePathname: currentEntityPathname,
+        relativePathname: path.relative(pathname, currentEntityPathname),
+        entityName: currentEntityPathname.split('/').pop(),
+        isBinary: (stat.isFile() && fileContent)
+          ? isBinaryFileSync(fileContent, fileContent.length)
+          : false,
+        isDirectory: stat.isDirectory(),
+      });
+
+      if (stat.isDirectory()) {
         const entities = fileSystem.readdirSync(currentEntityPathname);
         for (const entity of entities) {
           traverse(fileSystem, `${currentEntityPathname}/${entity}`);

@@ -1,4 +1,9 @@
-import { DollieConfig, DollieTemplateConfig, FileSystem } from './interfaces';
+import {
+  DollieConfig,
+  DollieTemplateConfig,
+  FileSystem,
+  TemplatePropsQueueItem,
+} from './interfaces';
 import _ from 'lodash';
 import {
   InvalidInputError,
@@ -22,6 +27,8 @@ class Generator {
   protected origins: DollieOrigin[];
   protected volume: FileSystem;
   protected templateConfig: DollieTemplateConfig;
+  private moduleProps: TemplatePropsQueueItem[];
+  private pendingModuleLabels: string[];
 
   public constructor(
     private templateOriginName: string,
@@ -32,6 +39,7 @@ class Generator {
     this.templateOrigin = '';
     this.origins = [githubOrigin, gitlabOrigin];
     this.volume = new Volume();
+    this.pendingModuleLabels.push('main');
   }
 
   public checkInputs() {
@@ -89,14 +97,37 @@ class Generator {
     });
   }
 
-  public async getUserProps(extendId = null) {
+  public async queryAllTemplateProps() {
+    while (this.pendingModuleLabels.length !== 0) {
+      const currentPendingModuleLabel = this.pendingModuleLabels.shift();
+      if (currentPendingModuleLabel === 'main') {
+        await this.getTemplateProps();
+      } else if (currentPendingModuleLabel.startsWith('extend:')) {
+        await this.getTemplateProps(currentPendingModuleLabel);
+      }
+    }
+  }
+
+  private async getTemplateProps(extendTemplateLabel = null) {
     const { getTemplateProps } = this.config;
-    const questions = (extendId && _.isString(extendId))
+    const questions = (extendTemplateLabel && _.isString(extendTemplateLabel))
       ? _.get(this.templateConfig, 'questions.main')
-      : _.get(this.templateConfig, `question.extendedTemplates.${extendId}`);
+      : _.get(this.templateConfig, `question.extendedTemplates.${extendTemplateLabel}`);
+
     if (_.isFunction(getTemplateProps) && (questions && _.isArray(questions) && questions.length > 0)) {
       const answers = await getTemplateProps(this.templateConfig.questions.main);
-      const { props = {}, extendedTemplates = [] } = answersParser(answers);
+      const { props = {}, pendingExtendTemplateLabels = [] } = answersParser(answers);
+
+      this.moduleProps.push({
+        props,
+        label: extendTemplateLabel ? extendTemplateLabel : 'main',
+      });
+
+      if (pendingExtendTemplateLabels.length > 0) {
+        for (const pendingExtendTemplateLabel of pendingExtendTemplateLabels) {
+          this.pendingModuleLabels.push(`extend:${pendingExtendTemplateLabel}`);
+        }
+      }
     }
   }
 
