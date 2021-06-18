@@ -14,12 +14,14 @@ import { loadTemplate } from './loader';
 import path from 'path';
 import { VIRTUAL_VOLUME_DESTINATION_PATHNAME } from './constants';
 import requireFromString from 'require-from-string';
+import { answersParser } from './props';
 
 class Generator {
   public templateName: string;
   public templateOrigin: string;
   protected origins: DollieOrigin[];
   protected volume: FileSystem;
+  protected templateConfig: DollieTemplateConfig;
 
   public constructor(
     private templateOriginName: string,
@@ -39,7 +41,7 @@ class Generator {
     if (!this.projectName || !_.isString(this.projectName)) {
       throw new InvalidInputError('projectName should be a string');
     }
-  };
+  }
 
   public async initialize() {
     const { origins: customOrigins = [] } = this.config;
@@ -47,7 +49,8 @@ class Generator {
     if (_.isString(this.templateOriginName)) {
       [this.templateName, this.templateOrigin = 'github'] = this.templateOriginName.split(':');
     }
-  };
+    this.templateConfig = this.getTemplateConfig();
+  }
 
   public checkContext() {
     const originIds = this.origins.map((origin) => origin.name);
@@ -55,7 +58,7 @@ class Generator {
     if (originIds.length > uniqueOriginIds.length) {
       throw new ContextError('duplicated origin names');
     }
-  };
+  }
 
   public async loadTemplate() {
     const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
@@ -84,9 +87,35 @@ class Generator {
       }),
       ...this.config.loader,
     });
-  };
+  }
 
-  public getTemplateConfig() {
+  public async getUserProps(extendId = null) {
+    const { getTemplateProps } = this.config;
+    const questions = (extendId && _.isString(extendId))
+      ? _.get(this.templateConfig, 'questions.main')
+      : _.get(this.templateConfig, `question.extendedTemplates.${extendId}`);
+    if (_.isFunction(getTemplateProps) && (questions && _.isArray(questions) && questions.length > 0)) {
+      const answers = await getTemplateProps(this.templateConfig.questions.main);
+      const { props = {}, extendedTemplates = [] } = answersParser(answers);
+    }
+  }
+
+  private readTemplateFile(pathname: string): Buffer {
+    return this.volume.readFileSync(path.resolve(
+      VIRTUAL_VOLUME_DESTINATION_PATHNAME,
+      pathname,
+    )) as Buffer;
+  }
+
+  private checkFile(pathname: string): boolean {
+    const absolutePathname = path.resolve(VIRTUAL_VOLUME_DESTINATION_PATHNAME, pathname);
+    return (
+      this.volume.existsSync(absolutePathname)
+      && this.volume.statSync(absolutePathname).isFile()
+    );
+  }
+
+  private getTemplateConfig() {
     let configFileName: string;
     if (this.checkFile('.dollie.json')) {
       configFileName = '.dollie.json';
@@ -108,22 +137,7 @@ class Generator {
     } else {
       return {} as DollieTemplateConfig;
     }
-  };
-
-  private readTemplateFile(pathname: string): Buffer {
-    return this.volume.readFileSync(path.resolve(
-      VIRTUAL_VOLUME_DESTINATION_PATHNAME,
-      pathname,
-    )) as Buffer;
   }
-
-  private checkFile(pathname: string): boolean {
-    const absolutePathname = path.resolve(VIRTUAL_VOLUME_DESTINATION_PATHNAME, pathname);
-    return (
-      this.volume.existsSync(absolutePathname)
-      && this.volume.statSync(absolutePathname).isFile()
-    );
-  };
 }
 
 export default Generator;
