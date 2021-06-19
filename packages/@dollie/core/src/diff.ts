@@ -75,7 +75,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
     }
   }
 
-  const blocks: Array<Array<DiffChange>> = [];
+  const blocks: DiffChange[][] = [];
   const patches = Object.keys(patchTable).map(
     (patchIndex) => patchTable[patchIndex],
   );
@@ -104,7 +104,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
   }, []);
 };
 
-const parseMergeBlocksToText = (blocks: Array<MergeBlock>): string => {
+const parseMergeBlocksToText = (blocks: MergeBlock[]): string => {
   return blocks.reduce((result, currentBlock) => {
     if (currentBlock.status === 'OK') {
       return `${result}${currentBlock.values.current.join('')}`;
@@ -121,8 +121,8 @@ const parseMergeBlocksToText = (blocks: Array<MergeBlock>): string => {
   }, '');
 };
 
-const parseDiffToMergeBlocks = (changes: Array<DiffChange>): Array<MergeBlock> => {
-  const mergeBlocks: Array<MergeBlock> = [];
+const parseDiffToMergeBlocks = (changes: DiffChange[]): MergeBlock[] => {
+  const mergeBlocks: MergeBlock[] = [];
   for (const line of changes) {
     if (line.removed) {
       continue;
@@ -162,7 +162,7 @@ const parseDiffToMergeBlocks = (changes: Array<DiffChange>): Array<MergeBlock> =
   return mergeBlocks;
 };
 
-const parseFileTextToMergeBlocks = (content: string): Array<MergeBlock> => {
+const parseFileTextToMergeBlocks = (content: string): MergeBlock[] => {
   return parseDiffToMergeBlocks(diff(content));
 };
 

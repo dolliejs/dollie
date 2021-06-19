@@ -27,10 +27,11 @@ export interface DollieConfig {
   origins?: DollieOrigin[];
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
+  conflictsSolver?: (data: ConflictSolverData) => MergeBlock;
 }
 
 export interface PatchTableItem {
-  changes: Array<DiffChange>;
+  changes: DiffChange[];
   modifyLength: number;
 }
 export type PatchTable = Record<string, PatchTableItem>;
@@ -48,9 +49,9 @@ export interface TemplateEntity {
 }
 
 export interface DollieTemplateFileConfig {
-  merge?: Array<string>;
-  add?: Array<string | Function>;
-  delete?: Array<string | Function>;
+  merge?: string[];
+  add?: (string | Function)[];
+  delete?: (string | Function)[];
 }
 
 export interface DollieTemplateConfig {
@@ -74,10 +75,30 @@ export interface TemplatePropsItem {
 export interface MergeBlock {
   status: 'OK' | 'CONFLICT';
   values: {
-    former: Array<string>,
-    current: Array<string>,
+    former: string[],
+    current: string[],
   };
   ignored?: boolean;
 }
 
 export type CacheTable = Record<string, DiffChange[][]>;
+export type MergeTable = Record<string, MergeBlock[]>;
+
+export interface ConflictItem {
+  pathname: string;
+  blocks: MergeBlock[];
+}
+
+export interface ConflictBlockMetadata {
+  pathname: string;
+  index: number;
+}
+
+export interface ConflictSolverData extends ConflictBlockMetadata {
+  block: MergeBlock;
+}
+
+export interface DollieGeneratorResult {
+  files: Record<string, string | Buffer>;
+  conflicts: string[];
+}

@@ -1,8 +1,12 @@
 import {
   CacheTable,
+  ConflictBlockMetadata,
+  ConflictItem,
   DollieConfig,
+  DollieGeneratorResult,
   DollieTemplateConfig,
   FileSystem,
+  MergeTable,
   TemplateEntity,
   TemplatePropsItem,
 } from './interfaces';
@@ -28,7 +32,7 @@ import {
 } from './constants';
 import requireFromString from 'require-from-string';
 import { answersParser } from './props';
-import { diff } from './diff';
+import { diff, merge, parseDiffToMergeBlocks, parseMergeBlocksToText } from './diff';
 import ejs from 'ejs';
 
 class Generator {
@@ -38,7 +42,9 @@ class Generator {
   protected volume: FileSystem;
   protected templateConfig: DollieTemplateConfig;
   protected cacheTable: CacheTable = {};
+  protected mergeTable: MergeTable = {};
   protected binaryEntities: TemplateEntity[];
+  protected conflicts: ConflictItem[] = [];
   private moduleProps: TemplatePropsItem[];
   private pendingModuleLabels: string[];
 
@@ -118,60 +124,146 @@ class Generator {
         await this.getTemplateProps(currentPendingModuleLabel);
       }
     }
-    return this.moduleProps;
+    return _.clone(this.moduleProps);
   }
 
-  public async generateTemplateFile(propItems: TemplatePropsItem[]) {
-    for (const propItem of propItems) {
+  public copyTemplateFileToCacheTable() {
+    for (const propItem of this.moduleProps) {
       const { label, props } = propItem;
       let moduleStartPathname: string;
       if (label === 'main') {
-        moduleStartPathname = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${MAIN_TEMPLATE_PATHNAME_PREFIX}`;
+        moduleStartPathname = this.mainTemplatePathname();
       } else if (label.startsWith(EXTEND_TEMPLATE_PATHNAME_PREFIX)) {
         const extendTemplateId = label.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length);
-        moduleStartPathname = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${EXTEND_TEMPLATE_PATHNAME_PREFIX}/${extendTemplateId}`;
+        moduleStartPathname = this.extendTemplatePathname(extendTemplateId);
       }
-      if (moduleStartPathname) {
-        const entities = readTemplateEntities(this.volume, moduleStartPathname);
-        for (const entity of entities) {
-          const {
-            absolutePathname,
-            entityName,
-            isBinary,
-            isDirectory,
-            relativeDirectoryPathname,
-          } = entity;
-          if (isDirectory) { continue; }
-          if (isBinary) {
-            this.binaryEntities.push(entity);
+
+      if (!moduleStartPathname) { return; }
+
+      const entities = readTemplateEntities(this.volume, moduleStartPathname);
+
+      for (const entity of entities) {
+        const {
+          absolutePathname,
+          entityName,
+          isBinary,
+          isDirectory,
+          relativeDirectoryPathname,
+        } = entity;
+        if (isDirectory) { continue; }
+        if (isBinary) {
+          this.binaryEntities.push(entity);
+        } else {
+          const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
+          let fileContent: string;
+
+          if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
+            fileContent = ejs.render(fileRawContent, props);
           } else {
-            const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
-            let fileContent: string;
-
-            if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
-              fileContent = ejs.render(fileRawContent, props);
-            } else {
-              fileContent = fileRawContent;
-            }
-
-            const currentFileName = entityName.startsWith(TEMPLATE_FILE_PREFIX)
-              ? entityName.slice(TEMPLATE_FILE_PREFIX.length)
-              : entityName;
-            const currentFileRelativePathname = `${relativeDirectoryPathname}/${currentFileName}`;
-
-            const currentFileDiffChanges = diff(fileContent);
-            if (
-              !this.cacheTable[currentFileRelativePathname]
-              || !_.isArray(this.cacheTable[currentFileRelativePathname])
-            ) {
-              this.cacheTable[currentFileRelativePathname] = [];
-            }
-            const currentCacheTableItem = this.cacheTable[currentFileRelativePathname];
-            currentCacheTableItem.push(currentFileDiffChanges);
+            fileContent = fileRawContent;
           }
+
+          const currentFileName = entityName.startsWith(TEMPLATE_FILE_PREFIX)
+            ? entityName.slice(TEMPLATE_FILE_PREFIX.length)
+            : entityName;
+          const currentFileRelativePathname = `${relativeDirectoryPathname}/${currentFileName}`;
+
+          const currentFileDiffChanges = diff(fileContent);
+          if (
+            !this.cacheTable[currentFileRelativePathname]
+              || !_.isArray(this.cacheTable[currentFileRelativePathname])
+          ) {
+            this.cacheTable[currentFileRelativePathname] = [];
+          }
+          const currentCacheTableItem = this.cacheTable[currentFileRelativePathname];
+          currentCacheTableItem.push(currentFileDiffChanges);
         }
       }
     }
+  }
+
+  public mergeTemplateFiles() {
+    for (const entityPathname of Object.keys(this.cacheTable)) {
+      const diffs = this.cacheTable[entityPathname];
+      if (!diffs || !_.isArray(diffs) || diffs.length === 0) {
+        continue;
+      }
+      if (diffs.length === 1) {
+        this.mergeTable[entityPathname] = parseDiffToMergeBlocks(diffs[0]);
+      } else {
+        const originalDiffChanges = diffs[0];
+        const forwardDiffChangesGroup = diffs.slice(1);
+        const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
+        this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
+      }
+    }
+  }
+
+  public async resolveConflicts() {
+    const { conflictsSolver } = this.config;
+    if (!_.isFunction(conflictsSolver)) {
+      return;
+    }
+    let remainedConflictedFileDataList = this.getConflictedFileDataList();
+    while (remainedConflictedFileDataList.length > 0) {
+      const { pathname, index } = remainedConflictedFileDataList.shift();
+      const result = await conflictsSolver({
+        pathname,
+        index,
+        block: this.mergeTable[pathname][index],
+      });
+      if (result) {
+        this.mergeTable[pathname][index] = result;
+      } else {
+        this.mergeTable[pathname][index] = {
+          ...this.mergeTable[pathname][index],
+          ignored: true,
+        };
+      }
+    }
+  }
+
+  public getResult(): DollieGeneratorResult {
+    const files = Object.keys(this.mergeTable).reduce((result, pathname) => {
+      result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
+      return result;
+    }, {});
+    for (const binaryEntity of this.binaryEntities) {
+      const { absolutePathname, relativePathname } = binaryEntity;
+      const buffer = this.volume.readFileSync(absolutePathname) as Buffer;
+      files[relativePathname] = buffer;
+    }
+    const conflicts = this.getIgnoredConflictedFilePathnameList();
+    return { files, conflicts };
+  }
+
+  private getConflictedFileDataList() {
+    const conflicts: ConflictBlockMetadata[] = [];
+    for (const pathname of Object.keys(this.mergeTable)) {
+      const mergeBlocks = this.mergeTable[pathname];
+      for (const [index, mergeBlock] of mergeBlocks.entries()) {
+        if (mergeBlock.status === 'CONFLICT' && !mergeBlock.ignored) {
+          conflicts.push({
+            pathname,
+            index,
+          });
+        }
+      }
+    }
+    return conflicts;
+  }
+
+  private getIgnoredConflictedFilePathnameList() {
+    const result: string[] = [];
+    for (const pathname of Object.keys(this.mergeTable)) {
+      const mergeBlocks = this.mergeTable[pathname];
+      for (const mergeBlock of mergeBlocks) {
+        if (mergeBlock.status === 'CONFLICT' && mergeBlock.ignored) {
+          result.push(pathname);
+        }
+      }
+    }
+    return result;
   }
 
   private async getTemplateProps(extendTemplateLabel = null) {
@@ -204,8 +296,18 @@ class Generator {
     )) as Buffer;
   }
 
-  private readTemplateFileContent(pathname: string): string {
-    return this.readTemplateFileBuffer(pathname).toString();
+  private mainTemplatePathname(pathname = '') {
+    return `${TEMPLATE_CACHE_PATHNAME_PREFIX}${MAIN_TEMPLATE_PATHNAME_PREFIX}${pathname ? `/${pathname}` : ''}`;
+  }
+
+  private extendTemplatePathname(templateId: string, pathname = '') {
+    const BASE_PATH = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${TEMPLATE_CACHE_PATHNAME_PREFIX}`;
+
+    if (!templateId) {
+      return null;
+    }
+
+    return `${BASE_PATH}/${templateId}${pathname ? `/${pathname}` : ''}`;
   }
 
   private checkFile(pathname: string): boolean {
