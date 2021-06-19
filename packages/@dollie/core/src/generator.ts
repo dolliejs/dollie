@@ -160,7 +160,10 @@ class Generator {
             const currentFileRelativePathname = `${relativeDirectoryPathname}/${currentFileName}`;
 
             const currentFileDiffChanges = diff(fileContent);
-            if (!this.cacheTable[currentFileRelativePathname] || !_.isArray(this.cacheTable[currentFileRelativePathname])) {
+            if (
+              !this.cacheTable[currentFileRelativePathname]
+              || !_.isArray(this.cacheTable[currentFileRelativePathname])
+            ) {
               this.cacheTable[currentFileRelativePathname] = [];
             }
             const currentCacheTableItem = this.cacheTable[currentFileRelativePathname];
