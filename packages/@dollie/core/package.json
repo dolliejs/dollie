@@ -20,8 +20,10 @@
   },
   "dependencies": {
     "@dollie/origins": "^3.0.0",
+    "@types/ejs": "^3.0.6",
     "decompress": "^4.2.1",
     "diff": "^5.0.0",
+    "ejs": "^3.1.6",
     "got": "^11.8.2",
     "inquirer": "^8.1.1",
     "isbinaryfile": "^4.0.8",

@@ -149,15 +149,17 @@ const readTemplateEntities = (
       const fileContent = stat.isFile()
         ? fileSystem.readFileSync(currentEntityPathname, 'binary')
         : null;
+      const relativePathname = path.relative(pathname, currentEntityPathname);
 
       currentResult.push({
         absolutePathname: currentEntityPathname,
-        relativePathname: path.relative(pathname, currentEntityPathname),
+        relativePathname,
         entityName: currentEntityPathname.split('/').pop(),
         isBinary: (stat.isFile() && fileContent)
           ? isBinaryFileSync(fileContent, fileContent.length)
           : false,
         isDirectory: stat.isDirectory(),
+        relativeDirectoryPathname: relativePathname.split(path.sep).slice(0, -1).join(path.sep),
       });
 
       if (stat.isDirectory()) {

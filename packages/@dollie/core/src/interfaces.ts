@@ -44,6 +44,7 @@ export interface TemplateEntity {
   entityName: string;
   isBinary: boolean;
   isDirectory: boolean;
+  relativeDirectoryPathname: string;
 }
 
 export interface DollieTemplateFileConfig {

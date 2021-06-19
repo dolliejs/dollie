@@ -24,10 +24,12 @@ import {
   EXTEND_TEMPLATE_PATHNAME_PREFIX,
   MAIN_TEMPLATE_PATHNAME_PREFIX,
   TEMPLATE_CACHE_PATHNAME_PREFIX,
+  TEMPLATE_FILE_PREFIX,
 } from './constants';
 import requireFromString from 'require-from-string';
 import { answersParser } from './props';
 import { diff } from './diff';
+import ejs from 'ejs';
 
 class Generator {
   public templateName: string;
@@ -134,18 +136,35 @@ class Generator {
         for (const entity of entities) {
           const {
             absolutePathname,
-            relativePathname,
             entityName,
             isBinary,
             isDirectory,
+            relativeDirectoryPathname,
           } = entity;
           if (isDirectory) { continue; }
           if (isBinary) {
             this.binaryEntities.push(entity);
           } else {
-            const fileContent = this.volume.readFileSync(absolutePathname).toString();
+            const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
+            let fileContent: string;
+
+            if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
+              fileContent = ejs.render(fileRawContent, props);
+            } else {
+              fileContent = fileRawContent;
+            }
+
+            const currentFileName = entityName.startsWith(TEMPLATE_FILE_PREFIX)
+              ? entityName.slice(TEMPLATE_FILE_PREFIX.length)
+              : entityName;
+            const currentFileRelativePathname = `${relativeDirectoryPathname}/${currentFileName}`;
+
             const currentFileDiffChanges = diff(fileContent);
-            // TODO:
+            if (!this.cacheTable[currentFileRelativePathname] || !_.isArray(this.cacheTable[currentFileRelativePathname])) {
+              this.cacheTable[currentFileRelativePathname] = [];
+            }
+            const currentCacheTableItem = this.cacheTable[currentFileRelativePathname];
+            currentCacheTableItem.push(currentFileDiffChanges);
           }
         }
       }
