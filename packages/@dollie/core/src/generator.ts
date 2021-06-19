@@ -1,8 +1,10 @@
 import {
+  CacheTable,
   DollieConfig,
   DollieTemplateConfig,
   FileSystem,
-  TemplatePropsQueueItem,
+  TemplateEntity,
+  TemplatePropsItem,
 } from './interfaces';
 import _ from 'lodash';
 import {
@@ -15,11 +17,17 @@ import {
   gitlabOrigin,
 } from '@dollie/origins';
 import { Volume } from 'memfs';
-import { loadTemplate } from './loader';
+import { loadTemplate, readTemplateEntities } from './loader';
 import path from 'path';
-import { VIRTUAL_VOLUME_DESTINATION_PATHNAME } from './constants';
+import {
+  EXTEND_TEMPLATE_LABEL_PREFIX,
+  EXTEND_TEMPLATE_PATHNAME_PREFIX,
+  MAIN_TEMPLATE_PATHNAME_PREFIX,
+  TEMPLATE_CACHE_PATHNAME_PREFIX,
+} from './constants';
 import requireFromString from 'require-from-string';
 import { answersParser } from './props';
+import { diff } from './diff';
 
 class Generator {
   public templateName: string;
@@ -27,7 +35,9 @@ class Generator {
   protected origins: DollieOrigin[];
   protected volume: FileSystem;
   protected templateConfig: DollieTemplateConfig;
-  private moduleProps: TemplatePropsQueueItem[];
+  protected cacheTable: CacheTable = {};
+  protected binaryEntities: TemplateEntity[];
+  private moduleProps: TemplatePropsItem[];
   private pendingModuleLabels: string[];
 
   public constructor(
@@ -102,8 +112,42 @@ class Generator {
       const currentPendingModuleLabel = this.pendingModuleLabels.shift();
       if (currentPendingModuleLabel === 'main') {
         await this.getTemplateProps();
-      } else if (currentPendingModuleLabel.startsWith('extend:')) {
+      } else if (currentPendingModuleLabel.startsWith(EXTEND_TEMPLATE_LABEL_PREFIX)) {
         await this.getTemplateProps(currentPendingModuleLabel);
+      }
+    }
+    return this.moduleProps;
+  }
+
+  public async generateTemplateFile(propItems: TemplatePropsItem[]) {
+    for (const propItem of propItems) {
+      const { label, props } = propItem;
+      let moduleStartPathname: string;
+      if (label === 'main') {
+        moduleStartPathname = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${MAIN_TEMPLATE_PATHNAME_PREFIX}`;
+      } else if (label.startsWith(EXTEND_TEMPLATE_PATHNAME_PREFIX)) {
+        const extendTemplateId = label.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length);
+        moduleStartPathname = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${EXTEND_TEMPLATE_PATHNAME_PREFIX}/${extendTemplateId}`;
+      }
+      if (moduleStartPathname) {
+        const entities = readTemplateEntities(this.volume, moduleStartPathname);
+        for (const entity of entities) {
+          const {
+            absolutePathname,
+            relativePathname,
+            entityName,
+            isBinary,
+            isDirectory,
+          } = entity;
+          if (isDirectory) { continue; }
+          if (isBinary) {
+            this.binaryEntities.push(entity);
+          } else {
+            const fileContent = this.volume.readFileSync(absolutePathname).toString();
+            const currentFileDiffChanges = diff(fileContent);
+            // TODO:
+          }
+        }
       }
     }
   }
@@ -125,21 +169,25 @@ class Generator {
 
       if (pendingExtendTemplateLabels.length > 0) {
         for (const pendingExtendTemplateLabel of pendingExtendTemplateLabels) {
-          this.pendingModuleLabels.push(`extend:${pendingExtendTemplateLabel}`);
+          this.pendingModuleLabels.push(`${EXTEND_TEMPLATE_LABEL_PREFIX}${pendingExtendTemplateLabel}`);
         }
       }
     }
   }
 
-  private readTemplateFile(pathname: string): Buffer {
+  private readTemplateFileBuffer(pathname: string): Buffer {
     return this.volume.readFileSync(path.resolve(
-      VIRTUAL_VOLUME_DESTINATION_PATHNAME,
+      TEMPLATE_CACHE_PATHNAME_PREFIX,
       pathname,
     )) as Buffer;
   }
 
+  private readTemplateFileContent(pathname: string): string {
+    return this.readTemplateFileBuffer(pathname).toString();
+  }
+
   private checkFile(pathname: string): boolean {
-    const absolutePathname = path.resolve(VIRTUAL_VOLUME_DESTINATION_PATHNAME, pathname);
+    const absolutePathname = path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, pathname);
     return (
       this.volume.existsSync(absolutePathname)
       && this.volume.statSync(absolutePathname).isFile()
@@ -156,7 +204,9 @@ class Generator {
     if (!configFileName) {
       return {} as DollieTemplateConfig;
     }
-    const dollieConfigFileContent = this.readTemplateFile(configFileName).toString();
+
+    const dollieConfigFileContent = this.readTemplateFileBuffer(configFileName).toString();
+
     if (configFileName.endsWith('.json')) {
       try {
         return JSON.parse(dollieConfigFileContent) as DollieTemplateConfig;

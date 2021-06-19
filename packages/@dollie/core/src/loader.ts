@@ -11,9 +11,9 @@ import Url from 'url';
 import tunnel from 'tunnel';
 import fs from 'fs';
 import {
-  VIRTUAL_VOLUME_DESTINATION_PATHNAME,
+  TEMPLATE_CACHE_PATHNAME_PREFIX,
 } from './constants';
-import { FileSystem, LoaderConfig, ReadTemplateCallbackData } from './interfaces';
+import { FileSystem, LoaderConfig, TemplateEntity } from './interfaces';
 import { isBinaryFileSync } from 'isbinaryfile';
 
 const downloadCompressedFile = async (
@@ -24,11 +24,11 @@ const downloadCompressedFile = async (
   const startTimestamp = Date.now();
 
   return new Promise((resolve, reject) => {
-    fileSystem.mkdirSync(VIRTUAL_VOLUME_DESTINATION_PATHNAME, { recursive: true });
+    fileSystem.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
 
     const getAbsolutePath = (filePath) => {
       const relativePathname = filePath.split('/').slice(1).join('/');
-      return path.resolve(VIRTUAL_VOLUME_DESTINATION_PATHNAME, relativePathname);
+      return path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, relativePathname);
     };
 
     const downloaderOptions = _.merge(options || {}, { isStream: true });
@@ -133,20 +133,24 @@ const loadTemplate = async (
   return await traverse(url, fileSystem, 0, options);
 };
 
-const readTemplateContent = (
+const readTemplateEntities = (
   fileSystem: FileSystem = fs,
-  pathname = VIRTUAL_VOLUME_DESTINATION_PATHNAME,
+  pathname = TEMPLATE_CACHE_PATHNAME_PREFIX,
 ) => {
-  const result: ReadTemplateCallbackData[] = [];
+  const traverse = (
+    fileSystem: FileSystem = fs,
+    currentEntityPathname: string,
+    result: TemplateEntity[] = [],
+  ) => {
+    let currentResult = Array.from(result);
 
-  const traverse = async (fileSystem: FileSystem = fs, currentEntityPathname: string) => {
     if (fileSystem.existsSync(currentEntityPathname)) {
       const stat = fileSystem.statSync(currentEntityPathname);
       const fileContent = stat.isFile()
         ? fileSystem.readFileSync(currentEntityPathname, 'binary')
         : null;
 
-      result.push({
+      currentResult.push({
         absolutePathname: currentEntityPathname,
         relativePathname: path.relative(pathname, currentEntityPathname),
         entityName: currentEntityPathname.split('/').pop(),
@@ -159,19 +163,19 @@ const readTemplateContent = (
       if (stat.isDirectory()) {
         const entities = fileSystem.readdirSync(currentEntityPathname);
         for (const entity of entities) {
-          traverse(fileSystem, `${currentEntityPathname}/${entity}`);
+          currentResult = traverse(fileSystem, `${currentEntityPathname}/${entity}`, currentResult);
         }
       }
     }
+
+    return currentResult;
   };
 
-  traverse(fileSystem, pathname);
-
-  return result;
+  return traverse(fileSystem, pathname);
 };
 
 export {
   downloadCompressedFile,
   loadTemplate,
-  readTemplateContent,
+  readTemplateEntities,
 };

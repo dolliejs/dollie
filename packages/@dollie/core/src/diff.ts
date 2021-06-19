@@ -1,8 +1,8 @@
 import { diffLines } from 'diff';
 import _ from 'lodash';
-import { DiffChange, PatchTable } from './interfaces';
+import { DiffChange, MergeBlock, PatchTable } from './interfaces';
 
-const diff = (originalContent: string, currentContent: string): DiffChange[] => {
+const diff = (originalContent: string, currentContent?: string): DiffChange[] => {
   const changes = diffLines(originalContent, currentContent || originalContent);
   const result: DiffChange[] = [];
   let lineNumber = 0;
@@ -104,7 +104,72 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
   }, []);
 };
 
+const parseMergeBlocksToText = (blocks: Array<MergeBlock>): string => {
+  return blocks.reduce((result, currentBlock) => {
+    if (currentBlock.status === 'OK') {
+      return `${result}${currentBlock.values.current.join('')}`;
+    } else {
+      return (
+        result +
+        '<<<<<<< former\n' +
+        currentBlock.values.former.join('') +
+        '=======\n' +
+        currentBlock.values.current.join('') +
+        '>>>>>>> current\n'
+      );
+    }
+  }, '');
+};
+
+const parseDiffToMergeBlocks = (changes: Array<DiffChange>): Array<MergeBlock> => {
+  const mergeBlocks: Array<MergeBlock> = [];
+  for (const line of changes) {
+    if (line.removed) {
+      continue;
+    }
+    if (line.conflicted) {
+      if (
+        mergeBlocks.length === 0 ||
+        _.last(mergeBlocks).status !== 'CONFLICT'
+      ) {
+        mergeBlocks.push({
+          status: 'CONFLICT',
+          values: {
+            current: [],
+            former: [],
+          },
+        });
+      }
+      const lastMergeBlock = _.last(mergeBlocks);
+      lastMergeBlock.values[line.conflictGroup].push(line.value);
+    } else {
+      if (
+        mergeBlocks.length === 0 ||
+        _.last(mergeBlocks).status === 'CONFLICT'
+      ) {
+        mergeBlocks.push({
+          status: 'OK',
+          values: {
+            former: [],
+            current: [],
+          },
+        });
+      }
+      const lastMergeBlock = _.last(mergeBlocks);
+      lastMergeBlock.values.current.push(line.value);
+    }
+  }
+  return mergeBlocks;
+};
+
+const parseFileTextToMergeBlocks = (content: string): Array<MergeBlock> => {
+  return parseDiffToMergeBlocks(diff(content));
+};
+
 export {
   diff,
   merge,
+  parseMergeBlocksToText,
+  parseDiffToMergeBlocks,
+  parseFileTextToMergeBlocks,
 };

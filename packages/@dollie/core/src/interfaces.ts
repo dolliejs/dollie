@@ -38,7 +38,7 @@ export type PatchTable = Record<string, PatchTableItem>;
 export type MemFS = typeof Volume.prototype;
 export type FileSystem = MemFS | typeof fs;
 
-export interface ReadTemplateCallbackData {
+export interface TemplateEntity {
   absolutePathname: string;
   relativePathname: string;
   entityName: string;
@@ -65,7 +65,18 @@ export interface ParsedProps {
   pendingExtendTemplateLabels: string[];
 }
 
-export interface TemplatePropsQueueItem {
+export interface TemplatePropsItem {
   label: string;
   props: DollieAnswers;
 }
+
+export interface MergeBlock {
+  status: 'OK' | 'CONFLICT';
+  values: {
+    former: Array<string>,
+    current: Array<string>,
+  };
+  ignored?: boolean;
+}
+
+export type CacheTable = Record<string, DiffChange[][]>;
