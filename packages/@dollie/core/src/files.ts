@@ -1,22 +1,32 @@
 import {
+  DeleteConfigHandler,
   DollieTemplateConfig,
 } from './interfaces';
 import _ from 'lodash';
 
-const getFileConfigGlobs = <T = string>(
+const getFileConfigGlobs = async (
   config: DollieTemplateConfig,
   targets: string[],
   type: string,
-): T[] => {
-  let files = (_.get(config, `files.${type}`) || []) as T[];
+): Promise<string[]> => {
+  let patterns = (_.get(config, `files.${type}`) || []) as (string | DeleteConfigHandler)[];
   for (const target of targets) {
-    files = files.concat((_.get(config, `${target}.files.${type}`)) || [] as T[]);
+    patterns = patterns.concat((_.get(config, `${target}.files.${type}`)) || [] as (string | DeleteConfigHandler)[]);
   }
-  return ((_.get(config, `files.${type}`) || []) as T[])
-    .concat(targets.reduce((result, target) => {
-      const currentTemplateFiles = (_.get(config, `extendTemplates.${target}.files.${type}`) || []) as T[];
-      return result.concat(currentTemplateFiles);
-    }, [] as T[]));
+  let result: string[] = [];
+  for (const pattern of patterns) {
+    if (_.isString(pattern)) {
+      result.push(pattern);
+    } else if (_.isFunction(pattern)) {
+      const returnValue = pattern(config);
+      if (_.isArray(returnValue) && returnValue.length > 0) {
+        result = result.concat(returnValue);
+      } else if (_.isString(returnValue)) {
+        result.push(returnValue);
+      }
+    }
+  }
+  return _.uniq(result.filter((item) => !!item).filter((item) => !_.isString(item))) as string[];
 };
 
 export {

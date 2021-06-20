@@ -130,10 +130,12 @@ class Generator {
         await this.getTemplateProps();
       } else if (currentPendingExtendTemplateLabel.startsWith(EXTEND_TEMPLATE_LABEL_PREFIX)) {
         await this.getTemplateProps(currentPendingExtendTemplateLabel);
-        this.targetedExtendTemplateLabels.push(currentPendingExtendTemplateLabel.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length));
+        this.targetedExtendTemplateLabels.push(
+          currentPendingExtendTemplateLabel.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length),
+        );
       }
     }
-    this.generateFilePatterns();
+    await this.generateFilePatterns();
     this.matcher = new GlobMatcher(this.filePatterns);
     return _.clone(this.templatePropsList);
   }
@@ -193,6 +195,9 @@ class Generator {
     }
   }
 
+  // TODO:
+  public deleteFiles() {}
+
   public mergeTemplateFiles() {
     for (const entityPathname of Object.keys(this.cacheTable)) {
       const diffs = this.cacheTable[entityPathname];
@@ -249,9 +254,9 @@ class Generator {
     return { files, conflicts };
   }
 
-  private generateFilePatterns() {
+  private async generateFilePatterns() {
     for (const type of ['merge', 'delete']) {
-      this.filePatterns[type] = getFileConfigGlobs(
+      this.filePatterns[type] = await getFileConfigGlobs(
         this.templateConfig,
         this.targetedExtendTemplateLabels,
         type,
