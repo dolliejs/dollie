@@ -34,6 +34,8 @@ import requireFromString from 'require-from-string';
 import { answersParser } from './props';
 import { diff, merge, parseDiffToMergeBlocks, parseMergeBlocksToText } from './diff';
 import ejs from 'ejs';
+import { getFileConfigGlobs } from './files';
+import { GlobMatcher } from './matchers';
 
 class Generator {
   public templateName: string;
@@ -45,8 +47,11 @@ class Generator {
   protected mergeTable: MergeTable = {};
   protected binaryEntities: TemplateEntity[] = [];
   protected conflicts: ConflictItem[] = [];
-  private moduleProps: TemplatePropsItem[] = [];
-  private pendingModuleLabels: string[] = [];
+  private templatePropsList: TemplatePropsItem[] = [];
+  private pendingTemplateLabels: string[] = [];
+  private targetedExtendTemplateLabels: string[] = [];
+  private filePatterns: Record<string, string[]> = {};
+  private matcher: GlobMatcher;
 
   public constructor(
     private templateOriginName: string,
@@ -57,7 +62,7 @@ class Generator {
     this.templateOrigin = '';
     this.origins = [githubOrigin, gitlabOrigin];
     this.volume = new Volume();
-    this.pendingModuleLabels.push('main');
+    this.pendingTemplateLabels.push('main');
   }
 
   public checkInputs() {
@@ -119,31 +124,34 @@ class Generator {
   }
 
   public async queryAllTemplateProps() {
-    while (this.pendingModuleLabels.length !== 0) {
-      const currentPendingModuleLabel = this.pendingModuleLabels.shift();
-      if (currentPendingModuleLabel === 'main') {
+    while (this.pendingTemplateLabels.length !== 0) {
+      const currentPendingExtendTemplateLabel = this.pendingTemplateLabels.shift();
+      if (currentPendingExtendTemplateLabel === 'main') {
         await this.getTemplateProps();
-      } else if (currentPendingModuleLabel.startsWith(EXTEND_TEMPLATE_LABEL_PREFIX)) {
-        await this.getTemplateProps(currentPendingModuleLabel);
+      } else if (currentPendingExtendTemplateLabel.startsWith(EXTEND_TEMPLATE_LABEL_PREFIX)) {
+        await this.getTemplateProps(currentPendingExtendTemplateLabel);
+        this.targetedExtendTemplateLabels.push(currentPendingExtendTemplateLabel.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length));
       }
     }
-    return _.clone(this.moduleProps);
+    this.generateFilePatterns();
+    this.matcher = new GlobMatcher(this.filePatterns);
+    return _.clone(this.templatePropsList);
   }
 
   public copyTemplateFileToCacheTable() {
-    for (const propItem of this.moduleProps) {
+    for (const propItem of this.templatePropsList) {
       const { label, props } = propItem;
-      let moduleStartPathname: string;
+      let templateStartPathname: string;
       if (label === 'main') {
-        moduleStartPathname = this.mainTemplatePathname();
+        templateStartPathname = this.mainTemplatePathname();
       } else if (label.startsWith(EXTEND_TEMPLATE_PATHNAME_PREFIX)) {
         const extendTemplateId = label.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length);
-        moduleStartPathname = this.extendTemplatePathname(extendTemplateId);
+        templateStartPathname = this.extendTemplatePathname(extendTemplateId);
       }
 
-      if (!moduleStartPathname) { return; }
+      if (!templateStartPathname) { return; }
 
-      const entities = readTemplateEntities(this.volume, moduleStartPathname);
+      const entities = readTemplateEntities(this.volume, templateStartPathname);
 
       for (const entity of entities) {
         const {
@@ -188,6 +196,7 @@ class Generator {
   public mergeTemplateFiles() {
     for (const entityPathname of Object.keys(this.cacheTable)) {
       const diffs = this.cacheTable[entityPathname];
+      // TODO: match file and make different decisions
       if (!diffs || !_.isArray(diffs) || diffs.length === 0) {
         continue;
       }
@@ -240,6 +249,16 @@ class Generator {
     return { files, conflicts };
   }
 
+  private generateFilePatterns() {
+    for (const type of ['merge', 'delete']) {
+      this.filePatterns[type] = getFileConfigGlobs(
+        this.templateConfig,
+        this.targetedExtendTemplateLabels,
+        type,
+      );
+    }
+  }
+
   private getConflictedFileDataList() {
     const conflicts: ConflictBlockMetadata[] = [];
     for (const pathname of Object.keys(this.mergeTable)) {
@@ -272,21 +291,21 @@ class Generator {
   private async getTemplateProps(extendTemplateLabel = null) {
     const { getTemplateProps } = this.config;
     const questions = (extendTemplateLabel && _.isString(extendTemplateLabel))
-      ? _.get(this.templateConfig, 'questions.main')
-      : _.get(this.templateConfig, `question.extendTemplates.${extendTemplateLabel}`);
+      ? _.get(this.templateConfig, 'questions')
+      : _.get(this.templateConfig, `extendTemplates.${extendTemplateLabel}.questions`);
 
     if (_.isFunction(getTemplateProps) && (questions && _.isArray(questions) && questions.length > 0)) {
-      const answers = await getTemplateProps(this.templateConfig.questions.main);
+      const answers = await getTemplateProps(this.templateConfig.questions);
       const { props = {}, pendingExtendTemplateLabels = [] } = answersParser(answers);
 
-      this.moduleProps.push({
+      this.templatePropsList.push({
         props,
         label: extendTemplateLabel ? extendTemplateLabel : 'main',
       });
 
       if (pendingExtendTemplateLabels.length > 0) {
         for (const pendingExtendTemplateLabel of pendingExtendTemplateLabels) {
-          this.pendingModuleLabels.push(`${EXTEND_TEMPLATE_LABEL_PREFIX}${pendingExtendTemplateLabel}`);
+          this.pendingTemplateLabels.push(`${EXTEND_TEMPLATE_LABEL_PREFIX}${pendingExtendTemplateLabel}`);
         }
       }
     }
