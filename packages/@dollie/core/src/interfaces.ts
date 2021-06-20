@@ -57,7 +57,7 @@ export interface DollieTemplateFileConfig {
 export interface DollieTemplateConfig {
   questions?: {
     main?: DollieQuestion[];
-    extendedTemplates?: Record<string, DollieQuestion[]>;
+    extendTemplates?: Record<string, DollieQuestion[]>;
   };
   files?: DollieTemplateFileConfig;
 }

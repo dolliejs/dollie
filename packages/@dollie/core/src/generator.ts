@@ -38,15 +38,15 @@ import ejs from 'ejs';
 class Generator {
   public templateName: string;
   public templateOrigin: string;
-  protected origins: DollieOrigin[];
+  protected origins: DollieOrigin[] = [];
   protected volume: FileSystem;
-  protected templateConfig: DollieTemplateConfig;
+  protected templateConfig: DollieTemplateConfig = {};
   protected cacheTable: CacheTable = {};
   protected mergeTable: MergeTable = {};
-  protected binaryEntities: TemplateEntity[];
+  protected binaryEntities: TemplateEntity[] = [];
   protected conflicts: ConflictItem[] = [];
-  private moduleProps: TemplatePropsItem[];
-  private pendingModuleLabels: string[];
+  private moduleProps: TemplatePropsItem[] = [];
+  private pendingModuleLabels: string[] = [];
 
   public constructor(
     private templateOriginName: string,
@@ -69,13 +69,14 @@ class Generator {
     }
   }
 
-  public async initialize() {
+  public initialize() {
     const { origins: customOrigins = [] } = this.config;
     this.origins = this.origins.concat(customOrigins);
     if (_.isString(this.templateOriginName)) {
       [this.templateName, this.templateOrigin = 'github'] = this.templateOriginName.split(':');
     }
     this.templateConfig = this.getTemplateConfig();
+    this.volume.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
   }
 
   public checkContext() {
@@ -106,13 +107,15 @@ class Generator {
       throw new ContextError(`origin \`${this.templateOrigin}\` url parsed with errors`);
     }
 
-    return await loadTemplate(url, this.volume, {
+    const duration = await loadTemplate(url, this.volume, {
       headers,
       ...({
         timeout: 90000,
       }),
       ...this.config.loader,
     });
+
+    return duration;
   }
 
   public async queryAllTemplateProps() {
@@ -270,7 +273,7 @@ class Generator {
     const { getTemplateProps } = this.config;
     const questions = (extendTemplateLabel && _.isString(extendTemplateLabel))
       ? _.get(this.templateConfig, 'questions.main')
-      : _.get(this.templateConfig, `question.extendedTemplates.${extendTemplateLabel}`);
+      : _.get(this.templateConfig, `question.extendTemplates.${extendTemplateLabel}`);
 
     if (_.isFunction(getTemplateProps) && (questions && _.isArray(questions) && questions.length > 0)) {
       const answers = await getTemplateProps(this.templateConfig.questions.main);

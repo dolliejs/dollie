@@ -7,9 +7,10 @@ const answersParser = (answers: Answers) => {
     const currentProp = answers[currentKey];
     if (currentKey === '$EXTEND$') {
       if (_.isArray(currentProp)) {
-        result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentProp));
+        result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentProp))
+          .filter((extendTemplateName) => extendTemplateName !== 'null');
       }
-      if (_.isString(currentProp)) {
+      if (_.isString(currentProp) && currentProp !== 'null') {
         result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentProp));
       }
     } else if (currentKey.startsWith('$EXTEND:')) {
