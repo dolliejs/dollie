@@ -48,7 +48,7 @@ export interface TemplateEntity {
   relativeDirectoryPathname: string;
 }
 
-export type DeleteConfigHandler = (scaffoldConfig: DollieTemplateConfig) => string | string[];
+export type DeleteConfigHandler = (scaffoldConfig: DollieTemplateConfig, targets: string[]) => string | string[];
 
 export interface DollieTemplateFileConfig {
   merge?: string[];

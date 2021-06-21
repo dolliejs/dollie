@@ -18,7 +18,7 @@ const getFileConfigGlobs = async (
     if (_.isString(pattern)) {
       result.push(pattern);
     } else if (_.isFunction(pattern)) {
-      const returnValue = pattern(config);
+      const returnValue = pattern(config, targets);
       if (_.isArray(returnValue) && returnValue.length > 0) {
         result = result.concat(returnValue);
       } else if (_.isString(returnValue)) {

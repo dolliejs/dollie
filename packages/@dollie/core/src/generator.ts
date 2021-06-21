@@ -8,7 +8,6 @@ import {
   DollieTemplateConfig,
   FileSystem,
   MergeTable,
-  TemplateEntity,
   TemplatePropsItem,
 } from './interfaces';
 import _ from 'lodash';
@@ -354,10 +353,10 @@ class Generator {
 
   private getTemplateConfig() {
     let configFileName: string;
-    if (this.checkFile('.dollie.json')) {
-      configFileName = '.dollie.json';
-    } else if (this.checkFile('.dollie.js')) {
-      configFileName = '.dollie.js';
+    if (this.checkFile('dollie.json')) {
+      configFileName = 'dollie.json';
+    } else if (this.checkFile('dollie.js')) {
+      configFileName = 'dollie.js';
     }
     if (!configFileName) {
       return {} as DollieTemplateConfig;
