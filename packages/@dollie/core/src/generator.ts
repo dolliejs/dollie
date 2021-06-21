@@ -1,4 +1,5 @@
 import {
+  BinaryTable,
   CacheTable,
   ConflictBlockMetadata,
   ConflictItem,
@@ -45,7 +46,7 @@ class Generator {
   protected templateConfig: DollieTemplateConfig = {};
   protected cacheTable: CacheTable = {};
   protected mergeTable: MergeTable = {};
-  protected binaryEntities: TemplateEntity[] = [];
+  protected binaryTable: BinaryTable = {};
   protected conflicts: ConflictItem[] = [];
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
@@ -165,7 +166,8 @@ class Generator {
         } = entity;
         if (isDirectory) { continue; }
         if (isBinary) {
-          this.binaryEntities.push(entity);
+          this.binaryTable[`${relativeDirectoryPathname}/${entityName}`]
+            = this.volume.readFileSync(absolutePathname) as Buffer;
         } else {
           const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
           let fileContent: string;
@@ -250,15 +252,11 @@ class Generator {
   }
 
   public getResult(): DollieGeneratorResult {
-    const files = Object.keys(this.mergeTable).reduce((result, pathname) => {
+    let files = Object.keys(this.mergeTable).reduce((result, pathname) => {
       result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
       return result;
     }, {});
-    for (const binaryEntity of this.binaryEntities) {
-      const { absolutePathname, relativePathname } = binaryEntity;
-      const buffer = this.volume.readFileSync(absolutePathname) as Buffer;
-      files[relativePathname] = buffer;
-    }
+    files = _.merge(this.binaryTable, files);
     const conflicts = this.getIgnoredConflictedFilePathnameList();
     return { files, conflicts };
   }

@@ -82,6 +82,7 @@ export interface MergeBlock {
 
 export type CacheTable = Record<string, DiffChange[][]>;
 export type MergeTable = Record<string, MergeBlock[]>;
+export type BinaryTable = Record<string, Buffer>;
 
 export interface ConflictItem {
   pathname: string;
