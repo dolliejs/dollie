@@ -28,6 +28,7 @@ import {
   EXTEND_TEMPLATE_PATHNAME_PREFIX,
   MAIN_TEMPLATE_PATHNAME_PREFIX,
   TEMPLATE_CACHE_PATHNAME_PREFIX,
+  TEMPLATE_CONFIG_FILE_NAMES,
   TEMPLATE_FILE_PREFIX,
 } from './constants';
 import requireFromString from 'require-from-string';
@@ -353,11 +354,14 @@ class Generator {
 
   private getTemplateConfig() {
     let configFileName: string;
-    if (this.checkFile('dollie.json')) {
-      configFileName = 'dollie.json';
-    } else if (this.checkFile('dollie.js')) {
-      configFileName = 'dollie.js';
+
+    for (const fileName of TEMPLATE_CONFIG_FILE_NAMES) {
+      if (this.checkFile(fileName)) {
+        configFileName = fileName;
+        break;
+      }
     }
+
     if (!configFileName) {
       return {} as DollieTemplateConfig;
     }
