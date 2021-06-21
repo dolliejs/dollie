@@ -58,11 +58,12 @@ export interface DollieTemplateFileConfig {
   delete?: (string | DeleteConfigHandler)[];
 }
 
-export type DollieTemplateCleanUpFunction = (
-  templateConfig: DollieTemplateConfig,
-  mergeTable: MergeTable,
-  targets: string[],
-) => MergeTable;
+export interface DollieTemplateCleanupData {
+  addFile: (pathname: string, content: string) => void;
+  deleteFiles: (pathnameList: string[]) => void;
+}
+
+export type DollieTemplateCleanUpFunction = (data: DollieTemplateCleanupData) => MergeTable;
 
 export interface DollieTemplateConfig {
   questions?: DollieQuestion[];

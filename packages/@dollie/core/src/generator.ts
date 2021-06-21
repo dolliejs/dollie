@@ -34,7 +34,13 @@ import {
 } from './constants';
 import requireFromString from 'require-from-string';
 import { answersParser } from './props';
-import { diff, merge, parseDiffToMergeBlocks, parseMergeBlocksToText } from './diff';
+import {
+  diff,
+  merge,
+  parseDiffToMergeBlocks,
+  parseFileTextToMergeBlocks,
+  parseMergeBlocksToText,
+} from './diff';
 import ejs from 'ejs';
 import { getFileConfigGlobs } from './files';
 import { GlobMatcher } from './matchers';
@@ -140,6 +146,7 @@ class Generator {
     }
     await this.generateFilePatterns();
     this.matcher = new GlobMatcher(this.filePatterns);
+    // TODO: test
     return _.clone(this.templatePropsList);
   }
 
@@ -257,19 +264,36 @@ class Generator {
   }
 
   public async runCleanups() {
+    const mergeTable = _.clone(this.mergeTable);
     const cleanups = (_.get(this.templateConfig, 'cleanups') || [])
       .concat(this.targetedExtendTemplateIds.reduce((result, templateId) => {
         const currentCleanups = _.get(this.templateConfig, `extendTemplates.${templateId}.cleanups`) || [];
         return result.concat(currentCleanups);
       }, []))
       .filter((cleanup) => _.isFunction(cleanup)) as DollieTemplateCleanUpFunction[];
+
+    const addFile = (pathname: string, content: string) => {
+      if (!mergeTable[pathname]) {
+        mergeTable[pathname] = parseFileTextToMergeBlocks(content);
+      }
+    };
+
+    const deleteFiles = (pathnameList: string[]) => {
+      for (const pathname of pathnameList) {
+        mergeTable[pathname] = null;
+      }
+    };
+
     for (const cleanup of cleanups) {
-      this.mergeTable = await cleanup(
-        this.templateConfig,
-        this.mergeTable,
-        this.targetedExtendTemplateIds,
-      );
+      await cleanup({ addFile, deleteFiles });
     }
+
+    this.mergeTable = Object.keys(mergeTable).reduce((result, pathname) => {
+      if (!_.isNull(mergeTable[pathname])) {
+        result[pathname] = mergeTable[pathname];
+      }
+      return result;
+    }, {} as MergeTable);
   }
 
   public getResult(): DollieGeneratorResult {
