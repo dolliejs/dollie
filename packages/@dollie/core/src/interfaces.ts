@@ -27,7 +27,7 @@ export interface DollieConfig {
   origins?: DollieOrigin[];
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
-  conflictsSolver?: (data: ConflictSolverData) => MergeBlock;
+  conflictsSolver?: (data: ConflictSolverData) => MergeBlock | 'ignored' | null;
 }
 
 export interface PatchTableItem {
@@ -106,6 +106,7 @@ export interface ConflictBlockMetadata {
 
 export interface ConflictSolverData extends ConflictBlockMetadata {
   block: MergeBlock;
+  content: string;
 }
 
 export interface DollieGeneratorResult {

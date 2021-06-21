@@ -241,14 +241,17 @@ class Generator {
         pathname,
         index,
         block: this.mergeTable[pathname][index],
+        content: parseMergeBlocksToText(this.mergeTable[pathname]),
       });
-      if (result) {
-        this.mergeTable[pathname][index] = result;
-      } else {
+      if (_.isNull(result)) {
+        remainedConflictedFileDataList.unshift({ pathname, index });
+      } else if (result === 'ignored') {
         this.mergeTable[pathname][index] = {
           ...this.mergeTable[pathname][index],
           ignored: true,
         };
+      } else if (!_.isEmpty(result)) {
+        this.mergeTable[pathname][index] = result;
       }
     }
   }
