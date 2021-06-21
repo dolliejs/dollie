@@ -195,23 +195,32 @@ class Generator {
     }
   }
 
-  // TODO:
-  public deleteFiles() {}
+  public deleteFiles() {
+    this.cacheTable = Object.keys(this.cacheTable).reduce((result, pathname) => {
+      if (!this.matcher.match(pathname, 'delete')) {
+        result[pathname] = this.cacheTable[pathname];
+      }
+      return result;
+    }, {} as CacheTable);
+  }
 
   public mergeTemplateFiles() {
     for (const entityPathname of Object.keys(this.cacheTable)) {
       const diffs = this.cacheTable[entityPathname];
-      // TODO: match file and make different decisions
       if (!diffs || !_.isArray(diffs) || diffs.length === 0) {
         continue;
       }
-      if (diffs.length === 1) {
-        this.mergeTable[entityPathname] = parseDiffToMergeBlocks(diffs[0]);
+      if (this.matcher.match(entityPathname, 'merge')) {
+        if (diffs.length === 1) {
+          this.mergeTable[entityPathname] = parseDiffToMergeBlocks(diffs[0]);
+        } else {
+          const originalDiffChanges = diffs[0];
+          const forwardDiffChangesGroup = diffs.slice(1);
+          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
+          this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
+        }
       } else {
-        const originalDiffChanges = diffs[0];
-        const forwardDiffChangesGroup = diffs.slice(1);
-        const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
-        this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
+        this.mergeTable[entityPathname] = parseDiffToMergeBlocks(_.last(diffs));
       }
     }
   }
