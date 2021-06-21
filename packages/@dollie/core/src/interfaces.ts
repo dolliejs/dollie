@@ -48,16 +48,26 @@ export interface TemplateEntity {
   relativeDirectoryPathname: string;
 }
 
-export type DeleteConfigHandler = (scaffoldConfig: DollieTemplateConfig, targets: string[]) => string | string[];
+export type DeleteConfigHandler = (
+  templateConfig: DollieTemplateConfig,
+  targets: string[],
+) => string | string[];
 
 export interface DollieTemplateFileConfig {
   merge?: string[];
   delete?: (string | DeleteConfigHandler)[];
 }
 
+export type DollieTemplateCleanUpFunction = (
+  templateConfig: DollieTemplateConfig,
+  mergeTable: MergeTable,
+  targets: string[],
+) => MergeTable;
+
 export interface DollieTemplateConfig {
   questions?: DollieQuestion[];
   files?: DollieTemplateFileConfig;
+  cleanups?: DollieTemplateCleanUpFunction[];
   extendTemplates?: Record<string, Omit<DollieTemplateConfig, 'extendTemplates'>>;
 }
 

@@ -5,6 +5,7 @@ import {
   ConflictItem,
   DollieConfig,
   DollieGeneratorResult,
+  DollieTemplateCleanUpFunction,
   DollieTemplateConfig,
   FileSystem,
   MergeTable,
@@ -50,7 +51,7 @@ class Generator {
   protected conflicts: ConflictItem[] = [];
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
-  private targetedExtendTemplateLabels: string[] = [];
+  private targetedExtendTemplateIds: string[] = [];
   private filePatterns: Record<string, string[]> = {};
   private matcher: GlobMatcher;
 
@@ -131,7 +132,7 @@ class Generator {
         await this.getTemplateProps();
       } else if (currentPendingExtendTemplateLabel.startsWith(EXTEND_TEMPLATE_LABEL_PREFIX)) {
         await this.getTemplateProps(currentPendingExtendTemplateLabel);
-        this.targetedExtendTemplateLabels.push(
+        this.targetedExtendTemplateIds.push(
           currentPendingExtendTemplateLabel.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length),
         );
       }
@@ -251,6 +252,22 @@ class Generator {
     }
   }
 
+  public async runCleanups() {
+    const cleanups = (_.get(this.templateConfig, 'cleanups') || [])
+      .concat(this.targetedExtendTemplateIds.reduce((result, templateId) => {
+        const currentCleanups = _.get(this.templateConfig, `extendTemplates.${templateId}.cleanups`) || [];
+        return result.concat(currentCleanups);
+      }, []))
+      .filter((cleanup) => _.isFunction(cleanup)) as DollieTemplateCleanUpFunction[];
+    for (const cleanup of cleanups) {
+      this.mergeTable = await cleanup(
+        this.templateConfig,
+        this.mergeTable,
+        this.targetedExtendTemplateIds,
+      );
+    }
+  }
+
   public getResult(): DollieGeneratorResult {
     let files = Object.keys(this.mergeTable).reduce((result, pathname) => {
       result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
@@ -265,7 +282,7 @@ class Generator {
     for (const type of ['merge', 'delete']) {
       this.filePatterns[type] = await getFileConfigGlobs(
         this.templateConfig,
-        this.targetedExtendTemplateLabels,
+        this.targetedExtendTemplateIds,
         type,
       );
     }

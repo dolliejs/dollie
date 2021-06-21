@@ -6,6 +6,8 @@ const TEMPLATE_FILE_PREFIX = '__template.';
 const TEMPLATE_CONFIG_FILE_NAMES = [
   'dollie.json',
   'dollie.js',
+  '.dollie.json',
+  '.dollie.js',
 ];
 
 export {
