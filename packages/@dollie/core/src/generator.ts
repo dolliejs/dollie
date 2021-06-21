@@ -279,6 +279,20 @@ class Generator {
     return { files, conflicts };
   }
 
+  protected mainTemplatePathname(pathname = '') {
+    return `${TEMPLATE_CACHE_PATHNAME_PREFIX}${MAIN_TEMPLATE_PATHNAME_PREFIX}${pathname ? `/${pathname}` : ''}`;
+  }
+
+  protected extendTemplatePathname(templateId: string, pathname = '') {
+    const BASE_PATH = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${TEMPLATE_CACHE_PATHNAME_PREFIX}`;
+
+    if (!templateId) {
+      return null;
+    }
+
+    return `${BASE_PATH}/${templateId}${pathname ? `/${pathname}` : ''}`;
+  }
+
   private async generateFilePatterns() {
     for (const type of ['merge', 'delete']) {
       this.filePatterns[type] = await getFileConfigGlobs(
@@ -346,20 +360,6 @@ class Generator {
       TEMPLATE_CACHE_PATHNAME_PREFIX,
       pathname,
     )) as Buffer;
-  }
-
-  private mainTemplatePathname(pathname = '') {
-    return `${TEMPLATE_CACHE_PATHNAME_PREFIX}${MAIN_TEMPLATE_PATHNAME_PREFIX}${pathname ? `/${pathname}` : ''}`;
-  }
-
-  private extendTemplatePathname(templateId: string, pathname = '') {
-    const BASE_PATH = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${TEMPLATE_CACHE_PATHNAME_PREFIX}`;
-
-    if (!templateId) {
-      return null;
-    }
-
-    return `${BASE_PATH}/${templateId}${pathname ? `/${pathname}` : ''}`;
   }
 
   private checkFile(pathname: string): boolean {
