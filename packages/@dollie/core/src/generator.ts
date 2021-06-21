@@ -56,9 +56,9 @@ class Generator {
   private matcher: GlobMatcher;
 
   public constructor(
+    protected projectName: string,
     private templateOriginName: string,
     private config: DollieConfig = {},
-    protected projectName: string,
   ) {
     this.templateName = '';
     this.templateOrigin = '';
@@ -82,7 +82,6 @@ class Generator {
     if (_.isString(this.templateOriginName)) {
       [this.templateName, this.templateOrigin = 'github'] = this.templateOriginName.split(':');
     }
-    this.templateConfig = this.getTemplateConfig();
     this.volume.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
   }
 
@@ -121,6 +120,8 @@ class Generator {
       }),
       ...this.config.loader,
     });
+
+    this.templateConfig = this.getTemplateConfig();
 
     return duration;
   }
@@ -320,8 +321,8 @@ class Generator {
   private async getTemplateProps(extendTemplateLabel = null) {
     const { getTemplateProps } = this.config;
     const questions = (extendTemplateLabel && _.isString(extendTemplateLabel))
-      ? _.get(this.templateConfig, 'questions')
-      : _.get(this.templateConfig, `extendTemplates.${extendTemplateLabel}.questions`);
+      ? _.get(this.templateConfig, `extendTemplates.${extendTemplateLabel}.questions`)
+      : _.get(this.templateConfig, 'questions');
 
     if (_.isFunction(getTemplateProps) && (questions && _.isArray(questions) && questions.length > 0)) {
       const answers = await getTemplateProps(this.templateConfig.questions);
