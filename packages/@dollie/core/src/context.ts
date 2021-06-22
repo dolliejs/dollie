@@ -22,6 +22,7 @@ class Context {
     this.generator.checkContext();
     await this.generator.loadTemplate();
     await this.generator.queryAllTemplateProps();
+    this.generator.copyTemplateFileToCacheTable();
   }
 }
 

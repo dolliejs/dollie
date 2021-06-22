@@ -149,8 +149,6 @@ class Generator {
     }
     await this.generateFilePatterns();
     this.matcher = new GlobMatcher(this.filePatterns);
-    // TODO: test
-    console.log(this.targetedExtendTemplateIds, this.templatePropsList);
     return _.clone(this.templatePropsList);
   }
 
@@ -162,6 +160,7 @@ class Generator {
     }
 
     const templateIds = ['main'].concat(this.targetedExtendTemplateIds.map((id) => `extend:${id}`));
+
     for (const templateId of templateIds) {
       const templatePropsItem = this.templatePropsList.find((item) => item.label === templateId);
       if (!templatePropsItem) {
@@ -171,15 +170,16 @@ class Generator {
       let templateStartPathname: string;
       if (label === 'main') {
         templateStartPathname = this.mainTemplatePathname();
-      } else if (label.startsWith(EXTEND_TEMPLATE_PATHNAME_PREFIX)) {
+      } else if (label.startsWith(EXTEND_TEMPLATE_LABEL_PREFIX)) {
         const extendTemplateId = label.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length);
         templateStartPathname = this.extendTemplatePathname(extendTemplateId);
       }
 
-      if (!templateStartPathname) { return; }
+      if (!templateStartPathname) { continue; }
 
       const entities = readTemplateEntities(this.volume, templateStartPathname);
 
+      // TODO: test
       for (const entity of entities) {
         const {
           absolutePathname,
@@ -190,8 +190,7 @@ class Generator {
         } = entity;
         if (isDirectory) { continue; }
         if (isBinary) {
-          this.binaryTable[`${relativeDirectoryPathname}/${entityName}`]
-            = this.volume.readFileSync(absolutePathname) as Buffer;
+          this.binaryTable[`${relativeDirectoryPathname}/${entityName}`] = this.volume.readFileSync(absolutePathname) as Buffer;
         } else {
           const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
           let fileContent: string;
@@ -209,8 +208,7 @@ class Generator {
 
           const currentFileDiffChanges = diff(fileContent);
           if (
-            !this.cacheTable[currentFileRelativePathname]
-              || !_.isArray(this.cacheTable[currentFileRelativePathname])
+            !this.cacheTable[currentFileRelativePathname] || !_.isArray(this.cacheTable[currentFileRelativePathname])
           ) {
             this.cacheTable[currentFileRelativePathname] = [];
           }
@@ -326,7 +324,7 @@ class Generator {
   }
 
   protected extendTemplatePathname(templateId: string, pathname = '') {
-    const BASE_PATH = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${TEMPLATE_CACHE_PATHNAME_PREFIX}`;
+    const BASE_PATH = `${TEMPLATE_CACHE_PATHNAME_PREFIX}${EXTEND_TEMPLATE_PATHNAME_PREFIX}`;
 
     if (!templateId) {
       return null;

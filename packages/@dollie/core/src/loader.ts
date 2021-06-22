@@ -147,7 +147,7 @@ const readTemplateEntities = (
     if (fileSystem.existsSync(currentEntityPathname)) {
       const stat = fileSystem.statSync(currentEntityPathname);
       const fileContent = stat.isFile()
-        ? fileSystem.readFileSync(currentEntityPathname, 'binary')
+        ? fileSystem.readFileSync(currentEntityPathname)
         : null;
       const relativePathname = path.relative(pathname, currentEntityPathname);
 
