@@ -11,7 +11,7 @@ const getFileConfigGlobs = async (
 ): Promise<string[]> => {
   let patterns = (_.get(config, `files.${type}`) || []) as (string | DeleteConfigHandler)[];
   for (const target of targets) {
-    patterns = patterns.concat((_.get(config, `${target}.files.${type}`)) || [] as (string | DeleteConfigHandler)[]);
+    patterns = patterns.concat((_.get(config, `extendTemplates.${target}.files.${type}`)) || [] as (string | DeleteConfigHandler)[]);
   }
   let result: string[] = [];
   for (const pattern of patterns) {
@@ -26,7 +26,7 @@ const getFileConfigGlobs = async (
       }
     }
   }
-  return _.uniq(result.filter((item) => !!item).filter((item) => !_.isString(item))) as string[];
+  return _.uniq(result.filter((item) => !!item).filter((item) => _.isString(item))) as string[];
 };
 
 export {

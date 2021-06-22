@@ -23,6 +23,7 @@ class Context {
     await this.generator.loadTemplate();
     await this.generator.queryAllTemplateProps();
     this.generator.copyTemplateFileToCacheTable();
+    this.generator.deleteFiles();
   }
 }
 

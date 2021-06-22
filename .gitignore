@@ -12,3 +12,4 @@ temp
 package-lock.json
 lib
 .idea
+test.ts

@@ -179,7 +179,6 @@ class Generator {
 
       const entities = readTemplateEntities(this.volume, templateStartPathname);
 
-      // TODO: test
       for (const entity of entities) {
         const {
           absolutePathname,
@@ -188,7 +187,9 @@ class Generator {
           isDirectory,
           relativeDirectoryPathname,
         } = entity;
+
         if (isDirectory) { continue; }
+
         if (isBinary) {
           this.binaryTable[`${relativeDirectoryPathname}/${entityName}`] = this.volume.readFileSync(absolutePathname) as Buffer;
         } else {
