@@ -1,11 +1,12 @@
 import { Answers } from 'inquirer';
 import _ from 'lodash';
+import { EXTEND_TEMPLATE_PREFIX } from './constants';
 import { ParsedProps } from './interfaces';
 
 const answersParser = (answers: Answers) => {
   return Object.keys(answers).reduce((result, currentKey) => {
     const currentProp = answers[currentKey];
-    if (currentKey === '$EXTEND$') {
+    if (currentKey.startsWith('$EXTEND$')) {
       if (_.isArray(currentProp)) {
         result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentProp))
           .filter((extendTemplateName) => extendTemplateName !== 'null');
@@ -15,9 +16,18 @@ const answersParser = (answers: Answers) => {
       }
     } else if (currentKey.startsWith('$EXTEND:')) {
       if (_.isBoolean(currentProp) && currentProp) {
-        const currentExtend = /^\$EXTEND\:(.*)?\$$/.exec(currentKey)[1];
-        if (currentExtend) {
-          result.pendingExtendTemplateLabels = _.uniq(result.pendingExtendTemplateLabels.concat(currentExtend));
+        const extendTemplateIdChars = [];
+        for (const char of currentKey.slice(EXTEND_TEMPLATE_PREFIX.length + 1)) {
+          if (char !== '$') {
+            extendTemplateIdChars.push(char);
+          } else {
+            break;
+          }
+        }
+        if (extendTemplateIdChars.length > 0) {
+          result.pendingExtendTemplateLabels = _.uniq(
+            result.pendingExtendTemplateLabels.concat(extendTemplateIdChars.join('')),
+          );
         }
       }
     } else {

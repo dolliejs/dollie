@@ -4,7 +4,9 @@ import {
   ConflictBlockMetadata,
   ConflictItem,
   DollieConfig,
+  DollieExtendTemplateConfig,
   DollieGeneratorResult,
+  DollieQuestion,
   DollieTemplateCleanUpFunction,
   DollieTemplateConfig,
   FileSystem,
@@ -27,6 +29,7 @@ import path from 'path';
 import {
   EXTEND_TEMPLATE_LABEL_PREFIX,
   EXTEND_TEMPLATE_PATHNAME_PREFIX,
+  EXTEND_TEMPLATE_PREFIX,
   MAIN_TEMPLATE_PATHNAME_PREFIX,
   TEMPLATE_CACHE_PATHNAME_PREFIX,
   TEMPLATE_CONFIG_FILE_NAMES,
@@ -127,7 +130,7 @@ class Generator {
       ...this.config.loader,
     });
 
-    this.templateConfig = this.getTemplateConfig();
+    this.templateConfig = this.parseTemplateConfig();
 
     return duration;
   }
@@ -147,12 +150,18 @@ class Generator {
     await this.generateFilePatterns();
     this.matcher = new GlobMatcher(this.filePatterns);
     // TODO: test
+    console.log(this.targetedExtendTemplateIds, this.templatePropsList);
     return _.clone(this.templatePropsList);
   }
 
   public copyTemplateFileToCacheTable() {
-    for (const propItem of this.templatePropsList) {
-      const { label, props } = propItem;
+    const templateIds = ['main'].concat(this.targetedExtendTemplateIds.map((id) => `extend:${id}`));
+    for (const templateId of templateIds) {
+      const templatePropsItem = this.templatePropsList.find((item) => item.label === templateId);
+      if (!templatePropsItem) {
+        continue;
+      }
+      const { label, props } = templatePropsItem;
       let templateStartPathname: string;
       if (label === 'main') {
         templateStartPathname = this.mainTemplatePathname();
@@ -365,20 +374,24 @@ class Generator {
       ? _.get(this.templateConfig, `extendTemplates.${extendTemplateLabel}.questions`)
       : _.get(this.templateConfig, 'questions');
 
-    if (_.isFunction(getTemplateProps) && (questions && _.isArray(questions) && questions.length > 0)) {
-      const answers = await getTemplateProps(this.templateConfig.questions);
-      const { props = {}, pendingExtendTemplateLabels = [] } = answersParser(answers);
+    if (_.isFunction(getTemplateProps)) {
+      let props = {};
+      if (questions && _.isArray(questions) && questions.length > 0) {
+        const answers = await getTemplateProps(this.templateConfig.questions);
+        const { props: currentProps = {}, pendingExtendTemplateLabels = [] } = answersParser(answers);
 
+        props = currentProps;
+
+        if (pendingExtendTemplateLabels.length > 0) {
+          for (const pendingExtendTemplateLabel of pendingExtendTemplateLabels) {
+            this.pendingTemplateLabels.push(`${EXTEND_TEMPLATE_LABEL_PREFIX}${pendingExtendTemplateLabel}`);
+          }
+        }
+      }
       this.templatePropsList.push({
         props,
         label: extendTemplateLabel ? extendTemplateLabel : 'main',
       });
-
-      if (pendingExtendTemplateLabels.length > 0) {
-        for (const pendingExtendTemplateLabel of pendingExtendTemplateLabels) {
-          this.pendingTemplateLabels.push(`${EXTEND_TEMPLATE_LABEL_PREFIX}${pendingExtendTemplateLabel}`);
-        }
-      }
     }
   }
 
@@ -424,6 +437,49 @@ class Generator {
     } else {
       return {} as DollieTemplateConfig;
     }
+  }
+
+  private parseTemplateConfig() {
+    const postfixes: string[] = [];
+
+    const generatePostfix = () => {
+      const postfix = Math.random().toString(32).slice(2);
+      if (postfixes.includes(postfix)) {
+        return generatePostfix();
+      } else {
+        return postfix;
+      }
+    };
+
+    const modifyQuestionName = (questions: DollieQuestion[] = []) => {
+      return questions.map((question) => {
+        const { name } = question;
+        if (name.startsWith(`${EXTEND_TEMPLATE_PREFIX}`) && name.endsWith('$')) {
+          return {
+            ...question,
+            name: `${name}__${generatePostfix()}`,
+          };
+        }
+        return question;
+      });
+    };
+
+    const config = this.getTemplateConfig();
+
+    const extendTemplates = (_.get(config, 'extendTemplates') || {}) as DollieExtendTemplateConfig;
+
+    return {
+      ...config,
+      questions: modifyQuestionName(_.get(config, 'questions') || []),
+      extendTemplates: Object.keys(extendTemplates).reduce((result, templateId) => {
+        const currentExtendTemplateConfig = extendTemplates[templateId];
+        result[templateId] = {
+          ...currentExtendTemplateConfig,
+          questions: modifyQuestionName(_.get(currentExtendTemplateConfig, 'questions')),
+        } as Omit<DollieTemplateConfig, 'extendTemplates'>;
+        return result;
+      }, {} as DollieExtendTemplateConfig),
+    } as DollieTemplateConfig;
   }
 }
 

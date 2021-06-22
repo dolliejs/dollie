@@ -64,12 +64,13 @@ export interface DollieTemplateCleanupData {
 }
 
 export type DollieTemplateCleanUpFunction = (data: DollieTemplateCleanupData) => MergeTable;
+export type DollieExtendTemplateConfig = Record<string, Omit<DollieTemplateConfig, 'extendTemplates'>>;
 
 export interface DollieTemplateConfig {
   questions?: DollieQuestion[];
   files?: DollieTemplateFileConfig;
   cleanups?: DollieTemplateCleanUpFunction[];
-  extendTemplates?: Record<string, Omit<DollieTemplateConfig, 'extendTemplates'>>;
+  extendTemplates?: DollieExtendTemplateConfig;
 }
 
 export interface ParsedProps {
