@@ -3,6 +3,7 @@ import {
   CacheTable,
   ConflictBlockMetadata,
   ConflictItem,
+  DiffChange,
   DollieConfig,
   DollieExtendTemplateConfig,
   DollieGeneratorResult,
@@ -194,27 +195,34 @@ class Generator {
           this.binaryTable[`${relativeDirectoryPathname}/${entityName}`] = this.volume.readFileSync(absolutePathname) as Buffer;
         } else {
           const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
-          let fileContent: string;
+          let currentFileContent: string;
 
           if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
-            fileContent = ejs.render(fileRawContent, _.merge(mainTemplateProps, props));
+            currentFileContent = ejs.render(fileRawContent, _.merge(mainTemplateProps, props));
           } else {
-            fileContent = fileRawContent;
+            currentFileContent = fileRawContent;
           }
 
           const currentFileName = entityName.startsWith(TEMPLATE_FILE_PREFIX)
             ? entityName.slice(TEMPLATE_FILE_PREFIX.length)
             : entityName;
-          const currentFileRelativePathname = `${relativeDirectoryPathname}/${currentFileName}`;
+          const currentFileRelativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${currentFileName}`;
 
-          const currentFileDiffChanges = diff(fileContent);
+          let currentFileDiffChanges: DiffChange[];
           if (
-            !this.cacheTable[currentFileRelativePathname] || !_.isArray(this.cacheTable[currentFileRelativePathname])
+            !this.cacheTable[currentFileRelativePathname]
+            || this.cacheTable[currentFileRelativePathname].length === 0
+            || !_.isArray(this.cacheTable[currentFileRelativePathname])
           ) {
             this.cacheTable[currentFileRelativePathname] = [];
+            currentFileDiffChanges = diff(currentFileContent);
+          } else {
+            const originalFileDiffChanges = this.cacheTable[currentFileRelativePathname][0];
+            const originalFileContent = originalFileDiffChanges.map((diffItem) => diffItem.value).join('');
+            currentFileDiffChanges = diff(originalFileContent, currentFileContent);
           }
-          const currentCacheTableItem = this.cacheTable[currentFileRelativePathname];
-          currentCacheTableItem.push(currentFileDiffChanges);
+
+          this.cacheTable[currentFileRelativePathname].push(currentFileDiffChanges);
         }
       }
     }
@@ -241,7 +249,7 @@ class Generator {
         } else {
           const originalDiffChanges = diffs[0];
           const forwardDiffChangesGroup = diffs.slice(1);
-          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
+          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup, entityPathname);
           this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
         }
       } else {
@@ -252,10 +260,13 @@ class Generator {
 
   public async resolveConflicts() {
     const { conflictsSolver } = this.config;
+
     if (!_.isFunction(conflictsSolver)) {
       return;
     }
-    let remainedConflictedFileDataList = this.getConflictedFileDataList();
+
+    const remainedConflictedFileDataList = this.getConflictedFileDataList();
+
     while (remainedConflictedFileDataList.length > 0) {
       const { pathname, index } = remainedConflictedFileDataList.shift();
       const result = await conflictsSolver({
@@ -271,6 +282,8 @@ class Generator {
           ...this.mergeTable[pathname][index],
           ignored: true,
         };
+      } else if (_.isString(result)) {
+        this.mergeTable[pathname] = parseFileTextToMergeBlocks(result);
       } else if (!_.isEmpty(result)) {
         this.mergeTable[pathname][index] = result;
       }

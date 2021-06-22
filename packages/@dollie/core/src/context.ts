@@ -24,6 +24,10 @@ class Context {
     await this.generator.queryAllTemplateProps();
     this.generator.copyTemplateFileToCacheTable();
     this.generator.deleteFiles();
+    this.generator.mergeTemplateFiles();
+    await this.generator.resolveConflicts();
+    this.generator.runCleanups();
+    return this.generator.getResult();
   }
 }
 

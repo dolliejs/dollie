@@ -27,7 +27,7 @@ const diff = (originalContent: string, currentContent?: string): DiffChange[] =>
   return result;
 };
 
-const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffChange[] => {
+const merge = (originalChanges: DiffChange[], diffList: DiffChange[][], pathname: string): DiffChange[] => {
   if (!originalChanges) {
     return [];
   }
