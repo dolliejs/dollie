@@ -155,6 +155,12 @@ class Generator {
   }
 
   public copyTemplateFileToCacheTable() {
+    const mainTemplateProps = this.templatePropsList.find((item) => item.label === 'main') || {};
+
+    if (!mainTemplateProps) {
+      return;
+    }
+
     const templateIds = ['main'].concat(this.targetedExtendTemplateIds.map((id) => `extend:${id}`));
     for (const templateId of templateIds) {
       const templatePropsItem = this.templatePropsList.find((item) => item.label === templateId);
@@ -191,7 +197,7 @@ class Generator {
           let fileContent: string;
 
           if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
-            fileContent = ejs.render(fileRawContent, props);
+            fileContent = ejs.render(fileRawContent, _.merge(mainTemplateProps, props));
           } else {
             fileContent = fileRawContent;
           }
