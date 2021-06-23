@@ -4,7 +4,7 @@ import {
   ConflictBlockMetadata,
   ConflictItem,
   DiffChange,
-  DollieConfig,
+  DollieGeneratorConfig,
   DollieExtendTemplateConfig,
   DollieGeneratorResult,
   DollieQuestion,
@@ -68,7 +68,7 @@ class Generator {
   public constructor(
     protected projectName: string,
     private templateOriginName: string,
-    private config: DollieConfig = {},
+    private config: DollieGeneratorConfig = {},
   ) {
     this.templateName = '';
     this.templateOrigin = '';

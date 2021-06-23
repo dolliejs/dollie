@@ -6,6 +6,8 @@ import { Volume } from 'memfs';
 import fs from 'fs';
 import { Options as GotOptions } from 'got/dist/source';
 import { Answers as DollieAnswers, DistinctQuestion } from 'inquirer';
+import { DollieError } from './errors';
+import { noop } from 'lodash';
 
 export type DollieQuestion<T extends DollieAnswers = DollieAnswers> = DistinctQuestion<T>;
 
@@ -23,11 +25,12 @@ export interface LoaderOptions {
 
 export type LoaderConfig = LoaderOptions & GotOptions;
 
-export interface DollieConfig {
+export interface DollieGeneratorConfig {
   origins?: DollieOrigin[];
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => MergeBlock | 'ignored' | null;
+  onMessage?: MessageHandler;
 }
 
 export interface PatchTableItem {
@@ -119,4 +122,20 @@ export interface ConflictSolverData extends ConflictBlockMetadata {
 export interface DollieGeneratorResult {
   files: Record<string, string | Buffer>;
   conflicts: string[];
+}
+
+export type DollieContextStatus = 'pending' | 'running' | 'finished';
+export interface DollieContextStatusMap {
+  [key: string]: DollieContextStatus;
+}
+
+export type StatusChangeHandler = (status: DollieContextStatusMap) => void;
+export type ErrorHandler = (error: DollieError) => void;
+export type MessageHandler = (message: string) => void;
+
+export interface DollieConfig {
+  generator?: DollieGeneratorConfig;
+  onStatusChange?: StatusChangeHandler;
+  onError?: ErrorHandler;
+  onMessage?: MessageHandler;
 }
