@@ -13,6 +13,7 @@ import {
   FileSystem,
   MergeTable,
   TemplatePropsItem,
+  MessageHandler,
 } from './interfaces';
 import _ from 'lodash';
 import {
@@ -64,6 +65,7 @@ class Generator {
   private targetedExtendTemplateIds: string[] = [];
   private filePatterns: Record<string, string[]> = {};
   private matcher: GlobMatcher;
+  private messageHandler: MessageHandler;
 
   public constructor(
     protected projectName: string,
@@ -75,27 +77,39 @@ class Generator {
     this.origins = [githubOrigin, gitlabOrigin];
     this.volume = new Volume();
     this.pendingTemplateLabels.push('main');
+    const { onMessage: messageHandler = _.noop } = this.config;
+    this.messageHandler = messageHandler;
   }
 
   public checkInputs() {
+    this.messageHandler('Validating inputs...');
     if (!this.templateOriginName || !_.isString(this.templateOriginName)) {
-      throw new InvalidInputError('name should be a string');
+      throw new InvalidInputError('Parameter `name` should be a string');
     }
     if (!this.projectName || !_.isString(this.projectName)) {
-      throw new InvalidInputError('projectName should be a string');
+      throw new InvalidInputError('Parameter `projectName` should be a string');
     }
   }
 
   public initialize() {
+    this.messageHandler('Initializing origins...');
     const { origins: customOrigins = [] } = this.config;
     this.origins = this.origins.concat(customOrigins);
     if (_.isString(this.templateOriginName)) {
-      [this.templateName, this.templateOrigin = 'github'] = this.templateOriginName.split(':');
+      if (!this.templateOriginName.includes(':')) {
+        this.templateOrigin = 'github';
+        this.templateName = this.templateOriginName;
+      } else {
+        [this.templateOrigin = 'github', this.templateName] = this.templateOriginName.split(':');
+      }
     }
+    this.messageHandler('Preparing cache directory...');
     this.volume.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
+    this.messageHandler('Initialization finished successfully');
   }
 
   public checkContext() {
+    this.messageHandler('Checking runtime context...');
     const originIds = this.origins.map((origin) => origin.name);
     const uniqueOriginIds = _.uniq(originIds);
     if (originIds.length > uniqueOriginIds.length) {
@@ -104,8 +118,9 @@ class Generator {
   }
 
   public async loadTemplate() {
-    const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
+    this.messageHandler(`Start loading template from ${this.templateOrigin}:${this.templateName}`);
 
+    const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
     if (!origin) {
       throw new ContextError(`origin name \`${this.templateOrigin}\` not found`);
     }
@@ -131,7 +146,12 @@ class Generator {
       ...this.config.loader,
     });
 
+    this.messageHandler(`Template loaded in ${duration}ms`);
+    this.messageHandler('Parsing template config...');
+
     this.templateConfig = this.parseTemplateConfig();
+
+    this.messageHandler('Template parsed successfully');
 
     return duration;
   }
@@ -154,6 +174,8 @@ class Generator {
   }
 
   public copyTemplateFileToCacheTable() {
+    this.messageHandler('Generating template files...');
+
     const mainTemplateProps = this.templatePropsList.find((item) => item.label === 'main') || {};
 
     if (!mainTemplateProps) {
@@ -291,6 +313,8 @@ class Generator {
   }
 
   public async runCleanups() {
+    this.messageHandler('Running cleanup functions...');
+
     const clonedTables = {
       mergeTable: _.clone(this.mergeTable),
       binaryTable: _.clone(this.binaryTable),
@@ -366,6 +390,7 @@ class Generator {
     }, {});
     files = _.merge(this.binaryTable, files);
     const conflicts = this.getIgnoredConflictedFilePathnameList();
+    this.messageHandler('Generator finished successfully, exiting...');
     return { files, conflicts };
   }
 
