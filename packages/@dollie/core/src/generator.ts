@@ -306,6 +306,14 @@ class Generator {
       }
     };
 
+    const addTextFile = addFile;
+
+    const addBinaryFile = (pathname: string, content: Buffer) => {
+      if (!binaryTable[pathname]) {
+        binaryTable[pathname] = content;
+      }
+    };
+
     const deleteFiles = (pathnameList: string[]) => {
       for (const pathname of pathnameList) {
         mergeTable[pathname] = null;
@@ -328,6 +336,8 @@ class Generator {
     for (const cleanup of cleanups) {
       await cleanup({
         addFile,
+        addTextFile,
+        addBinaryFile,
         deleteFiles,
         exists,
         getTextFileContent,

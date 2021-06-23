@@ -60,6 +60,8 @@ export interface DollieTemplateFileConfig {
 
 export interface DollieTemplateCleanupData {
   addFile: (pathname: string, content: string) => void;
+  addTextFile: (pathname: string, content: string) => void;
+  addBinaryFile: (pathname: string, content: Buffer) => void;
   deleteFiles: (pathnameList: string[]) => void;
   exists: (pathname: string) => void;
   getTextFileContent: (pathname: string) => string;
