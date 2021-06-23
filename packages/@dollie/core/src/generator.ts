@@ -291,8 +291,11 @@ class Generator {
   }
 
   public async runCleanups() {
-    const mergeTable = _.clone(this.mergeTable);
-    const binaryTable = _.clone(this.binaryTable);
+    const clonedTables = {
+      mergeTable: _.clone(this.mergeTable),
+      binaryTable: _.clone(this.binaryTable),
+    };
+
     const cleanups = (_.get(this.templateConfig, 'cleanups') || [])
       .concat(this.targetedExtendTemplateIds.reduce((result, templateId) => {
         const currentCleanups = _.get(this.templateConfig, `extendTemplates.${templateId}.cleanups`) || [];
@@ -301,23 +304,23 @@ class Generator {
       .filter((cleanup) => _.isFunction(cleanup)) as DollieTemplateCleanUpFunction[];
 
     const addFile = (pathname: string, content: string) => {
-      if (!mergeTable[pathname]) {
-        mergeTable[pathname] = parseFileTextToMergeBlocks(content);
+      if (!clonedTables.mergeTable[pathname]) {
+        clonedTables.mergeTable[pathname] = parseFileTextToMergeBlocks(content);
       }
     };
 
     const addTextFile = addFile;
 
     const addBinaryFile = (pathname: string, content: Buffer) => {
-      if (!binaryTable[pathname]) {
-        binaryTable[pathname] = content;
+      if (!clonedTables.binaryTable[pathname]) {
+        clonedTables.binaryTable[pathname] = content;
       }
     };
 
     const deleteFiles = (pathnameList: string[]) => {
       for (const pathname of pathnameList) {
-        mergeTable[pathname] = null;
-        binaryTable[pathname] = null;
+        clonedTables.mergeTable[pathname] = null;
+        clonedTables.binaryTable[pathname] = null;
       }
     };
 
@@ -345,19 +348,15 @@ class Generator {
       });
     }
 
-    this.mergeTable = Object.keys(mergeTable).reduce((result, pathname) => {
-      if (!_.isNull(mergeTable[pathname])) {
-        result[pathname] = mergeTable[pathname];
-      }
-      return result;
-    }, {} as MergeTable);
-
-    this.binaryTable = Object.keys(binaryTable).reduce((result, pathname) => {
-      if (!_.isNull(binaryTable[pathname])) {
-        result[pathname] = binaryTable[pathname];
-      }
-      return result;
-    }, {} as BinaryTable);
+    Object.keys(clonedTables).forEach((tableName) => {
+      this[tableName] = Object.keys(clonedTables[tableName]).reduce((result, pathname) => {
+        const content = clonedTables[tableName][pathname];
+        if (!_.isNull(content)) {
+          result[pathname] = content;
+        }
+        return result;
+      }, {});
+    });
   }
 
   public getResult(): DollieGeneratorResult {
@@ -420,7 +419,7 @@ class Generator {
         }
       }
     }
-    return result;
+    return _.uniq(result);
   }
 
   private async getTemplateProps(extendTemplateLabel = null) {
