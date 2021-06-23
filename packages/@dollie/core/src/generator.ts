@@ -292,6 +292,7 @@ class Generator {
 
   public async runCleanups() {
     const mergeTable = _.clone(this.mergeTable);
+    const binaryTable = _.clone(this.binaryTable);
     const cleanups = (_.get(this.templateConfig, 'cleanups') || [])
       .concat(this.targetedExtendTemplateIds.reduce((result, templateId) => {
         const currentCleanups = _.get(this.templateConfig, `extendTemplates.${templateId}.cleanups`) || [];
@@ -308,11 +309,30 @@ class Generator {
     const deleteFiles = (pathnameList: string[]) => {
       for (const pathname of pathnameList) {
         mergeTable[pathname] = null;
+        binaryTable[pathname] = null;
       }
     };
 
+    const exists = (pathname: string): boolean => {
+      return Boolean(this.mergeTable[pathname]);
+    };
+
+    const getTextFileContent = (pathname: string) => {
+      return parseMergeBlocksToText(this.mergeTable[pathname]);
+    };
+
+    const getBinaryFileBuffer = (pathname: string) => {
+      return this.binaryTable[pathname];
+    };
+
     for (const cleanup of cleanups) {
-      await cleanup({ addFile, deleteFiles });
+      await cleanup({
+        addFile,
+        deleteFiles,
+        exists,
+        getTextFileContent,
+        getBinaryFileBuffer,
+      });
     }
 
     this.mergeTable = Object.keys(mergeTable).reduce((result, pathname) => {
@@ -321,6 +341,13 @@ class Generator {
       }
       return result;
     }, {} as MergeTable);
+
+    this.binaryTable = Object.keys(binaryTable).reduce((result, pathname) => {
+      if (!_.isNull(binaryTable[pathname])) {
+        result[pathname] = binaryTable[pathname];
+      }
+      return result;
+    }, {} as BinaryTable);
   }
 
   public getResult(): DollieGeneratorResult {

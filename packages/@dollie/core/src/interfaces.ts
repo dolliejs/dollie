@@ -61,6 +61,9 @@ export interface DollieTemplateFileConfig {
 export interface DollieTemplateCleanupData {
   addFile: (pathname: string, content: string) => void;
   deleteFiles: (pathnameList: string[]) => void;
+  exists: (pathname: string) => void;
+  getTextFileContent: (pathname: string) => string;
+  getBinaryFileBuffer: (pathname: string) => Buffer;
 }
 
 export type DollieTemplateCleanUpFunction = (data: DollieTemplateCleanupData) => MergeTable;
