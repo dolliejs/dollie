@@ -378,7 +378,7 @@ class Generator {
     for (const pathname of Object.keys(this.mergeTable)) {
       const mergeBlocks = this.mergeTable[pathname];
       for (const mergeBlock of mergeBlocks) {
-        if (mergeBlock.status === 'CONFLICT' && mergeBlock.ignored) {
+        if (mergeBlock.status === 'CONFLICT') {
           result.push(pathname);
         }
       }
