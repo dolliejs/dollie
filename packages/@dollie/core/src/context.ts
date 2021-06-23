@@ -26,7 +26,7 @@ class Context {
     this.generator.deleteFiles();
     this.generator.mergeTemplateFiles();
     await this.generator.resolveConflicts();
-    this.generator.runCleanups();
+    await this.generator.runCleanups();
     return this.generator.getResult();
   }
 }
