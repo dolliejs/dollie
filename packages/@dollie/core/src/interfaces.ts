@@ -7,7 +7,6 @@ import fs from 'fs';
 import { Options as GotOptions } from 'got/dist/source';
 import { Answers as DollieAnswers, DistinctQuestion } from 'inquirer';
 import { DollieError } from './errors';
-import { noop } from 'lodash';
 
 export type DollieQuestion<T extends DollieAnswers = DollieAnswers> = DistinctQuestion<T>;
 
