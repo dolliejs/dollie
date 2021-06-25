@@ -70,7 +70,7 @@ class Generator {
     protected projectName: string,
     private templateOriginName: string,
     private config: DollieGeneratorConfig = {},
-    protected origins: any[] = [],
+    protected origins: DollieOrigin[] = [],
   ) {
     this.templateName = '';
     this.templateOrigin = '';
