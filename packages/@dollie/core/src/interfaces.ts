@@ -1,5 +1,5 @@
 import {
-  DollieOrigin,
+  DollieOriginHandler,
 } from '@dollie/origins';
 import { Change } from 'diff';
 import { Volume } from 'memfs';
@@ -25,7 +25,7 @@ export interface LoaderOptions {
 export type LoaderConfig = LoaderOptions & GotOptions;
 
 export interface DollieGeneratorConfig {
-  origins?: DollieOrigin[];
+  origins?: DollieOriginHandler[];
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => MergeBlock | 'ignored' | null;
@@ -138,3 +138,8 @@ export interface DollieConfig {
   onError?: ErrorHandler;
   onMessage?: MessageHandler;
 }
+
+export interface DollieOrigin {
+  name: string;
+  handler: DollieOriginHandler;
+};

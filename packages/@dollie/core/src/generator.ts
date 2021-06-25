@@ -14,6 +14,7 @@ import {
   MergeTable,
   TemplatePropsItem,
   MessageHandler,
+  DollieOrigin,
 } from './interfaces';
 import _ from 'lodash';
 import {
@@ -21,7 +22,6 @@ import {
   ContextError,
 } from './errors';
 import {
-  DollieOrigin,
   githubOrigin,
   gitlabOrigin,
 } from '@dollie/origins';
@@ -53,7 +53,6 @@ import { GlobMatcher } from './matchers';
 class Generator {
   public templateName: string;
   public templateOrigin: string;
-  protected origins: DollieOrigin[] = [];
   protected volume: FileSystem;
   protected templateConfig: DollieTemplateConfig = {};
   protected cacheTable: CacheTable = {};
@@ -71,14 +70,24 @@ class Generator {
     protected projectName: string,
     private templateOriginName: string,
     private config: DollieGeneratorConfig = {},
+    protected origins: DollieOrigin[] = [],
   ) {
     this.templateName = '';
     this.templateOrigin = '';
-    this.origins = [githubOrigin, gitlabOrigin];
     this.volume = new Volume();
     this.pendingTemplateLabels.push('main');
     const { onMessage: messageHandler = _.noop } = this.config;
     this.messageHandler = messageHandler;
+    this.origins = origins.concat([
+      {
+        name: 'github',
+        handler: githubOrigin,
+      },
+      {
+        name: 'gitlab',
+        handler: gitlabOrigin,
+      },
+    ]);
   }
 
   public checkInputs() {
@@ -93,8 +102,6 @@ class Generator {
 
   public initialize() {
     this.messageHandler('Initializing origins...');
-    const { origins: customOrigins = [] } = this.config;
-    this.origins = this.origins.concat(customOrigins);
     if (_.isString(this.templateOriginName)) {
       if (!this.templateOriginName.includes(':')) {
         this.templateOrigin = 'github';
