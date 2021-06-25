@@ -10,3 +10,8 @@ export type DollieOriginHandler = (
   id: string,
   config: DollieOriginConfig,
 ) => Promise<DollieOriginInfo>;
+
+export interface DollieOrigin {
+  name: string;
+  handler: DollieOriginHandler;
+};

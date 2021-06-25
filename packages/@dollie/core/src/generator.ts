@@ -14,7 +14,6 @@ import {
   MergeTable,
   TemplatePropsItem,
   MessageHandler,
-  DollieOrigin,
 } from './interfaces';
 import _ from 'lodash';
 import {
@@ -24,6 +23,7 @@ import {
 import {
   githubOrigin,
   gitlabOrigin,
+  DollieOrigin,
 } from '@dollie/origins';
 import { Volume } from 'memfs';
 import { loadTemplate, readTemplateEntities } from './loader';
@@ -70,7 +70,7 @@ class Generator {
     protected projectName: string,
     private templateOriginName: string,
     private config: DollieGeneratorConfig = {},
-    protected origins: DollieOrigin[] = [],
+    protected origins: any[] = [],
   ) {
     this.templateName = '';
     this.templateOrigin = '';

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { DollieOriginHandler } from './interfaces';
+import { DollieOriginHandler } from '../interfaces';
 
 export default (async (id, config = {}) => {
   if (!id) {

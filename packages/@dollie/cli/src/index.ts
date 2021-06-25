@@ -1,18 +1,15 @@
-import { Context } from '@dollie/core';
-import inquirer from 'inquirer';
+// import { Context } from '@dollie/core';
+import commands from './commands';
+import commander from 'commander';
+import _ from 'lodash';
 
-async function test() {
-  const context = new Context('test', 'lenconda/template-react', {
-    generator: {
-      getTemplateProps: async (questions) => {
-        return await inquirer.prompt(questions);
-      },
-      loader: {
-        httpProxyUrl: 'http://127.0.0.1:7890',
-      },
-    },
-  });
-  await context.generate();
+const program = new commander.Command();
+
+for (const commandKey of Object.keys(commands)) {
+  const commandGenerator = commands[commandKey];
+  if (_.isFunction(commandGenerator)) {
+    program.addCommand(commandGenerator());
+  }
 }
 
-test();
+program.parse(process.argv);

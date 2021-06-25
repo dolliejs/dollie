@@ -1,5 +1,5 @@
-import githubOrigin from './github';
-import gitlabOrigin from './gitlab';
+import githubOrigin from './handlers/github';
+import gitlabOrigin from './handlers/gitlab';
 
 export {
   githubOrigin,
@@ -10,4 +10,5 @@ export {
   DollieOriginHeaders,
   DollieOriginInfo,
   DollieOriginHandler,
+  DollieOrigin,
 } from './interfaces';

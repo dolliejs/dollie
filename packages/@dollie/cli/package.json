@@ -13,7 +13,7 @@
     "dollie": "bin/dollie.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf ./lib && tsc",
     "build:watch": "tsc --watch",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
@@ -23,11 +23,14 @@
   "dependencies": {
     "@dollie/core": "^3.0.0",
     "commander": "^7.2.0",
-    "inquirer": "^8.1.1"
+    "got": "^11.8.2",
+    "inquirer": "^8.1.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/inquirer": "^7.3.2",
     "@types/lodash": "^4.14.170",
-    "@types/node": "^15.12.2"
+    "@types/node": "^15.12.2",
+    "rimraf": "^3.0.2"
   }
 }

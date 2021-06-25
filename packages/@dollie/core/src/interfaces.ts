@@ -138,8 +138,3 @@ export interface DollieConfig {
   onError?: ErrorHandler;
   onMessage?: MessageHandler;
 }
-
-export interface DollieOrigin {
-  name: string;
-  handler: DollieOriginHandler;
-};

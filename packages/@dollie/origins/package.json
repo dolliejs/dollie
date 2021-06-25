@@ -11,7 +11,7 @@
     "url": "git+https://github.com/lenconda/dollie.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf ./lib && tsc",
     "build:watch": "tsc --watch",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
@@ -25,6 +25,7 @@
   "typings": "lib/index.d.ts",
   "devDependencies": {
     "@types/lodash": "^4.14.170",
-    "@types/node": "^15.12.2"
+    "@types/node": "^15.12.2",
+    "rimraf": "^3.0.2"
   }
 }
