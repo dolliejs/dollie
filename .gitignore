@@ -10,6 +10,5 @@ temp
 .versions
 .changelog
 package-lock.json
-lib
 .idea
 test.ts
