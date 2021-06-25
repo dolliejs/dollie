@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@dollie/core": "^3.0.0",
+    "@dollie/origins": "^3.0.0",
     "commander": "^7.2.0",
     "got": "^11.8.2",
     "inquirer": "^8.1.1",

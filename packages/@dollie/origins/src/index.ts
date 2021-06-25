@@ -5,6 +5,7 @@ export {
   githubOrigin,
   gitlabOrigin,
 };
+
 export {
   DollieOriginConfig,
   DollieOriginHeaders,
@@ -12,3 +13,7 @@ export {
   DollieOriginHandler,
   DollieOrigin,
 } from './interfaces';
+
+export {
+  loadOrigins,
+} from './loader';

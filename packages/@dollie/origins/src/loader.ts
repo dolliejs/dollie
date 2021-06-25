@@ -30,6 +30,6 @@ const loadOrigins = async (config: DollieOriginConfig): Promise<DollieOrigin[]> 
   return result;
 };
 
-export default {
+export {
   loadOrigins,
 };

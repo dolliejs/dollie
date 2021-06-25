@@ -1,4 +1,3 @@
-// import { Context } from '@dollie/core';
 import commands from './commands';
 import commander from 'commander';
 import _ from 'lodash';
