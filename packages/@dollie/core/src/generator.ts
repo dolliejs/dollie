@@ -215,13 +215,14 @@ class Generator {
           entityName,
           isBinary,
           isDirectory,
-          relativeDirectoryPathname,
+          relativeDirectoryPathname: relativePathname,
         } = entity;
 
         if (isDirectory) { continue; }
 
         if (isBinary) {
-          this.binaryTable[`${relativeDirectoryPathname}/${entityName}`] = this.volume.readFileSync(absolutePathname) as Buffer;
+          this.binaryTable[`${relativePathname}/${entityName}`]
+            = this.volume.readFileSync(absolutePathname) as Buffer;
         } else {
           const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
           let currentFileContent: string;
@@ -235,7 +236,7 @@ class Generator {
           const currentFileName = entityName.startsWith(TEMPLATE_FILE_PREFIX)
             ? entityName.slice(TEMPLATE_FILE_PREFIX.length)
             : entityName;
-          const currentFileRelativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${currentFileName}`;
+          const currentFileRelativePathname = `${relativePathname ? `${relativePathname}/` : ''}${currentFileName}`;
 
           let currentFileDiffChanges: DiffChange[];
           if (
