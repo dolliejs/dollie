@@ -1,6 +1,7 @@
 import commander from 'commander';
+import { DollieCLIConfigSchema } from '../utils/config';
 
-export default () => {
+export default (config: DollieCLIConfigSchema) => {
   const command = new commander.Command('config');
 
   command
