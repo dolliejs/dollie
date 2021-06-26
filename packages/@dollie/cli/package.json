@@ -24,11 +24,13 @@
     "@dollie/core": "^3.0.0",
     "@dollie/origins": "^3.0.0",
     "commander": "^7.2.0",
+    "fs-extra": "^10.0.0",
     "got": "^11.8.2",
     "inquirer": "^8.1.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.11",
     "@types/inquirer": "^7.3.2",
     "@types/lodash": "^4.14.170",
     "@types/node": "^15.12.2",

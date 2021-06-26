@@ -1,6 +1,9 @@
 import commands from './commands';
 import commander from 'commander';
 import _ from 'lodash';
+import { initializeConfig } from './init';
+
+initializeConfig();
 
 const program = new commander.Command();
 
