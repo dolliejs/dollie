@@ -8,6 +8,8 @@ import {
 export default (config: DollieCLIConfigSchema) => {
   const command = new commander.Command('origin');
 
+  command.description('manage template origins');
+
   command
     .command('add')
     .description('add a template origins')

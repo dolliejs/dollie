@@ -21,8 +21,6 @@ import {
   ContextError,
 } from './errors';
 import {
-  githubOrigin,
-  gitlabOrigin,
   DollieOrigin,
 } from '@dollie/origins';
 import { Volume } from 'memfs';
@@ -78,16 +76,7 @@ class Generator {
     this.pendingTemplateLabels.push('main');
     const { onMessage: messageHandler = _.noop } = this.config;
     this.messageHandler = messageHandler;
-    this.origins = (this.config.origins || []).concat([
-      {
-        name: 'github',
-        handler: githubOrigin,
-      },
-      {
-        name: 'gitlab',
-        handler: gitlabOrigin,
-      },
-    ]);
+    this.origins = this.config.origins || [];
   }
 
   public checkInputs() {
