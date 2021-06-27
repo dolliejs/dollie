@@ -11,6 +11,34 @@ import {
 } from '../logger';
 import _ from 'lodash';
 import inquirer from 'inquirer';
+import { ConflictSolverData, MergeBlock } from '../../../core/lib/interfaces';
+
+export type ConflictSolveApproachType = 'simple' | 'manual' | 'edit' | 'ignore';
+
+// TODO: finish
+const conflictSolver = async (
+  data: ConflictSolverData,
+  onMessage: (message: string) => void,
+) => {
+  const { block, total, index, pathname } = data;
+
+  if (_.isFunction(onMessage)) {
+    onMessage(`Solving ${index + 1} of ${total} conflicts in \`${pathname}\``);
+  }
+
+  let approachType: ConflictSolveApproachType;
+  const approachTypeAnswer = await inquirer.prompt([
+    {
+      name: 'type',
+      message: 'Select an appropriate approach to solve this conflict',
+    },
+  ]);
+  approachType = approachTypeAnswer.type as ConflictSolveApproachType;
+
+  if (!approachType || !['simple', 'manual', 'edit', 'ignore'].includes(approachType)) {
+    approachType = 'simple';
+  }
+};
 
 export default (config: DollieCLIConfigSchema) => {
   const command = new commander.Command('init');

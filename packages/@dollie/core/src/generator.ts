@@ -293,6 +293,9 @@ class Generator {
         index,
         block: this.mergeTable[pathname][index],
         content: parseMergeBlocksToText(this.mergeTable[pathname]),
+        total: remainedConflictedFileDataList.filter((item) => {
+          return item.pathname === pathname;
+        }).length + 1,
       });
       if (_.isNull(result)) {
         remainedConflictedFileDataList.unshift({ pathname, index });

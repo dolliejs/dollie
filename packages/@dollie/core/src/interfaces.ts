@@ -118,6 +118,7 @@ export interface ConflictBlockMetadata {
 export interface ConflictSolverData extends ConflictBlockMetadata {
   block: MergeBlock;
   content: string;
+  total: number;
 }
 
 export interface DollieGeneratorResult {
