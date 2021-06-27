@@ -17,21 +17,28 @@ export default (config: DollieCLIConfigSchema) => {
     .description('Init a project with an appropriate template')
     .arguments('[template] [name]')
     .action(async (template: string, name: string) => {
-      const origins = await loadOrigins(config.origins || {});
-      const errorLogger = new ErrorLogger();
-      const infoLogger = new InfoLogger();
+      try {
+        const origins = await loadOrigins(config.origins || {});
+        const errorLogger = new ErrorLogger();
+        const infoLogger = new InfoLogger();
 
-      const context = new Context(name, template, {
-        generator: {
-          origins,
-        },
-        onMessage: infoLogger.log,
-        onError: (error) => errorLogger.log(error.message),
-      });
+        const context = new Context(name, template, {
+          generator: {
+            origins,
+          },
+          onMessage: (message) => infoLogger.log(message),
+          onError: (error) => {
+            errorLogger.log(error.message);
+            process.exit(1);
+          },
+        });
 
-      const result = await context.generate();
-      // TODO: test
-      writeGeneratedFiles(result);
+        const result = await context.generate();
+        console.log(result);
+        if (result) {
+          writeGeneratedFiles(result);
+        }
+      } catch {}
     });
 
   return command;
