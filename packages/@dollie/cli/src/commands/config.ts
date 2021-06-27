@@ -1,14 +1,23 @@
 import commander from 'commander';
-import { DollieCLIConfigSchema } from '../utils/config';
+import _ from 'lodash';
+import {
+  DollieCLIConfigSchema,
+  writeConfig,
+} from '../utils/config';
 
 export default (config: DollieCLIConfigSchema) => {
   const command = new commander.Command('config');
 
   command
-    .description('Set value to a configuration key')
+    .description('get or set CLI configuration')
     .arguments('[key] [value]')
     .action((key: string, value: string) => {
-      console.log(key, value);
+      if (!value) {
+        console.log(_.get(config, 'key'));
+        process.exit(0);
+      }
+
+      writeConfig(key, value);
     });
 
   return command;

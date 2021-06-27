@@ -9,12 +9,13 @@ import {
   ErrorLogger,
   InfoLogger,
 } from '../logger';
+import _ from 'lodash';
 
 export default (config: DollieCLIConfigSchema) => {
   const command = new commander.Command('init');
 
   command
-    .description('Init a project with an appropriate template')
+    .description('init a project with an appropriate template')
     .arguments('[template] [name]')
     .action(async (template: string, name: string) => {
       try {
@@ -25,6 +26,7 @@ export default (config: DollieCLIConfigSchema) => {
         const context = new Context(name, template, {
           generator: {
             origins,
+            loader: _.get(config, 'loader'),
           },
           onMessage: (message) => infoLogger.log(message),
           onError: (error) => {
@@ -34,7 +36,7 @@ export default (config: DollieCLIConfigSchema) => {
         });
 
         const result = await context.generate();
-        console.log(result);
+
         if (result) {
           writeGeneratedFiles(result);
         }

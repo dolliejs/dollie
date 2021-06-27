@@ -1,7 +1,6 @@
 import {
   DollieOrigin,
   DollieOriginConfig,
-  DollieOriginHandler,
 } from '@dollie/origins';
 import { Change } from 'diff';
 import { Volume } from 'memfs';
