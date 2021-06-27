@@ -17,9 +17,8 @@ export default (config: DollieCLIConfigSchema) => {
 
       const context = new Context(name, template, {
         generator: {
-          origins: origins.map((origin) => origin.handler),
         },
-      });
+      }, origins);
 
       const result = await context.generate();
       // TODO: test

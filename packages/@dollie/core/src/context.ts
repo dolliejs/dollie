@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { DollieOrigin } from '../../origins/lib';
 import { DollieError } from './errors';
 import Generator from './generator';
 import {
@@ -21,6 +22,7 @@ class Context {
     protected projectName: string,
     private templateOriginName: string,
     private config: DollieConfig = {},
+    private origins: DollieOrigin[] = [],
   ) {
     const { onStatusChange, onError, onMessage } = config;
     this.errorHandler = _.isFunction(onError) ? onError : _.noop;
@@ -53,7 +55,7 @@ class Context {
     this.generator = new Generator(projectName, templateOriginName, {
       ...(config.generator || {}),
       onMessage: this.messageHandler,
-    });
+    }, this.origins);
     this.generator.checkInputs();
     this.generator.initialize();
     this.generator.checkContext();

@@ -138,7 +138,7 @@ class Generator {
 
     const { url, headers } = await origin.handler(
       this.templateName,
-      _.get(this.config, `origins.${this.templateOrigin}`),
+      _.get(this.config, 'origin') || {},
     );
 
     if (!_.isString(url) || !url) {
