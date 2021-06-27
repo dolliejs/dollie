@@ -1,4 +1,5 @@
 import {
+  DollieOrigin,
   DollieOriginConfig,
   DollieOriginHandler,
 } from '@dollie/origins';
@@ -26,7 +27,8 @@ export interface LoaderOptions {
 export type LoaderConfig = LoaderOptions & GotOptions;
 
 export interface DollieGeneratorConfig {
-  origin?: DollieOriginConfig
+  origin?: DollieOriginConfig;
+  origins?: DollieOrigin[];
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => MergeBlock | 'ignored' | null;

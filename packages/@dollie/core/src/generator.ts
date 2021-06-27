@@ -59,6 +59,7 @@ class Generator {
   protected mergeTable: MergeTable = {};
   protected binaryTable: BinaryTable = {};
   protected conflicts: ConflictItem[] = [];
+  protected origins: DollieOrigin[] = [];
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];
@@ -70,7 +71,6 @@ class Generator {
     protected projectName: string,
     private templateOriginName: string,
     private config: DollieGeneratorConfig = {},
-    protected origins: DollieOrigin[] = [],
   ) {
     this.templateName = '';
     this.templateOrigin = '';
@@ -78,7 +78,7 @@ class Generator {
     this.pendingTemplateLabels.push('main');
     const { onMessage: messageHandler = _.noop } = this.config;
     this.messageHandler = messageHandler;
-    this.origins = origins.concat([
+    this.origins = (this.config.origins || []).concat([
       {
         name: 'github',
         handler: githubOrigin,
