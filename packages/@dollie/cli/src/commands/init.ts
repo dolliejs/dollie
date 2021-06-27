@@ -10,6 +10,7 @@ import {
   InfoLogger,
 } from '../logger';
 import _ from 'lodash';
+import inquirer from 'inquirer';
 
 export default (config: DollieCLIConfigSchema) => {
   const command = new commander.Command('init');
@@ -27,6 +28,9 @@ export default (config: DollieCLIConfigSchema) => {
           generator: {
             origins,
             loader: _.get(config, 'loader'),
+            getTemplateProps: async (questions) => {
+              return await inquirer.prompt(questions);
+            },
           },
           onMessage: (message) => infoLogger.log(message),
           onError: (error) => {
@@ -38,7 +42,7 @@ export default (config: DollieCLIConfigSchema) => {
         const result = await context.generate();
 
         if (result) {
-          writeGeneratedFiles(result);
+          writeGeneratedFiles(result, name);
         }
       } catch {}
     });
