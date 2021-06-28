@@ -285,17 +285,26 @@ class Generator {
     }
 
     const remainedConflictedFileDataList = this.getConflictedFileDataList();
+    const totalConflicts = _.clone(remainedConflictedFileDataList);
 
     while (remainedConflictedFileDataList.length > 0) {
       const { pathname, index } = remainedConflictedFileDataList.shift();
+
+      const currentPathnameConflicts = totalConflicts.filter((item) => {
+        return item.pathname === pathname;
+      });
+
+      const total = currentPathnameConflicts.length;
+      const currentIndex = currentPathnameConflicts.findIndex((conflict) => {
+        return index === conflict.index;
+      });
+
       const result = await conflictsSolver({
         pathname,
-        index,
+        total,
         block: this.mergeTable[pathname][index],
+        index: currentIndex,
         content: parseMergeBlocksToText(this.mergeTable[pathname]),
-        total: remainedConflictedFileDataList.filter((item) => {
-          return item.pathname === pathname;
-        }).length + 1,
       });
       if (_.isNull(result)) {
         remainedConflictedFileDataList.unshift({ pathname, index });
@@ -304,8 +313,6 @@ class Generator {
           ...this.mergeTable[pathname][index],
           ignored: true,
         };
-      } else if (_.isString(result)) {
-        this.mergeTable[pathname] = parseFileTextToMergeBlocks(result);
       } else if (!_.isEmpty(result)) {
         this.mergeTable[pathname][index] = {
           ...result,
@@ -393,7 +400,7 @@ class Generator {
     }, {});
     files = _.merge(this.binaryTable, files);
     const conflicts = this.getIgnoredConflictedFilePathnameList();
-    this.messageHandler('Generator finished successfully, exiting...');
+    this.messageHandler('Generator finished successfully');
     return { files, conflicts };
   }
 

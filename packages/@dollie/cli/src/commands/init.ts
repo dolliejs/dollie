@@ -7,14 +7,16 @@ import {
   Context,
   ConflictSolverData,
   ConflictSolveResult,
+  parseFileTextToMergeBlocks,
 } from '@dollie/core';
 import { writeGeneratedFiles } from '../utils/writer';
 import {
   ErrorLogger,
   InfoLogger,
 } from '../logger';
-import _, { result } from 'lodash';
+import _ from 'lodash';
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -33,7 +35,7 @@ const conflictsSolver = async (
   }));
 
   await onMessage(
-    'Solving ' + index + ' of ' + total + ' conflicts in `' + pathname + '`:\n' +
+    'Solving ' + (index + 1) + ' of ' + total + ' conflicts in `' + pathname + '`:\n' +
     lines.join('\n'),
   );
 
@@ -111,13 +113,12 @@ const conflictsSolver = async (
         case 'all': {
           block.values.current = Array
             .from(block.values.former)
-            .concat(Array.from(block.values.current))
-            .map((line) => `${line}\n`);
+            .concat(Array.from(block.values.current));
           block.values.former = [];
           break;
         }
         case 'former': {
-          block.values.current = Array.from(block.values.former).map((line) => `${line}\n`);
+          block.values.current = Array.from(block.values.former);
           break;
         }
         case 'current': {
@@ -188,7 +189,7 @@ const conflictsSolver = async (
         },
       ])) as { content: string };
 
-      conflictSolveResult = content;
+      [conflictSolveResult] = parseFileTextToMergeBlocks(content);
       break;
     }
 
@@ -258,6 +259,15 @@ export default (config: DollieCLIConfigSchema) => {
 
         if (result) {
           writeGeneratedFiles(result, name);
+        }
+
+        if (_.isArray(result.conflicts) && result.conflicts.length > 0) {
+          infoLogger.log(
+            `Generated template files with ${result.conflicts.length} ignored conflicted file(s):\n` +
+            result.conflicts.map((conflict) => {
+              return chalk.yellow(` - ${conflict}`);
+            }).join('\n'),
+          );
         }
       } catch {}
     });

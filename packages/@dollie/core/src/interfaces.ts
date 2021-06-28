@@ -25,7 +25,7 @@ export interface LoaderOptions {
 
 export type LoaderConfig = LoaderOptions & GotOptions;
 
-export type ConflictSolveResult = MergeBlock | 'ignored' | string | null;
+export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 
 export interface DollieGeneratorConfig {
   origin?: DollieOriginConfig;
