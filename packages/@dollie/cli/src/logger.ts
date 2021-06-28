@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import _ from 'lodash';
 
-class Logger {
+export class Logger {
   public constructor(
     private color: string,
     private backgroundColor: string,

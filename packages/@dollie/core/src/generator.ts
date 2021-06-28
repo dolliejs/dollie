@@ -307,7 +307,10 @@ class Generator {
       } else if (_.isString(result)) {
         this.mergeTable[pathname] = parseFileTextToMergeBlocks(result);
       } else if (!_.isEmpty(result)) {
-        this.mergeTable[pathname][index] = result;
+        this.mergeTable[pathname][index] = {
+          ...result,
+          status: 'OK',
+        };
       }
     }
   }

@@ -25,12 +25,14 @@ export interface LoaderOptions {
 
 export type LoaderConfig = LoaderOptions & GotOptions;
 
+export type ConflictSolveResult = MergeBlock | 'ignored' | string | null;
+
 export interface DollieGeneratorConfig {
   origin?: DollieOriginConfig;
   origins?: DollieOrigin[];
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
-  conflictsSolver?: (data: ConflictSolverData) => MergeBlock | 'ignored' | null;
+  conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
   onMessage?: MessageHandler;
 }
 

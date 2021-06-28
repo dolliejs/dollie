@@ -6,4 +6,7 @@ export {
 
 export {
   DollieConfig,
+  ConflictSolveResult,
+  MergeBlock,
+  ConflictSolverData,
 } from './interfaces';
