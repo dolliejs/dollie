@@ -1,7 +1,7 @@
 import { defineConfig } from 'dumi';
 
 export default defineConfig({
-  title: 'Dollie',
+  title: 'Dollie.js',
   outputPath: 'docs/dist',
   mode: 'site',
   publicPath: '/',
@@ -34,7 +34,7 @@ export default defineConfig({
     '.__dumi-default-navbar nav > span > a.active::after { display: none !important; }',
     '.__dumi-default-locale-select:hover { background-color: transparent !important; }',
     '.__dumi-default-menu[data-mode=\'site\'] .__dumi-default-menu-list > li > a::after { display: none !important; }',
-    '.__dumi-default-menu[data-mode=\'site\'] .__dumi-default-menu-list > li > a.active { background: rgba(69, 123, 157, .3) !important; }',
+    '.__dumi-default-menu[data-mode=\'site\'] .__dumi-default-menu-list > li > a.active { background: rgb(132, 77, 40, 0.3) !important; }',
     '.__dumi-default-menu-inner ul li a::before, .__dumi-default-menu-inner ul li > span::before { display: none !important; }',
     '.__dumi-default-layout-hero button { border-radius: 4px !important; }',
     '.__dumi-default-menu[data-mode=\'site\'] { background: white !important; }',

@@ -15,3 +15,4 @@ test.ts
 lib
 .npmrc
 checksum.txt
+.umi
