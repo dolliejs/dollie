@@ -114,7 +114,7 @@ class Generator {
   }
 
   public async loadTemplate() {
-    this.messageHandler(`Start loading template from ${this.templateOrigin}:${this.templateName}`);
+    this.messageHandler(`Start downloading template from ${this.templateOrigin}:${this.templateName}`);
 
     const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
     if (!origin) {
@@ -142,12 +142,12 @@ class Generator {
       ...this.config.loader,
     });
 
-    this.messageHandler(`Template loaded in ${duration}ms`);
+    this.messageHandler(`Template downloaded in ${duration}ms`);
     this.messageHandler('Parsing template config...');
 
     this.templateConfig = this.parseTemplateConfig();
 
-    this.messageHandler('Template parsed successfully');
+    this.messageHandler('Template config parsed successfully');
 
     return duration;
   }

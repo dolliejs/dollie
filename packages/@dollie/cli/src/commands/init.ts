@@ -17,6 +17,7 @@ import {
 import _ from 'lodash';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import figlet from 'figlet';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -228,6 +229,7 @@ export default (config: DollieCLIConfigSchema) => {
     .description('init a project with an appropriate template')
     .arguments('[template] [name]')
     .action(async (template: string, name: string) => {
+      console.log(figlet.textSync('DOLLIE'));
       try {
         const origins = await loadOrigins(config.origins || {});
         const errorLogger = new ErrorLogger();

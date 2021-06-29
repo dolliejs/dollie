@@ -25,12 +25,14 @@
     "@dollie/origins": "^3.0.0",
     "chalk": "^4.1.1",
     "commander": "^7.2.0",
+    "figlet": "^1.5.0",
     "fs-extra": "^10.0.0",
     "got": "^11.8.2",
     "inquirer": "^8.1.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/figlet": "^1.5.1",
     "@types/fs-extra": "^9.0.11",
     "@types/inquirer": "^7.3.2",
     "@types/lodash": "^4.14.170",
