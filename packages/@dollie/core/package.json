@@ -25,6 +25,9 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@dollie/origins": "^3.0.0",
     "@types/ejs": "^3.0.6",

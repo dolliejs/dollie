@@ -19,6 +19,9 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rimraf ./lib && tsc",
     "build:watch": "tsc --watch",
