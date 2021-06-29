@@ -19,6 +19,12 @@
   "bugs": {
     "url": "https://github.com/lenconda/dollie/issues"
   },
+  "files": [
+    "lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "@dollie/origins": "^3.0.0",
     "@types/ejs": "^3.0.6",

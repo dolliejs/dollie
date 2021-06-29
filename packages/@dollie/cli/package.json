@@ -12,6 +12,13 @@
   "bin": {
     "dollie": "bin/dollie.js"
   },
+  "files": [
+    "bin",
+    "lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "rimraf ./lib && tsc",
     "build:watch": "tsc --watch",
