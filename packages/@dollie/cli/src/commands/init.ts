@@ -237,6 +237,7 @@ export default (config: DollieCLIConfigSchema) => {
         const context = new Context(name, template, {
           generator: {
             origins: config.origins || {},
+            origin: config.origin || {},
             loader: _.get(config, 'loader'),
             getTemplateProps: async (questions) => {
               const answers = await inquirer.prompt(questions);

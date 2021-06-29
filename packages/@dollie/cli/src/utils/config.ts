@@ -4,6 +4,7 @@ import { LoaderConfig } from '../../../core/lib/interfaces';
 import { SYSTEM_CONFIG_PATHNAME } from '../constants';
 
 interface DollieCLIConfigSchema {
+  origin?: Record<string, string>;
   origins?: Record<string, string>;
   loader?: LoaderConfig;
 }
