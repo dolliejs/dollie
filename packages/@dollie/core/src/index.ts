@@ -1,7 +1,18 @@
-import Generator from './generator';
 import Context from './context';
 
 export {
-  Generator,
   Context,
 };
+
+export {
+  DollieConfig,
+  ConflictSolveResult,
+  MergeBlock,
+  ConflictSolverData,
+} from './interfaces';
+
+export {
+  parseDiffToMergeBlocks,
+  parseFileTextToMergeBlocks,
+  parseMergeBlocksToText,
+} from './diff';

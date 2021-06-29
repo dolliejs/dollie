@@ -12,3 +12,7 @@ temp
 package-lock.json
 .idea
 test.ts
+lib
+.npmrc
+checksum.txt
+.umi

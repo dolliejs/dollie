@@ -1,18 +1,21 @@
+import { Got } from 'got';
+
 export type DollieOriginConfig = Record<string, any>;
 export type DollieOriginHeaders = Record<string, any>;
-
-export interface DollieOriginMetadata {
-  configPaths: string[];
-  getTemplateUrl: (name: string, config: DollieOriginConfig) => Promise<string>;
-  getHeaders?: (name: string, config: DollieOriginConfig) => Promise<DollieOriginHeaders>;
-}
+export type DollieOriginMap = Record<string, string | DollieOriginHandler>;
 
 export interface DollieOriginInfo {
   url: string;
   headers?: DollieOriginHeaders;
 }
 
+export type DollieOriginHandler = (
+  id: string,
+  config: DollieOriginConfig,
+  request: Got,
+) => Promise<DollieOriginInfo>;
+
 export interface DollieOrigin {
   name: string;
-  handler: (templateName: string, config: DollieOriginConfig) => Promise<DollieOriginInfo>;
-}
+  handler: DollieOriginHandler;
+};

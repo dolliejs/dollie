@@ -1,5 +1,7 @@
 import {
   DollieOrigin,
+  DollieOriginConfig,
+  DollieOriginMap,
 } from '@dollie/origins';
 import { Change } from 'diff';
 import { Volume } from 'memfs';
@@ -16,19 +18,27 @@ export interface DiffChange extends Change {
   lineNumber: number;
 }
 
-export interface LoaderOptions {
+export interface HttpOptions {
   httpProxyUrl?: string;
   httpProxyAuth?: string;
+}
+
+export type RequestOptions = HttpOptions & GotOptions;
+
+export interface LoaderOptions extends HttpOptions {
   maximumRetryCount?: number;
 }
 
 export type LoaderConfig = LoaderOptions & GotOptions;
 
+export type ConflictSolveResult = MergeBlock | 'ignored' | null;
+
 export interface DollieGeneratorConfig {
-  origins?: DollieOrigin[];
+  origin?: DollieOriginConfig;
+  origins?: DollieOriginMap;
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
-  conflictsSolver?: (data: ConflictSolverData) => MergeBlock | 'ignored' | null;
+  conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
   onMessage?: MessageHandler;
 }
 
@@ -116,6 +126,7 @@ export interface ConflictBlockMetadata {
 export interface ConflictSolverData extends ConflictBlockMetadata {
   block: MergeBlock;
   content: string;
+  total: number;
 }
 
 export interface DollieGeneratorResult {

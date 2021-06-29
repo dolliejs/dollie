@@ -12,8 +12,19 @@
   "bin": {
     "dollie": "bin/dollie.js"
   },
+  "files": [
+    "bin",
+    "lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf ./lib && tsc",
+    "build:watch": "tsc --watch",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
@@ -21,13 +32,19 @@
   },
   "dependencies": {
     "@dollie/core": "^3.0.0",
+    "chalk": "^4.1.1",
     "commander": "^7.2.0",
-    "inquirer": "^8.1.1"
+    "figlet": "^1.5.0",
+    "fs-extra": "^10.0.0",
+    "inquirer": "^8.1.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/figlet": "^1.5.1",
+    "@types/fs-extra": "^9.0.11",
     "@types/inquirer": "^7.3.2",
     "@types/lodash": "^4.14.170",
     "@types/node": "^15.12.2",
-    "typescript": "^4.3.2"
+    "rimraf": "^3.0.2"
   }
 }

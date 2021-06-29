@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { DollieOrigin } from '../../origins/lib';
 import { DollieError } from './errors';
 import Generator from './generator';
 import {
@@ -43,7 +44,7 @@ class Context {
     }
   }
 
-  protected bootstrap() {
+  protected async bootstrap() {
     this.updateRunningStatus('bootstrap');
     const {
       projectName,
@@ -55,7 +56,7 @@ class Context {
       onMessage: this.messageHandler,
     });
     this.generator.checkInputs();
-    this.generator.initialize();
+    await this.generator.initialize();
     this.generator.checkContext();
     this.updateFinishedStatus('bootstrap');
   }

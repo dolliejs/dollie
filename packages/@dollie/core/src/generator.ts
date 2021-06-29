@@ -21,9 +21,7 @@ import {
   ContextError,
 } from './errors';
 import {
-  DollieOrigin,
-  githubOrigin,
-  gitlabOrigin,
+  DollieOrigin, loadOrigins,
 } from '@dollie/origins';
 import { Volume } from 'memfs';
 import { loadTemplate, readTemplateEntities } from './loader';
@@ -49,17 +47,18 @@ import {
 import ejs from 'ejs';
 import { getFileConfigGlobs } from './files';
 import { GlobMatcher } from './matchers';
+import { createHttpInstance } from './http';
 
 class Generator {
   public templateName: string;
   public templateOrigin: string;
-  protected origins: DollieOrigin[] = [];
   protected volume: FileSystem;
   protected templateConfig: DollieTemplateConfig = {};
   protected cacheTable: CacheTable = {};
   protected mergeTable: MergeTable = {};
   protected binaryTable: BinaryTable = {};
   protected conflicts: ConflictItem[] = [];
+  protected origins: DollieOrigin[] = [];
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];
@@ -74,7 +73,6 @@ class Generator {
   ) {
     this.templateName = '';
     this.templateOrigin = '';
-    this.origins = [githubOrigin, gitlabOrigin];
     this.volume = new Volume();
     this.pendingTemplateLabels.push('main');
     const { onMessage: messageHandler = _.noop } = this.config;
@@ -91,10 +89,11 @@ class Generator {
     }
   }
 
-  public initialize() {
+  public async initialize() {
     this.messageHandler('Initializing origins...');
-    const { origins: customOrigins = [] } = this.config;
-    this.origins = this.origins.concat(customOrigins);
+
+    this.origins = await loadOrigins(this.config.origins);
+
     if (_.isString(this.templateOriginName)) {
       if (!this.templateOriginName.includes(':')) {
         this.templateOrigin = 'github';
@@ -103,6 +102,7 @@ class Generator {
         [this.templateOrigin = 'github', this.templateName] = this.templateOriginName.split(':');
       }
     }
+
     this.messageHandler('Preparing cache directory...');
     this.volume.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
     this.messageHandler('Initialization finished successfully');
@@ -118,7 +118,7 @@ class Generator {
   }
 
   public async loadTemplate() {
-    this.messageHandler(`Start loading template from ${this.templateOrigin}:${this.templateName}`);
+    this.messageHandler(`Start downloading template from ${this.templateOrigin}:${this.templateName}`);
 
     const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
     if (!origin) {
@@ -131,7 +131,8 @@ class Generator {
 
     const { url, headers } = await origin.handler(
       this.templateName,
-      _.get(this.config, `origins.${this.templateOrigin}`),
+      _.get(this.config, 'origin') || {},
+      createHttpInstance(_.get(this.config, 'loader') || {}),
     );
 
     if (!_.isString(url) || !url) {
@@ -146,12 +147,12 @@ class Generator {
       ...this.config.loader,
     });
 
-    this.messageHandler(`Template loaded in ${duration}ms`);
+    this.messageHandler(`Template downloaded in ${duration}ms`);
     this.messageHandler('Parsing template config...');
 
     this.templateConfig = this.parseTemplateConfig();
 
-    this.messageHandler('Template parsed successfully');
+    this.messageHandler('Template config parsed successfully');
 
     return duration;
   }
@@ -208,13 +209,14 @@ class Generator {
           entityName,
           isBinary,
           isDirectory,
-          relativeDirectoryPathname,
+          relativeDirectoryPathname: relativePathname,
         } = entity;
 
         if (isDirectory) { continue; }
 
         if (isBinary) {
-          this.binaryTable[`${relativeDirectoryPathname}/${entityName}`] = this.volume.readFileSync(absolutePathname) as Buffer;
+          this.binaryTable[`${relativePathname}/${entityName}`]
+            = this.volume.readFileSync(absolutePathname) as Buffer;
         } else {
           const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
           let currentFileContent: string;
@@ -228,7 +230,7 @@ class Generator {
           const currentFileName = entityName.startsWith(TEMPLATE_FILE_PREFIX)
             ? entityName.slice(TEMPLATE_FILE_PREFIX.length)
             : entityName;
-          const currentFileRelativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${currentFileName}`;
+          const currentFileRelativePathname = `${relativePathname ? `${relativePathname}/` : ''}${currentFileName}`;
 
           let currentFileDiffChanges: DiffChange[];
           if (
@@ -288,13 +290,25 @@ class Generator {
     }
 
     const remainedConflictedFileDataList = this.getConflictedFileDataList();
+    const totalConflicts = _.clone(remainedConflictedFileDataList);
 
     while (remainedConflictedFileDataList.length > 0) {
       const { pathname, index } = remainedConflictedFileDataList.shift();
+
+      const currentPathnameConflicts = totalConflicts.filter((item) => {
+        return item.pathname === pathname;
+      });
+
+      const total = currentPathnameConflicts.length;
+      const currentIndex = currentPathnameConflicts.findIndex((conflict) => {
+        return index === conflict.index;
+      });
+
       const result = await conflictsSolver({
         pathname,
-        index,
+        total,
         block: this.mergeTable[pathname][index],
+        index: currentIndex,
         content: parseMergeBlocksToText(this.mergeTable[pathname]),
       });
       if (_.isNull(result)) {
@@ -304,10 +318,11 @@ class Generator {
           ...this.mergeTable[pathname][index],
           ignored: true,
         };
-      } else if (_.isString(result)) {
-        this.mergeTable[pathname] = parseFileTextToMergeBlocks(result);
       } else if (!_.isEmpty(result)) {
-        this.mergeTable[pathname][index] = result;
+        this.mergeTable[pathname][index] = {
+          ...result,
+          status: 'OK',
+        };
       }
     }
   }
@@ -390,7 +405,7 @@ class Generator {
     }, {});
     files = _.merge(this.binaryTable, files);
     const conflicts = this.getIgnoredConflictedFilePathnameList();
-    this.messageHandler('Generator finished successfully, exiting...');
+    this.messageHandler('Generator finished successfully');
     return { files, conflicts };
   }
 

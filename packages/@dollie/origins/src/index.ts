@@ -1,16 +1,20 @@
-import createTemplateOrigin from './create';
-import githubOrigin from './origins/github';
-import gitlabOrigin from './origins/gitlab';
+import githubOrigin from './handlers/github';
+import gitlabOrigin from './handlers/gitlab';
 
 export {
-  createTemplateOrigin,
   githubOrigin,
   gitlabOrigin,
 };
+
 export {
-  DollieOrigin,
   DollieOriginConfig,
   DollieOriginHeaders,
   DollieOriginInfo,
-  DollieOriginMetadata,
+  DollieOriginHandler,
+  DollieOrigin,
+  DollieOriginMap,
 } from './interfaces';
+
+export {
+  loadOrigins,
+} from './loader';

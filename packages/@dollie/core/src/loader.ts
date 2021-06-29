@@ -1,4 +1,4 @@
-import got, { Options as GotOptions, RequestError } from 'got';
+import { Options as GotOptions, RequestError } from 'got';
 import _ from 'lodash';
 import path from 'path';
 import decompress from 'decompress';
@@ -7,14 +7,13 @@ import {
   HTTPNotFoundError,
   HTTPTimeoutError,
 } from './errors';
-import Url from 'url';
-import tunnel from 'tunnel';
 import fs from 'fs';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
 } from './constants';
 import { FileSystem, LoaderConfig, TemplateEntity } from './interfaces';
 import { isBinaryFileSync } from 'isbinaryfile';
+import { createHttpInstance } from './http';
 
 const downloadCompressedFile = async (
   url: string,
@@ -31,12 +30,7 @@ const downloadCompressedFile = async (
       return path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, relativePathname);
     };
 
-    const downloaderOptions = _.merge(options || {}, { isStream: true });
-
-    const downloader = got.stream(
-      url,
-      downloaderOptions as GotOptions & { isStream: true },
-    );
+    const downloader = createHttpInstance(_.merge(options || {}, { isStream: true })).stream(url);
 
     const fileBufferChunks = [];
 
@@ -89,29 +83,15 @@ const loadTemplate = async (
     options: LoaderConfig = {},
   ) {
     const {
-      httpProxyUrl = '',
-      httpProxyAuth = '',
       maximumRetryCount = 3,
       ...originalOptions
     } = options;
-    const gotOptions = _.clone(originalOptions) as GotOptions;
-    if (httpProxyUrl) {
-      const { hostname: host, port } = Url.parse(httpProxyUrl);
-      const proxy: tunnel.ProxyOptions = {
-        host,
-        port: parseInt(port, 10),
-      };
-      if (httpProxyAuth) { proxy.proxyAuth = httpProxyAuth; }
-      gotOptions.agent = {
-        http: tunnel.httpOverHttp({ proxy }),
-        https: tunnel.httpsOverHttp({ proxy }),
-      };
-    }
+
     try {
       return await downloadCompressedFile(
         url,
         fileSystem,
-        gotOptions,
+        originalOptions,
       );
     } catch (error) {
       if (error.code === 'E_TEMPLATE_TIMEOUT' || error instanceof HTTPTimeoutError) {
@@ -130,6 +110,7 @@ const loadTemplate = async (
       }
     }
   };
+
   return await traverse(url, fileSystem, 0, options);
 };
 

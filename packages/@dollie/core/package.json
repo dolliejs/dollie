@@ -11,12 +11,22 @@
     "url": "git+https://github.com/lenconda/dollie.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf ./lib && tsc",
+    "build:watch": "tsc --watch",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "typings": "lib/index.d.ts",
   "bugs": {
     "url": "https://github.com/lenconda/dollie/issues"
+  },
+  "files": [
+    "lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@dollie/origins": "^3.0.0",
@@ -42,6 +52,6 @@
     "@types/node": "^15.12.2",
     "@types/require-from-string": "^1.2.0",
     "fs-extra": "^10.0.0",
-    "typescript": "^4.3.2"
+    "rimraf": "^3.0.2"
   }
 }
