@@ -21,7 +21,7 @@ import {
   ContextError,
 } from './errors';
 import {
-  DollieOrigin,
+  DollieOrigin, loadOrigins,
 } from '@dollie/origins';
 import { Volume } from 'memfs';
 import { loadTemplate, readTemplateEntities } from './loader';
@@ -47,6 +47,7 @@ import {
 import ejs from 'ejs';
 import { getFileConfigGlobs } from './files';
 import { GlobMatcher } from './matchers';
+import { createHttpInstance } from './http';
 
 class Generator {
   public templateName: string;
@@ -76,7 +77,6 @@ class Generator {
     this.pendingTemplateLabels.push('main');
     const { onMessage: messageHandler = _.noop } = this.config;
     this.messageHandler = messageHandler;
-    this.origins = this.config.origins || [];
   }
 
   public checkInputs() {
@@ -89,8 +89,11 @@ class Generator {
     }
   }
 
-  public initialize() {
+  public async initialize() {
     this.messageHandler('Initializing origins...');
+
+    this.origins = await loadOrigins(this.config.origins);
+
     if (_.isString(this.templateOriginName)) {
       if (!this.templateOriginName.includes(':')) {
         this.templateOrigin = 'github';
@@ -99,6 +102,7 @@ class Generator {
         [this.templateOrigin = 'github', this.templateName] = this.templateOriginName.split(':');
       }
     }
+
     this.messageHandler('Preparing cache directory...');
     this.volume.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
     this.messageHandler('Initialization finished successfully');
@@ -128,6 +132,7 @@ class Generator {
     const { url, headers } = await origin.handler(
       this.templateName,
       _.get(this.config, 'origin') || {},
+      createHttpInstance(_.get(this.config, 'loader') || {}),
     );
 
     if (!_.isString(url) || !url) {

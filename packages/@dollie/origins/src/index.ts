@@ -12,6 +12,7 @@ export {
   DollieOriginInfo,
   DollieOriginHandler,
   DollieOrigin,
+  DollieOriginMap,
 } from './interfaces';
 
 export {

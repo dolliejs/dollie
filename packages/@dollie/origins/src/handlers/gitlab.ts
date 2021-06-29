@@ -2,7 +2,7 @@ import _ from 'lodash';
 import got from 'got';
 import { DollieOriginHandler } from '../interfaces';
 
-export default (async (id, config = {}) => {
+export default (async (id, config = {}, request = got) => {
   if (!id) {
     return null;
   }
@@ -21,7 +21,7 @@ export default (async (id, config = {}) => {
     }
     : {};
 
-  const res = await got(`${protocol}://${host}/api/v4/users/${repositoryOwner}/projects`, {
+  const res = await request(`${protocol}://${host}/api/v4/users/${repositoryOwner}/projects`, {
     timeout: 10000,
     retry: 3,
     headers,

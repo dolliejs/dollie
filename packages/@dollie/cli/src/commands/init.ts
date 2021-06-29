@@ -231,13 +231,12 @@ export default (config: DollieCLIConfigSchema) => {
     .action(async (template: string, name: string) => {
       console.log(figlet.textSync('DOLLIE'));
       try {
-        const origins = await loadOrigins(config.origins || {});
         const errorLogger = new ErrorLogger();
         const infoLogger = new InfoLogger();
 
         const context = new Context(name, template, {
           generator: {
-            origins,
+            origins: config.origins || {},
             loader: _.get(config, 'loader'),
             getTemplateProps: async (questions) => {
               const answers = await inquirer.prompt(questions);
