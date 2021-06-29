@@ -1,5 +1,4 @@
 import commander from 'commander';
-import { loadOrigins } from '@dollie/origins';
 import {
   DollieCLIConfigSchema,
 } from '../utils/config';
