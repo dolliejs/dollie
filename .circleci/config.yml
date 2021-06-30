@@ -11,8 +11,7 @@ jobs:
     steps:
       - checkout
       - run: npm install
-      - run: npm i lerna -g
-      - run: lerna bootstrap
+      - run: npx lerna bootstrap
       - run: npm run checksum
       - save_cache:
           paths:
