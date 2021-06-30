@@ -34,7 +34,7 @@ jobs:
             - v1-dependencies-{{ checksum "checksum.txt" }}
             - v1-dependencies-
       - run: ls -al
-      - run: npm run build
+      - run: npx lerna run build
       - run: ls -al
       - save_cache:
           paths:
