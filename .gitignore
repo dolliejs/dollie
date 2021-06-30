@@ -16,3 +16,4 @@ lib
 .npmrc
 checksum.txt
 .umi
+.umi-production
