@@ -99,8 +99,7 @@ workflows:
               only:
                 - /^v.*/
             branches:
-              only:
-                - master
+              ignore: /.*/
       - deploy_docs:
           requires:
             - install
