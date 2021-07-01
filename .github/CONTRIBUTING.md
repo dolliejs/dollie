@@ -31,6 +31,29 @@ $ git clone git@github.com:dolliejs/dollie.git
 $ cd dollie && npm i && lerna bootstrap
 ```
 
+## Flow Management
+
+### For Core Contributors
+
+#### New Feature
+
+1. Checkout a new branch from `master`, name it as `feat/<name>`
+2. Commit code to this branch
+3. Make a Pull Request that merge from your branch to `master`
+
+#### Hot Fixes
+
+1. Checkout a new branch from `master`, name it as `hotfix/<name>`
+2. Fix bugs and commit code to this branch
+3. Make a Pull Request to `master`
+4. Merge and tag a new version in `dollie@<number>.<number>.<number>` format
+
+### For Normal Contributors
+
+1. Fork this project to your namespace
+2. Commit code and push to your forked origin
+3. Make a Pull Request, merge from your repo to `master` branch of `dolliejs/dollie`
+
 ## Start Developing
 
 We provide a lot of examples, you can run the examples：
@@ -55,10 +78,14 @@ $ npm link
 $ dollie init foo bar
 ```
 
-## Generate New Version & Publish
+## Generate New Version
 
-1. **Checkout to `master` branch**
-2. Run `lerna version {major}.{minor}.{patch}`
+```bash
+# execute in your feature branch
+$ lerna version {major}.{minor}.{patch} --no-git-tag-version
+```
+
+Then commit the changes and push to remote origin.
 
 > Please note that the version must follow the following conventions:
 > The version is seperated by `major`, `minor` and `patch` parts:
@@ -66,7 +93,9 @@ $ dollie init foo bar
 > 2. `minor` means the new version add some new APIs or refactor the existed APIs
 > 3. `patch` means some bugs are fixed
 
-After Lerna pushing the new tags to remote origin, the CI workflow will start automatically to build and publish the new version to NPM.
+## Publish Packages
+
+> NOTE: Only core contributors can publish packages, by merging from other branch to `master` and add a tag in `dollie@<number>.<number>.<number>` format. After a commit on `master` is beeing tagged, the CI will build and publish all packages automatically.
 
 ## Pull Request Guidelines
 
