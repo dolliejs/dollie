@@ -96,7 +96,7 @@ workflows:
           filters:
             tags:
               only:
-                - /^v.*/
+                - /^dollie@(\d+)\.(\d+)\.(\d+).*/
             branches:
               ignore: /.*/
       - deploy_docs:
