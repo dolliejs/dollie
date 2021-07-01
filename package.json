@@ -17,6 +17,7 @@
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
     "aliyun-oss-deploy": "^0.1.5",
+    "antd": "^4.16.6",
     "babel-eslint": "^10.1.0",
     "concurrently": "^6.2.0",
     "dumi": "^1.1.22",
