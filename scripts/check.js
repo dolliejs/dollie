@@ -4,7 +4,7 @@ const path = require('path');
 
 const getChecksum = (startPath) => {
   let result = [];
-  if (!/(\/?)node_modules|(\/?)lib|(\/?)\.git(\/)/.test(startPath)) {
+  if (!/(\/?)node_modules|(\/?)lib|(\/?)\.git(\/)|(\/?)\.umi(\/)|(\/?)\.idea(\/)|(\/?)\.vscode(\/)|(\/?)lib(\/)/.test(startPath)) {
     console.log(`Checking: ${startPath}`);
     const currentStartPath = path.resolve(__dirname, '..', startPath);
     const stat = fs.statSync(currentStartPath);

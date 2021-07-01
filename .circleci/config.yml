@@ -11,8 +11,7 @@ jobs:
     steps:
       - checkout
       - run: npm install
-      - run: npm i lerna -g
-      - run: lerna bootstrap
+      - run: npx lerna bootstrap
       - run: npm run checksum
       - save_cache:
           paths:
@@ -34,9 +33,9 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "checksum.txt" }}
             - v1-dependencies-
-      - run: ls -al
-      - run: npm run build
-      - run: ls -al
+      - run: ls -al packages/@dollie/core
+      - run: npx lerna run build
+      - run: ls -al packages/@dollie/core
       - save_cache:
           paths:
             - node_modules
@@ -99,8 +98,7 @@ workflows:
               only:
                 - /^v.*/
             branches:
-              only:
-                - master
+              ignore: /.*/
       - deploy_docs:
           requires:
             - install
