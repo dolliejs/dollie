@@ -7,7 +7,9 @@
     "watch": "concurrently \"npm:watch:*\"",
     "docs:start": "dumi dev",
     "docs:build": "dumi build",
-    "docs:deploy": "node scripts/docs.js"
+    "docs:deploy": "node scripts/docs.js",
+    "checksum": "node scripts/check.js",
+    "publish": "node scripts/publish.js"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
@@ -22,6 +24,7 @@
     "eslint-config-alloy": "^4.1.0",
     "jest": "^27.0.4",
     "lerna": "^4.0.0",
+    "md5-file": "^5.0.0",
     "typescript": "^3.7.7"
   }
 }

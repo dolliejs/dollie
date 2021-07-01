@@ -228,7 +228,7 @@ export default (config: DollieCLIConfigSchema) => {
     .description('init a project with an appropriate template')
     .arguments('[template] [name]')
     .action(async (template: string, name: string) => {
-      console.log(figlet.textSync('DOLLIE'));
+      console.log(figlet.textSync('dollie.js'));
       try {
         const errorLogger = new ErrorLogger();
         const infoLogger = new InfoLogger();
