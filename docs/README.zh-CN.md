@@ -5,7 +5,7 @@ hero:
   desc: Dollie 是初始化工程代码的工具链，它可以帮助你构建成熟的工程化方案。
   actions:
     - text: 快速上手
-      link: /zh-CN/guide
+      link: /zh-CN/guide#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
     - text: CLI 入门
 features:
   - title: 云端化

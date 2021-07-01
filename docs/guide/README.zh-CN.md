@@ -9,16 +9,15 @@ nav:
 
 # 指南
 
-## 什么是 Dollie
+## 介绍
 
-Dollie（国际标准音标：*[dɒli]*）是工程项目效率工具套件，基于 [Yeoman](https://yeoman.io/) 封装，旨在降低脚手架编写与维护的时间成本和开发成本，以提高项目起步、复用的效率。但与 Yeoman 不同，Dollie 将生成器逻辑和脚手架模板分离，从而极大程度地降低上手成本。
+Dollie（国际标准音标：*[dɒli]*），名称灵感来源于全球首例克隆羊 *Dolly*。Dollie 是工程项目效率工具套件，旨在降低脚手架编写与维护的时间成本和开发成本，以提高项目起步的效率和工程代码的可复用性。Dollie 将生成器逻辑和脚手架模板分离，从而极大程度地降低上手成本。
 
 ## 特性
 
 - 脚手架云端化，即用即取，时刻保持脚手架版本一致性
 - 编写极少代码甚至无需编写代码即可快速制作脚手架
 - 支持脚手架增量覆盖，轻松生成多技术栈工程
-- 同时支持交互式命令行和一键式配置化生成项目
 - 支持传入配置、提供大量 API 以支持二次开发和定制
 
 ## 快速上手
@@ -32,14 +31,17 @@ $ node -v
 v10.18.0
 ```
 
-### 生成项目工程
-
-在 Shell 中执行
+安装 Dollie.js 核心套件
 
 ```bash
-$ dollie
+$ npm i @dollie/core -S
 ```
 
-根据提示回答完所有交互问题即可：
+在任意一个 JavaScript 脚本中引入 Dollie.js 核心套件：
 
-![dollie_guide_quickstart.gif](https://i.loli.net/2021/02/23/6C1gY32NwkZ45d9.gif)
+```javascript
+
+const { Context } = require('@dollie/core');
+
+const context = new Context();
+```
