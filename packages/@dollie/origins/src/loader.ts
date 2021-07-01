@@ -7,6 +7,7 @@ import {
 import fs from 'fs';
 import requireFromString from 'require-from-string';
 import { githubOrigin, gitlabOrigin } from '.';
+import path from 'path';
 
 const isUrl = (url: string) => {
   return /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#.*)?$/.test(url);
@@ -30,7 +31,7 @@ const loadOrigins = async (config: DollieOriginMap): Promise<DollieOrigin[]> => 
         if (!isUrl(pathnameOrHandler)) {
           content = (await got(pathnameOrHandler)).body;
         } else {
-          content = fs.readFileSync(pathnameOrHandler).toString();
+          content = fs.readFileSync(path.resolve(process.cwd(), pathnameOrHandler)).toString();
         }
 
         if (!content || !_.isString(content)) {
