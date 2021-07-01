@@ -60,7 +60,6 @@ jobs:
             - v1-dist-
             - v1-dependencies-{{ checksum "checksum.txt" }}
             - v1-dependencies-
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run: ls -al
       - run: npm run publish
 

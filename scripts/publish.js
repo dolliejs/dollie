@@ -16,8 +16,16 @@ function publish(pkg, directory) {
 }
 
 const BASE_PATH = path.join(__dirname, '../packages/@dollie');
+const NPM_TOKEN = process.env.NPM_TOKEN;
+
+if (!NPM_TOKEN) {
+  console.log('No npm token found');
+}
+
 const packages = fs.readdirSync(BASE_PATH);
 
 for (const packageName of packages) {
-  publish(packageName, path.join(BASE_PATH, packageName));
+  const packagePathname = path.join(BASE_PATH, packageName);
+  fs.writeFileSync(path.join(packagePathname, '.npmrc'), `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`);
+  publish(packageName, packagePathname);
 }
