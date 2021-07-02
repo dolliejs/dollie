@@ -11,7 +11,7 @@ features:
   - title: Cloud Based
     desc: By hosting templates in the cloud and the design of separated templates and generators, the flexibility of upgrading and iterating templates is greatly enhanced
   - title: Easy to Get Started
-    desc: Template configuration items are simple, easy to understand and take a short learning time to get started; write little or no code to create scaffolding quickly
+    desc: Template configuration items are simple, easy to understand and take a short learning time to get started; write little or no code can create scaffolding quickly
   - title: Incremental Overlays
     desc: Support for incremental overlays via extended templates, making customization and selection of template technology stack easier and faster
 footer:
@@ -26,7 +26,7 @@ footer:
   <tr>
     <td width="160" align="center">
       <a target="_blank" href="https://team.ncuos.com">
-        <img width="100" src="https://avatars.githubusercontent.com/u/18623963?s=200&v=4" />
+        <img width="100" src="https://lenconda.top/18623963.png" />
         <br />
         <strong>NCUHOME</strong>
       </a>

@@ -22,7 +22,7 @@ export default defineConfig({
   },
   styles: [
     'https://unpkg.zhimg.com/antd@4.16.6/dist/antd.min.css',
-    'img { max-width: 680px !important; }',
+    'img { max-width: 720px !important; }',
     '.__dumi-default-locale-select, .__dumi-default-search-input { border-radius: 2px !important; }',
     '.__dumi-default-locale-select, .__dumi-default-search-input:focus { border: 1px solid rgba(255, 255, 255, .4) !important; }',
     '.__dumi-default-search-input { border: 1px solid transparent !important; }',

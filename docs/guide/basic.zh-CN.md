@@ -38,7 +38,7 @@ title: '基础用法'
 1. 前往 GitHub 创建一个以 `scaffold-` 或 `extend-scaffold-` 开头的仓库，请注意将开放程度设置为公开（Public）
 2. 将脚手架中的所有文件提交到仓库中
 
-## 内置 Origin 列表
+## 内置 Origin 函数
 
 ## 动态文件
 

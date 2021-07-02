@@ -26,7 +26,7 @@ footer:
   <tr>
     <td width="160" align="center">
       <a target="_blank" href="https://team.ncuos.com">
-        <img width="100" src="https://avatars.githubusercontent.com/u/18623963?s=200&v=4" />
+        <img width="100" src="https://lenconda.top/18623963.png" />
         <br />
         <strong>南昌大学家园工作室</strong>
       </a>
