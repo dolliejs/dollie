@@ -2,10 +2,9 @@ import { defineConfig } from 'dumi';
 
 export default defineConfig({
   title: 'Dollie.js',
-  outputPath: 'docs/dist',
+  outputPath: 'docs-dist',
   mode: 'site',
   publicPath: '/',
-  base: 'docs',
   hash: true,
   locales: [
     ['en-US', 'English'],
