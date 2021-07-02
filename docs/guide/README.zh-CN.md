@@ -23,6 +23,10 @@ Dollie 是一款工程项目效率工具套件，旨在降低模板编写与维�
 
 ![structure](/public/images/structure.png)
 
+Dollie 的成功运行离不开核心组件 `@dollie/core`、用户代理和 Origin 函数的紧密合作。Dollie 核心组件实现了与项目代码生成的一切相关逻辑，并提供了一系列 API 用于与用户代理传送和接收数据。用户代理一般是指将 Dollie 核心业务逻辑展现给用户，并面向用户提供一切所需要的交互。Dollie 官方提供的 [CLI 工具](/zh-CN/ecosystem#cli) `@dollie/cli` 就是用户代理的一种实现，它可以帮助用户处理核心组件运行过程中的用户中断操作，例如向用户询问 EJS Props、处理由于多个增量模板在覆盖过程中对同一文件的修改所导致的冲突等。
+
+由于 Dollie 只允许从远程拉取模板，但每次都向用户索取 URL 显得有些麻烦，因此 Dollie 提供了 Origin 机制帮助用户以较简短的字符串让 Dollie 选择合适的 Origin 函数生成 URL 和 HTTP 请求头，并实现模板的拉取。Dollie 内置了两个 Origin 函数，分别是 [GitHub](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/github.ts) 和 [GitLab](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/gitlab.ts)，它们可以分别帮助你从 GitHub 和 GitLab 仓库中拉取所需模板。在用户提供模板名称字符串后，Dollie 将会选择合适的 Origin 函数按照[一定的规则](/zh-CN/guide/basic#模板名称解析规则)解析模板名称，最终形成 URL 并从 Origin 拉取模板。
+
 ### 生命周期
 
 下图描述了 Dollie 上下文的生命周期。在简单使用的情况下，生命周期对于外部来说是不可感知的；但对于基于 Dollie 核心组件进行二次开发的情况，理解生命周期函数以及掌握 Dollie 会在每个生命周期函数中做哪些事就比较有必要了。

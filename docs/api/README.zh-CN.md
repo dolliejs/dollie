@@ -1,10 +1,10 @@
 ---
-order: 1
+order: 2
 toc: 'menu'
 title: 'API'
 nav:
   title: 'API'
-  order: 1
+  order: 2
 ---
 
 # API
