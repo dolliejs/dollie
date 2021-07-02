@@ -9,10 +9,8 @@ nav:
 
 # API
 
-## 类型与接口
+## `@dollie/core`
 
-## 实用工具函数
+## `@dollie/origins`
 
-## Web API
-
-目前版本暂未支持
+### 内置 Origins
