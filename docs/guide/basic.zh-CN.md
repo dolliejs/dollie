@@ -145,7 +145,7 @@ Dollie 通过 [Inquirer.js](https://github.com/SBoudrias/Inquirer.js#readme) 在
 
 Dollie 仅允许从互联网上拉取模板，并且目前仅支持 ZIP 类型的模板文件。因此，在编写好模板后，请将模板使用 ZIP 压缩并上传到互联网中，同时请确保向 Dollie 提供一个可以访问的 URL。
 
-Dollie 内置对使用 GitHub 和 GitLab 托管模板的支持，并为其分别提供了[内置 Origin 函数](/zh-CN/api#内置-origins)。你可以直接将你编写好的模板提交给 GitHub 或 GitLab 托管。Dollie 的 GitHub 和 GitLab Origin 函数支持将模板仓库私有化（需要分别提供对应的 Access Token），对 GitLab 支持定义自托管服务域名等。因此，**通过 GitHub 或 GitLab 上传并托管模板可以满足绝大部分使用场景**。
+Dollie 内置对使用 GitHub 和 GitLab 托管模板的支持，并为其分别提供了[内置 Origin 函数](/zh-CN/api#内置-origins)。你可以直接将你编写好的模板提交给 GitHub 或 GitLab 托管。Dollie 的 GitHub 和 GitLab Origin 函数支持将模板仓库私有化（需要分别提供对应的 Access Token），对 GitLab 支持定义自托管服务域名等。因此，**通过 GitHub 或 GitLab 上传并托管模板可以满足绝大部分使用场景**，但 Dollie 仍然允许你注册[自定义的 Origin 函数](/zh-CN/guide/advanced#%E7%BC%96%E5%86%99-origin-%E5%87%BD%E6%95%B0)。
 
 ## 使用模板
 
