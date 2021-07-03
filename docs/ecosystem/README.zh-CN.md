@@ -1,7 +1,7 @@
 ---
-order: 1
-toc: 'menu'
+toc: false
 title: '生态系统'
+order: 0
 nav:
   title: '生态系统'
   order: 1
@@ -9,8 +9,5 @@ nav:
 
 # 生态系统
 
-## CLI
-
-## Web 工具
-
-正在进行中...
+- [CLI](/zh-CN/ecosystem/cli)
+- [Web 工具](/zh-CN/ecosystem/web)

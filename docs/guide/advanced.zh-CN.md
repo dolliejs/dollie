@@ -206,14 +206,58 @@ const context = new Context('foo', 'example_origin:bar', {
 });
 ```
 
-### 传递参数
+### 设置参数
+
+在创建 `Context` 实例时，可以通过 `Generator` 配置向 Dollie 传递一个键值对来设置 Origin 函数的参数，配置项路径为 `generator.origin`：
+
+```js
+const context = new Context('foo', 'example_origin:bar', {
+    generator: {
+        // ...生成器其他配置
+        origin: {
+            foo: 'bar',
+        },
+    },
+});
+```
+
+`{ foo: 'bar' }` 将会被作为第二个形式参数在 Dollie 调用 Origin 函数时传入。
 
 ## 处理文件冲突
 
 ### 为什么会产生冲突
 
+由于 Dollie 支持通过扩展模板对项目代码增量覆盖，当多个扩展模板同时从某一文件的同一行开始增加内容时，Dollie 无法判定增加的内容是否全部需要保留。因此 Dollie 会将这种情况判定为冲突，将所有扩展模板对此处增加的内容叠加起来作为合并区块，并标记这个合并区块为冲突区块标记，然后交由用户决定区块内每一行的保留与否。
+
 ### 接收 Dollie Core 抛出的冲突
 
-### 向用户报告冲突并寻求解决方案
+在实例化 `Context` 时，可以向 `generator.conflictSolver` 传入一个函数，以当前冲突区块作为回调形式参数传递，并返回解决后的合并区块：
 
-### 向 Dollie Core 告知解决方案
+```js
+const context = new Context('foo', 'example_origin:bar', {
+    generator: {
+        // ...生成器其他配置
+        conflictSolver: async function(data) {
+            const { block } = data;
+            const { values } = block;
+            // 获取冲突双方的每一行内容
+            const { former, current } = values;
+            // 将所有需要保留的行都 push 到 `current` 中
+            return block;
+        },
+    },
+});
+```
+
+此外，如果这个函数的返回值为 `'ignored'`，则代表放弃处理本次冲突。
+
+> 请注意：
+> - 在增量覆盖时，每遇到一个冲突，Dollie 都会执行一次 `generator.conflictSolver` 函数
+> - 在一个文件中，可能存在不止一处冲突
+> - 如果上述函数返回值为 `null`，Dollie 会再一次抛出同样的冲突信息，直到函数返回值不再是 `null`
+
+### 向用户获取解决方案
+
+上文提到，Dollie 在遇到冲突后，会抛出冲突，通过 `generator.conflictSolver` 可以实现带有冲突区块信息的回调。处理冲突属于用户中断操作，因此需要交由用户代理完成（事实上，上文所述的所有内容都是围绕着用户代理的实现展开的）。
+
+在一般情况下，`generator.conflictSolver` 可以承担向用户获取解决方案的责任。最简单的做法是将回调的形式参数中的冲突的每一行都打印在控制台中，由用户决定保留哪几行，并向用户代理输入。用户代理根据用户的输入解析成新的合并区块并返回给 Dollie，从而实现从用户侧获取冲突的解决方案。
