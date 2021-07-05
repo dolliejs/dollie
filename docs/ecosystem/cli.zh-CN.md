@@ -82,11 +82,9 @@ CLI 提供 3 种解决冲突的方式：选择需要保留的冲突组、逐行�
 
 #### 选择需要保留的冲突组
 
-Dollie 会将冲突的行全部放置于 `current` 数组中，并在 CLI 提示时为每一行添加 `[current]` 前缀。Dollie 会在使用这种方式选择需要保留的行时，会向用户提供四种选择：
+Dollie 会将冲突的行全部放置于 `current` 数组中，并在 CLI 提示时为每一行添加 `[current]` 前缀。Dollie 会在使用这种方式选择需要保留的行时，会向用户提供两种选择：
 
 - 保留所有行
-- 保留 `former` 里的所有行（相当于全部丢弃）
-- 保留 `current` 里的所有行（相当于全部保留）
 - 丢弃所有行
 
 ![cli-conflict-select-group.jpg](/public/images/cli-conflict-select-group.jpg)
