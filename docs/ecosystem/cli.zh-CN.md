@@ -149,4 +149,4 @@ Dollie 只允许用户以 [Lodash `get` 风格](https://lodash.com/docs#set)设�
 dollie config set loader.httpProxyUrl http://127.0.0.1:1086
 ```
 
-同时，Dollie `config` 命令还支持 `delete` 和 `set` 两个子命令，其中访问配置项的方式与 `config set` 相同。
+同时，Dollie `config` 命令还支持 `delete` 和 `get` 两个子命令，其中访问配置项的方式与 `config set` 相同。
