@@ -28,7 +28,7 @@ const loadOrigins = async (config: DollieOriginMap): Promise<DollieOrigin[]> => 
       try {
         let content: string;
 
-        if (!isUrl(pathnameOrHandler)) {
+        if (isUrl(pathnameOrHandler)) {
           content = (await got(pathnameOrHandler)).body;
         } else {
           content = fs.readFileSync(path.resolve(process.cwd(), pathnameOrHandler)).toString();
