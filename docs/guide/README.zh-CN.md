@@ -77,7 +77,7 @@ Dollie 最核心的组件，包含 Dollie 的一切业务逻辑，从读取配�
 Dollie 依赖 [Node.js](https://nodejs.org/en/download/)，并且要求其版本在 v10.0.0 以上：
 
 ```bash
-$ node -v
+node -v
 v10.18.0
 ```
 
@@ -86,8 +86,8 @@ v10.18.0
 安装 Dollie.js 核心套件
 
 ```bash
-$ npm i @dollie/core -S
-$ npm i inquirer -S
+npm i @dollie/core -S
+npm i inquirer -S
 ```
 
 在任意一个 JavaScript 代码文件中引入 Dollie.js 核心套件：
