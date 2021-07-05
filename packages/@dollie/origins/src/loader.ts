@@ -31,7 +31,14 @@ const loadOrigins = async (config: DollieOriginMap): Promise<DollieOrigin[]> => 
         if (isUrl(pathnameOrHandler)) {
           content = (await got(pathnameOrHandler)).body;
         } else {
-          content = fs.readFileSync(path.resolve(process.cwd(), pathnameOrHandler)).toString();
+          const originHandlerFilePathname = path.resolve(process.cwd(), pathnameOrHandler);
+          if (!fs.existsSync(originHandlerFilePathname)) {
+            continue;
+          }
+          const stat = fs.statSync(originHandlerFilePathname);
+          if (stat.isFile()) {
+            content = fs.readFileSync(originHandlerFilePathname).toString();
+          }
         }
 
         if (!content || !_.isString(content)) {
