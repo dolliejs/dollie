@@ -94,14 +94,6 @@ const conflictsSolver = async (
               name: 'I want to keep all lines',
             },
             {
-              value: 'former',
-              name: 'I want to keep the lines in `former` group',
-            },
-            {
-              value: 'current',
-              name: 'I want to keep the lines in `current` group',
-            },
-            {
               value: 'none',
               name: 'I want to discard all lines',
             },
@@ -114,14 +106,6 @@ const conflictsSolver = async (
           block.values.current = Array
             .from(block.values.former)
             .concat(Array.from(block.values.current));
-          block.values.former = [];
-          break;
-        }
-        case 'former': {
-          block.values.current = Array.from(block.values.former);
-          break;
-        }
-        case 'current': {
           block.values.former = [];
           break;
         }
