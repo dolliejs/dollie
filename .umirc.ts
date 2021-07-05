@@ -21,7 +21,7 @@ export default defineConfig({
   },
   styles: [
     'https://unpkg.zhimg.com/antd@4.16.6/dist/antd.min.css',
-    'img { max-width: 720px !important; }',
+    'img { max-width: 86% !important; display: block; margin: 0 auto; }',
     '.__dumi-default-locale-select, .__dumi-default-search-input { border-radius: 2px !important; }',
     '.__dumi-default-locale-select, .__dumi-default-search-input:focus { border: 1px solid rgba(255, 255, 255, .4) !important; }',
     '.__dumi-default-search-input { border: 1px solid transparent !important; }',
@@ -49,6 +49,8 @@ export default defineConfig({
     '.__dumi-default-menu[data-mode=\'site\'] { padding-top: 0 !important; }',
     '[data-prefers-color=dark] .__dumi-default-navbar nav > span > a:hover, [data-prefers-color=dark] .__dumi-default-navbar nav > span > a.active, [data-prefers-color=dark] .__dumi-default-layout-footer-meta, [data-prefers-color=dark] .__dumi-default-layout-footer-meta > span:last-child::before { color: #844d28 !important; }',
     '.__dumi-default-menu[data-mode=\'site\'] .__dumi-default-menu-list { margin-top: 50px; }',
+    '@media (min-width: 960px) { div[data-show-sidemenu="true"] .__dumi-default-layout-content { padding-left: 10%; padding-right: 10%; } }',
+    '@media (min-width: 1680px) { div[data-show-sidemenu="true"] .__dumi-default-layout-content { padding-left: 26%; padding-right: 26%; } }',
   ],
   favicon: '/public/images/favicon.ico',
   resolve: {
