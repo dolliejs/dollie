@@ -7,6 +7,7 @@ hero:
     - text: 快速上手
       link: /zh-CN/guide#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
     - text: CLI 入门
+      link: /zh-CN/ecosystem/cli
 features:
   - title: 云端化
     desc: 通过云端托管模板，以及模板与生成器分离的设计，极大提升模板升级迭代的灵活性

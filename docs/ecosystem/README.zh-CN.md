@@ -10,4 +10,4 @@ nav:
 # 生态系统
 
 - [CLI](/zh-CN/ecosystem/cli)
-- [Web 工具](/zh-CN/ecosystem/web)
+- [Web UI](/zh-CN/ecosystem/web)

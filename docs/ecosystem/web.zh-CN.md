@@ -1,9 +1,9 @@
 ---
 order: 1
 toc: 'menu'
-title: 'Web'
+title: 'Web UI'
 ---
 
-# Web
+# Web UI
 
 正在开发中...

@@ -11,6 +11,12 @@ nav:
 
 ## `@dollie/core`
 
+### 类型和接口
+
 ## `@dollie/origins`
 
+### 类型和接口
+
 ### 内置 Origins
+
+### `loadOrigins`
