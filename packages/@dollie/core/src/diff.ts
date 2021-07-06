@@ -27,7 +27,7 @@ const diff = (originalContent: string, currentContent?: string): DiffChange[] =>
   return result;
 };
 
-const merge = (originalChanges: DiffChange[], diffList: DiffChange[][], pathname: string): DiffChange[] => {
+const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffChange[] => {
   if (!originalChanges) {
     return [];
   }
@@ -55,6 +55,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][], pathname
         }
       }
     }
+
     const addedChangeLineNumbers = currentDiff
       .filter((change) => change.added)
       .map((change) => change.lineNumber);
@@ -95,12 +96,16 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][], pathname
     }
   }
 
-  return blocks.reduce((result, currentBlock) => {
+  return blocks.reduce((currentResult, currentBlock) => {
     const currentPatchItem = patches.shift();
+
+    const result = currentResult.concat(currentBlock);
+
     if (!currentPatchItem) {
-      return result.concat(currentBlock);
+      return result;
     }
-    return result.concat(currentBlock).concat(currentPatchItem.changes);
+
+    return result.concat(currentPatchItem.changes);
   }, []);
 };
 

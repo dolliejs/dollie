@@ -17,6 +17,7 @@ import _ from 'lodash';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
+import { loadOrigins } from '../../../origins/lib';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -217,9 +218,11 @@ export default (config: DollieCLIConfigSchema) => {
         const errorLogger = new ErrorLogger();
         const infoLogger = new InfoLogger();
 
+        infoLogger.log('Loading origins...');
+
         const context = new Context(name, template, {
           generator: {
-            origins: config.origins || {},
+            origins: await loadOrigins(config.origins || {}),
             origin: config.origin || {},
             loader: _.get(config, 'loader'),
             getTemplateProps: async (questions) => {

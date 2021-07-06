@@ -1,7 +1,6 @@
 import {
   DollieOrigin,
   DollieOriginConfig,
-  DollieOriginMap,
 } from '@dollie/origins';
 import { Change } from 'diff';
 import { Volume } from 'memfs';
@@ -35,7 +34,7 @@ export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 
 export interface DollieGeneratorConfig {
   origin?: DollieOriginConfig;
-  origins?: DollieOriginMap;
+  origins?: DollieOrigin[];
   loader?: LoaderConfig;
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
