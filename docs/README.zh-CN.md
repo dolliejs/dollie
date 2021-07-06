@@ -5,15 +5,16 @@ hero:
   desc: Dollie 是初始化工程代码的工具链，它可以帮助你构建成熟的工程化方案。
   actions:
     - text: 快速上手
-      link: /zh-CN/guide
+      link: /zh-CN/guide#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
     - text: CLI 入门
+      link: /zh-CN/ecosystem/cli
 features:
   - title: 云端化
     desc: 通过云端托管模板，以及模板与生成器分离的设计，极大提升模板升级迭代的灵活性
   - title: 易上手
     desc: 模板配置项简单，易于理解，花费较短的学习时间即可上手；编写极少代码甚至无需编写代码即可快速制作脚手架
   - title: 增量覆盖
-    desc: 支持通过扩展模板增量覆盖，从而使定制与选择模板技术栈更加方便快捷
+    desc: 支持通过扩展模板实现增量覆盖，从而使定制与选择模板技术栈更加方便快捷
 footer:
   遵循 MIT 开源协议
   <br />版权所有 © 2021 至今，Dollie.js 及其贡献者
@@ -26,7 +27,7 @@ footer:
   <tr>
     <td width="160" align="center">
       <a target="_blank" href="https://team.ncuos.com">
-        <img width="100" src="https://avatars.githubusercontent.com/u/18623963?s=200&v=4" />
+        <img width="100" src="https://lenconda.top/18623963.png" />
         <br />
         <strong>南昌大学家园工作室</strong>
       </a>

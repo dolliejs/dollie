@@ -6,249 +6,258 @@ title: '进阶用法'
 
 # 进阶用法
 
-## 扩展脚手架
-
-### 命名规范
-
-扩展脚手架是一种可以对某一个主脚手架中的某些文件进行增量补充和覆盖的脚手架，Dollie 每次运行只能指定一个主脚手架，主脚手架可以依赖一个或多个扩展脚手架来对其本身进行补丁（Patch）操作。同样地，扩展脚手架也可以依赖一个或多个扩展脚手架。
-
-> 扩展脚手架只能被主脚手架及其父级扩展脚手架依赖，而不能通过 Dollie 直接生成工程
-
-扩展脚手架命名格式为 `$NAMESPACE/extend-scaffold-$EXTEND_SCAFFOLD_NAME#$BRANCH`。其中变量的含义如下：
-
-- `$OWNER`：脚手架所在的 GitHub 命名空间，可以映射到 `https://github.com/$OWNER`。其默认值为 `dolliejs`
-- `$EXTEND_SCAFFOLD_NAME`：脚手架名称，例如 `react-ts`、`react-sass`
-- `$CHECKOUT`：脚手架所在的分支 ID（可以是某一次提交的 Commit ID，也可以是别名，如 `master`、`dev`）。默认值为 `master`
-- `$ORIGIN`：脚手架采用的远程 Git 服务，目前支持的服务有 `github`、`gitlab` 和 `bitbucket`
-
-用户在使用 Dollie 时可以仅输入 `$EXTEND_SCAFFOLD_NAME`，也可以输入完整的脚手架名称，Dollie 均可将其映射到正确的 URL 上（在脚手架仓库存在并且具有 `public` 权限的前提下）。
-
-例子：
-
-```
-react-ts                -> https://github.com/dolliejs/extend-scaffold-react-ts/tree/master
-dolliejs/scaffold-react -> https://github.com/dolliejs/extend-scaffold-react/tree/master
-lenconda/vue-jsx        -> https://github.com/lenconda/extend-scaffold-vue-jsx/tree/master
-angular-rxjs#dev        -> https://github.com/dolliejs/extend-scaffold-angular-rxjs/tree/dev
-```
+## 编写扩展模板
 
 ### 主要使用场景
 
-- 主脚手架需要扩充多个纬度的功能（例如：React 主脚手架可能需要添加 TypeScript、Sass/Less/Stylus 预处理器、React Router、状态管理等功能或模块）
-- 主脚手架只用于提供基础项目文件，而将其他代表各个模块或功能的文件存放于扩展脚手架中
+- 主模板需要扩充多个维度的功能（例如：React 主模板可能需要添加 TypeScript、Sass/Less/Stylus 预处理器、React Router、状态管理等功能或模块）
+- 主模板只用于提供基础项目文件，而将其他代表各个模块或功能的文件存放于扩展模板中
 
-### 声明依赖
+### 存放位置
 
-Dollie 约定，在主脚手架或扩展脚手架的配置文件的 `questions` 字段中，如果某个问题的 `name` 字段为 `$DEPENDS_ON$`，用户对这个问题的回答内容将会被认为是扩展脚手架名称的输入。例如：
+在模板根目录中，建立一个名为 `extends` 的目录，在这个目录内存放所有扩展模板的目录。Dollie 将扩展模板目录名作为扩展模板的名称，并且大小写敏感。
+
+例如，一个名为 `foo` 的扩展模板应该存放于模板根目录下的 `extends/foo` 目录中。
+
+### 注册扩展模板配置
+
+在模板配置文件中可以为所有扩展模板注册配置，除 `extendTemplates` 外，扩展模板的配置项与主模板配置项并无二致。在模板根目录的配置文件中的 `extendTemplates` 字段内添加以扩展模板名称（即扩展模板目录名）为键、以配置项为值的键值对即可注册扩展模板的配置。
+
+例如，有一个名为 `foo` 扩展模板在配置文件中应该像下面的代码一样注册配置：
 
 ```json
 {
-  "questions": [
-    {
-      "name": "$DEPENDS_ON$",
-      "message": "Input the css preprocessor",
-      "type": "input"
+    "questions": [
+        // ...主模板问题
+    ],
+    // ...主模板其他配置
+    "extendTemplates": {
+        "foo": {
+            // ...foo 扩展模板的配置
+        }
     }
-  ]
 }
 ```
 
-当用户的回答该问题时输入 `less` 时，Dollie 将会从 `https://github.com/dolliejs/extend-scaffold-less/tree/master` 下载该扩展脚手架的内容。
+## 识别扩展模板
 
-> `$DEPENDS_ON$` 在 Dollie 中是大小写敏感的
+### 通过输入识别
 
-## 文件行为
+在主模板或扩展模板的 `questions` 字段中，如果某个问题的 `name` 字段为 `$EXTEND$` 且 `type` 字段为 `input`，用户对这个问题的回答内容将会被 Dollie 识别为扩展模板名称。例如：
 
-Dollie 在脚手架配置文件中的 `files` 字段内定义了三个字段：`add`、`merge` 和 `delete`，其含义分别如下：
+```json
+{
+    "questions": [
+        {
+            "name": "$EXTEND$",
+            "message": "Input the css preprocessor",
+            "type": "input"
+        }
+    ]
+}
+```
 
-### `files.add`
+例如，如果用户输入 `less`，Dollie 将会识别并将 `less` 作为本次生命周期中所依赖的扩展模板。
 
-当扩展脚手架将文件写入目标目录时，如果文件名能匹配到该项配置中的某一条正则表达式，Dollie 会将其直接添加到目标目录。如果目标目录存在同名文件，也会将其完全覆盖。
+### 通过确认结果识别
+
+在主模板或扩展模板的 `questions` 字段中，如果某个问题的 `name` 字段为 `$EXTEND:{name}$` 且 `type` 字段为 `confirm`，当用户选择 `y` 后，Dollie 会将 `{name}` 识别为扩展模板名称，否则 Dollie 不会采取任何识别扩展模板的措施。例如：
+
+```json
+{
+    "questions": [
+        {
+            "name": "$EXTEND:typescript$",
+            "message": "Would you want to use TypeScript in your project?",
+            "type": "confirm"
+        }
+    ]
+}
+```
+
+当用户确认时，Dollie 会将 `typescript` 识别并作为本次生命周期中所依赖的扩展模板，当用户拒绝时，Dollie 不会采取任何行动。
+
+### 通过列表/多选识别
+
+在主模板或扩展模板的 `questions` 字段中，如果某个问题的 `name` 字段为 `$EXTEND$` 且 `type` 字段为 `list` 或 `checkbox`，用户所有选中选项中的 `value` 字段都将会被 Dollie 识别并作为本次生命周期所依赖的扩展模板。例如：
+
+```json
+{
+    "questions": [
+        {
+            "name": "$EXTEND$",
+            "message": "Choose a state manager",
+            "type": "list",
+            "choices": [
+                {
+                    "name": "Redux",
+                    "value": "redux"
+                },
+                {
+                    "name": "MobX",
+                    "value": "mobx"
+                },
+                {
+                    "name": "Dva",
+                    "value": "dva"
+                }
+            ]
+        }
+    ]
+}
+```
+
+当用户选择 `'MobX'` 时，`mobx` 将会被 Dollie 识别并作为本次生命周期所依赖的扩展模板。
+
+> 请注意：
+> - `$EXTEND$` 在 Dollie 中是**大小写敏感的**
+> - 对于返回值为 `'null'`、空值的问题，Dollie 不会识别为任何扩展模板，因此**请不要将扩展模板命名为 `'null'`**
+> - 当采用列表或多选方式识别扩展模板时，请注意不要混淆 `choices` 中的 `name` 和 `value`
+
+## 文件行为配置
+
+Dollie 在模板配置文件中的 `files` 字段内定义了两个字段：`merge` 和 `delete`。对于上述所有字段，Dollie 都接受一个字符串数组作为每个字段的值，其中，数组元素为 [Glob 风格](https://en.wikipedia.org/wiki/Glob_(programming)) 的正则表达式用于匹配模板文件的相对路径（相对于项目根目录，以下简称“相对路径”）。
+
+在生命周期内，Dollie 会遍历已生成的模板文件，若某个文件的相对路径在数组中匹配到了至少一次，那么 Dollie 将会对这个文件采取对应的策略。
+
+对于上述两个字段，其含义分别如下：
 
 ### `files.merge`
 
-当扩展脚手架将文件写入目标目录时，如果文件名能匹配到该项配置中的某一条正则表达式，Dollie 将会记录其内容与文件初始内容的 Diff 结果，形成增量表（Patch Table），在最终写入文件内容时将该文件名下所有这样的增量表合并后作用到初始内容上。
+Dollie 约定在增量覆盖时，所有扩展模板中的文件将会按照顺序依次覆盖主模板中的同名文件。但大多数情况下，模板的创建者和使用者都不希望已有的扩展模板对主模板同名文件的更改被新的扩展模板中的同名文件覆盖掉——他们希望保留每个扩展模板对同一文件的**所有更改**。
+
+当扩展模板将文件写入目标目录时，如果文件名能匹配到该项配置中的某一条正则表达式，Dollie 将会记录其内容与文件初始内容的 Diff 结果，形成增量表（Patch Table），在最终写入文件内容时将该文件名下所有这样的增量表合并后作用到初始内容上。
 
 ### `files.delete`
 
-当写入文件操作完成后，删除在该项配置的数组中的所有文件。Dollie 每次运行时，所有脚手架的该项配置中的值都会被叠加。例如：主脚手架的配置为：
+在增量覆盖时，模板的创建者和使用者有时希望在某一个扩展模板生成完成后，删去已生成的某些文件，例如：一个 React 项目中如果使用了加入 TypeScript 支持的扩展模板，那么这个扩展模板就需要执行删除目录中使用 JavaScript 编写的代码文件。因此 `files.delete` 就能派上用场。
 
-```json
-{
-  "files": {
-    "delete": [
-      ".eslintignore"
-    ]
-  }
-}
-```
+> 请注意：
+> - Dollie 每次运行时，所有模板的上述两项配置中的值都会被叠加。
 
-其依赖的扩展脚手架中的配置为（假设本次运行主脚手架仅依赖此扩展脚手架）：
+## 清理函数队列（`cleanups`）
 
-```json
-{
-  "files": {
-    "delete": [
-      "src/(.*).js(x?)"
-    ]
-  }
-}
-```
-
-则最终的结果为：
-
-```json
-{
-  "delete": [
-    ".eslintignore",
-    "src/(.*).js(x?)"
-  ]
-}
-```
-
-Dollie 采用非贪婪的覆盖原则写入扩展脚手架中的文件。
-
-当 Dollie 在将扩展脚手架中的文件写入目标目录时，如果该文件既不能被 `files.add` 匹配，也不能被 `files.merge` 匹配，并且目标目录中不存在同名文件，Dollie 将会忽略这个文件。但若目标目录中存在同名文件，Dollie 将会用当前扩展脚手架的文件内容覆盖到目标目录的同名文件中。
-
-> 1. 对于主脚手架中的任何文件，上述覆盖规则无效
-> 2. `files.add` 和 `files.merge` 仅对扩展脚手架有效
-
-## `endScripts` 函数
-
-Dollie 在 `.dollie.js` 的 `endScripts` 提供了函数的支持，用户可以在该项配置中提供一个带有 Dollie 上下文的回调函数.
-
-Dollie 的上下文暴露了封装的 `fs` 实用工具以及被 Dollie 解析后的脚手架配置树（即包含依赖关系的脚手架基本信息）：
-
-例如：
+Dollie 允许用户定义一些清理函数，用于在 Dollie 生成最终文件结果之前对已生成的项目目录结构和文件内容进行操作。例如，在模板根目录的 `dollie.js` 中可以编写如下内容：
 
 ```js
 module.exports = {
-  endScripts: [
-    (context) => {
-      if (context.fs.exists('tsconfig.json')) {
-        fs.remove('src/App.js');
-        fs.remove('src/index.js');
-      }
-    },
-  ],
+    // ...主模板其他配置
+    cleanups: [
+        async function(context) {
+            if (context.exists('tsconfig.json')) {
+                context.deleteFiles(['src/index.js']);
+            }
+        },
+        // ...
+    ],
 };
 ```
 
-上述代码会在 Dollie 写入目标目录完毕后执行，当项目根目录存在 TypeScript 的配置时，删除 JSX 代码文件。
+上述清理函数的作用是：在 Dollie 生成项目代码文件和目录结构之后，运行上述函数，如果项目中存在 `tsconfig.json`，则删除老旧的 JavaScript 文件。
 
-> 上下文中的 `fs` 都是以项目根目录作为基础路径的，使用时无需调用 `path.resolve` 等相关方法即可进行文件操作
+> 请注意：
+> - 清理函数配置在 JSON 类型的配置文件中无效
+> - Dollie 同时对主模板和扩展模板提供清理函数的支持
 
-## 处理冲突
+## 编写 Origin 函数
 
-当不同的扩展脚手架对同一文件的同一行产生了一个或多个补丁时，Dollie 就会判定该文件该行存在冲突。冲突的双方分别被称为 `former` 和 `current`，但通常情况下，Dollie 会把所有的冲突归为后者。
+### 文件内容
 
-Dollie 为用户提供了几种解决冲突的选项：
+Dollie 仅接受 JavaScript 文件形式，在文件中必须使用 `module.exports` 导出 `Function` 类型的值。这个被导出的函数必须返回一个对象，其中 `url` 字段是一个字符串，它是必需的；`headers` 是一个键值对，用来设置 HTTP 请求头，它是非必需的。
 
-### 直接选择保留区块
+以 Dollie 内置的[ GitHub Origin 函数](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/github.ts)为例，它的内容（JS 转写后的）如下：
 
-![dollie_advanced_conflict_select_directly](/public/images/dollie_advanced_conflict_select_directly.gif)
+```js
+const _ = require('lodash');
 
-### 手动选择保留行
+module.exports = async (id, config = {}) => {
+    if (!id) {
+        return null;
+    }
 
-![dollie_advanced_conflict_select_manually](/public/images/dollie_advanced_conflict_select_manually.gif)
+    const [repository, checkout = ''] = id.split('@');
 
-### 编辑冲突区块
+    const token = config.token || '';
 
-![dollie_advanced_conflict_edit](/public/images/dollie_advanced_conflict_edit.gif)
-
-当然，用户也可以放弃冲突处理。被放弃处理冲突的文件将会被 Dollie 以 Git 风格标注：
-
-![dollie_advanced_conflict_example](/public/images/dollie_advanced_conflict_example.jpg)
-
-## Dollie Compose
-
-Dollie Compose 是 Dollie 提供的一种便捷的方式，用于通过配置代替交互式命令行中处理交互问题和冲突的过程。
-
-### 基本语法
-
-Dollie Compose 的配置文件采用 YAML 语法，用户需要在每个配置文件中指定项目名称和主脚手架：
-
-```yml
-# config.yml
-project_name: project
-
-scaffold_config:
-  scaffold_name: react
-  dependencies:
-    - scaffold_name: react-ts
-    - scaffold_name: react-less
+    return {
+        url: `https://api.github.com/repos/${repository}/zipball${checkout ? `/${checkout}` : ''}`,
+        headers: token ? {
+            'Authorization': `token ${token}`,
+        } : {},
+    };
+};
 ```
 
-执行：
+### 文件存放位置
 
-```bash
-$ dollie compose ./config.yml
+Origin 函数文件可以存放在能通过 HTTP 或 HTTPS 协议的 URL 被访问到的互联网位置，也可以存放在本地文件系统中（在 Node.js 有权限读取这些文件的前提下）。
+
+### 注册 Origin 函数
+
+在创建 `Context` 实例时，可以通过 `Generator` 配置向 Dollie 传递一个以 Origin 函数名称为键、以 Origin 函数 URL 的键值对注册 Origin 函数，配置项路径为 `generator.origins`：
+
+```js
+const context = new Context('foo', 'example_origin:bar', {
+    generator: {
+        origins: {
+            example_origin: 'https://example.com/origins/example_origin.js',
+        },
+    },
+});
 ```
 
-Dollie 将会读取其中的内容并解析生成脚手架依赖关系树，随后递归拉取所有脚手架，并写入目标目录：
+### 设置参数
 
-![dollie_advanced_compose](/public/images/dollie_advanced_compose.gif)
+在创建 `Context` 实例时，可以通过 `Generator` 配置向 Dollie 传递一个键值对来设置 Origin 函数的参数，配置项路径为 `generator.origin`：
 
-### 指定 Props
-
-在每个脚手架中指定 `props` 字段：
-
-```yml
-# config.yml
-project_name: project
-
-scaffold_config:
-  scaffold_name: react
-  props:
-    license: mit
-    author: lenconda <i@lenconda.top>
-  dependencies:
-    - scaffold_name: react-ts
-    - scaffold_name: react-less
+```js
+const context = new Context('foo', 'example_origin:bar', {
+    generator: {
+        // ...生成器其他配置
+        origin: {
+            foo: 'bar',
+        },
+    },
+});
 ```
 
-### 处理冲突
+`{ foo: 'bar' }` 将会被作为第二个形式参数在 Dollie 调用 Origin 函数时传入。
 
-在 YAML 配置文件最顶层指定 `conflict_keeps` 字段：
+## 处理文件冲突
 
-```yml
-conflict_keeps:
-  package.json:
-    -
-      all
+### 为什么会产生冲突
+
+由于 Dollie 支持通过扩展模板对项目代码增量覆盖，当多个扩展模板同时从某一文件的同一行开始增加内容时，Dollie 无法判定增加的内容是否全部需要保留。因此 Dollie 会将这种情况判定为冲突，将所有扩展模板对此处增加的内容叠加起来作为合并区块，并标记这个合并区块为冲突区块标记，然后交由用户决定区块内每一行的保留与否。
+
+### 接收 Dollie Core 抛出的冲突
+
+在实例化 `Context` 时，可以向 `generator.conflictSolver` 传入一个函数，以当前冲突区块作为回调形式参数传递，并返回解决后的合并区块：
+
+```js
+const context = new Context('foo', 'example_origin:bar', {
+    generator: {
+        // ...生成器其他配置
+        conflictSolver: async function(data) {
+            const { block } = data;
+            const { values } = block;
+            // 获取冲突双方的每一行内容
+            const { former, current } = values;
+            // 将所有需要保留的行都 push 到 `current` 中
+            return block;
+        },
+    },
+});
 ```
 
-此处代表保留冲突双方所有的行
+此外，如果这个函数的返回值为 `'ignored'`，则代表放弃处理本次冲突。
 
-```yml
-conflict_keeps:
-  package.json:
-    -
-      former
-```
+> 请注意：
+> - 在增量覆盖时，每遇到一个冲突，Dollie 都会执行一次 `generator.conflictSolver` 函数
+> - 在一个文件中，可能存在不止一处冲突
+> - 如果上述函数返回值为 `null`，Dollie 会再一次抛出同样的冲突信息，直到函数返回值不再是 `null`
 
-此处代表保留冲突双方中属于 `former` 的行
+### 向用户获取解决方案
 
-```yml
-conflict_keeps:
-  package.json:
-    -
-      former:
-        - 0
-      current:
-        - 0
-        - 1
-        - 2
-```
+上文提到，Dollie 在遇到冲突后，会抛出冲突，通过 `generator.conflictSolver` 可以实现带有冲突区块信息的回调。处理冲突属于用户中断操作，因此需要交由用户代理完成（事实上，上文所述的所有内容都是围绕着用户代理的实现展开的）。
 
-此处代表保留 `former` 的第一行以及 `current` 的前三行
-
-```yml
-conflict_keeps:
-  package.json:
-    - |
-      "dep1": "^1.0.0",
-      "dep2": "^2.0.0",
-```
-
-此处代表使用 `"dep1": "^1.0.0",\n"dep2": "^2.0.0",\n` 代替该处冲突区域的内容
+在一般情况下，`generator.conflictSolver` 可以承担向用户获取解决方案的责任。最简单的做法是将回调的形式参数中的冲突的每一行都打印在控制台中，由用户决定保留哪几行，并向用户代理输入。用户代理根据用户的输入解析成新的合并区块并返回给 Dollie，从而实现从用户侧获取冲突的解决方案。
