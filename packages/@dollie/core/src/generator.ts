@@ -90,9 +90,7 @@ class Generator {
   }
 
   public async initialize() {
-    this.messageHandler('Initializing origins...');
-
-    this.origins = await loadOrigins(this.config.origins);
+    this.origins = _.get(this, 'config.origins') || [];
 
     if (_.isString(this.templateOriginName)) {
       if (!this.templateOriginName.includes(':')) {
@@ -273,7 +271,7 @@ class Generator {
         } else {
           const originalDiffChanges = diffs[0];
           const forwardDiffChangesGroup = diffs.slice(1);
-          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup, entityPathname);
+          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
           this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
         }
       } else {
