@@ -11,48 +11,48 @@ title: '基础用法'
 ### 目录结构
 
 <Tree>
-  <ul>
-    <li>
-      main
-      <small>主模板目录</small>
-      <ul>
+    <ul>
         <li>
-          ...
-          <small>主模板文件</small>
-        </li>
-      </ul>
-    </li>
-    <li>
-      extends
-      <small>扩展模板目录</small>
-      <ul>
-        <li>
-          foo
-          <small>扩展模板 `foo` 根目录</small>
-          <ul>
-            <li>
-              ...
-              <small>扩展模板 `foo` 文件</small>
-            </li>
-          </ul>
+            main
+            <small>主模板目录</small>
+            <ul>
+                <li>
+                    ...
+                    <small>主模板文件</small>
+                </li>
+            </ul>
         </li>
         <li>
-          bar
-          <small>扩展模板 `bar` 根目录</small>
-          <ul>
-            <li>
-              ...
-              <small>扩展模板 `bar` 文件</small>
-            </li>
-          </ul>
+            extends
+            <small>扩展模板目录</small>
+            <ul>
+                <li>
+                    foo
+                    <small>扩展模板 `foo` 根目录</small>
+                    <ul>
+                        <li>
+                            ...
+                            <small>扩展模板 `foo` 文件</small>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    bar
+                    <small>扩展模板 `bar` 根目录</small>
+                    <ul>
+                        <li>
+                            ...
+                            <small>扩展模板 `bar` 文件</small>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </li>
-      </ul>
-    </li>
-    <li>
-      dollie.js | dollie.json
-      <small>配置文件</small>
-    </li>
-  </ul>
+        <li>
+            dollie.js | dollie.json
+            <small>配置文件</small>
+        </li>
+    </ul>
 </Tree>
 
 ### 动态模板文件
@@ -68,13 +68,13 @@ Dollie 约定：凡是以 `__template.`开头的字符串作为文件名的文�
 ```json
 // __template.package.json
 {
-  "name": "<%= name %>",
-  "dependencies": {
-    // ...
-  },
-  "devDependencies": {
-    // ...
-  },
+    "name": "<%= name %>",
+    "dependencies": {
+        // ...
+    },
+    "devDependencies": {
+        // ...
+    },
 }
 ```
 
@@ -83,13 +83,13 @@ Dollie 约定：凡是以 `__template.`开头的字符串作为文件名的文�
 ```json
 // package.json
 {
-  "name": "my-project",
-  "dependencies": {
-    // ...
-  },
-  "devDependencies": {
-    // ...
-  },
+    "name": "my-project",
+    "dependencies": {
+        // ...
+    },
+    "devDependencies": {
+        // ...
+    },
 }
 ```
 
@@ -111,27 +111,27 @@ Dollie 通过 [Inquirer.js](https://github.com/SBoudrias/Inquirer.js#readme) 在
 
 ```json
 {
-  "questions": [
-    {
-      "name": "license",
-      "message": "Please select a license",
-      "type": "list",
-      "choices": [
+    "questions": [
         {
-          "value": "mit",
-          "name": "MIT"
-        },
-        {
-          "value": "apache-2",
-          "name": "Apache License V2.0"
-        },
-        {
-          "value": "bsd",
-          "name": "BSD"
+            "name": "license",
+            "message": "Please select a license",
+            "type": "list",
+            "choices": [
+                {
+                    "value": "mit",
+                    "name": "MIT"
+                },
+                {
+                    "value": "apache-2",
+                    "name": "Apache License V2.0"
+                },
+                {
+                    "value": "bsd",
+                    "name": "BSD"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
 ```
 

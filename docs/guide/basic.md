@@ -11,145 +11,145 @@ title: 'Basic Usages'
 ### Directory Structure
 
 <Tree>
-  <ul>
-    <li>
-      main
-      <small>main template dir</small>
-      <ul>
+    <ul>
         <li>
-          ...
-          <small>main template files</small>
-        </li>
-      </ul>
-    </li>
-    <li>
-      extends
-      <small>extend templates dir</small>
-      <ul>
-        <li>
-          foo
-          <small>extend template `foo` root dir</small>
-          <ul>
-            <li>
-              ...
-              <small>extend template `foo` files</small>
-            </li>
-          </ul>
+            main
+            <small>main template dir</small>
+            <ul>
+                <li>
+                    ...
+                    <small>main template files</small>
+                </li>
+            </ul>
         </li>
         <li>
-          bar
-          <small>extend template `bar` root dir</small>
-          <ul>
-            <li>
-              ...
-              <small>extend template `bar` files</small>
-            </li>
-          </ul>
+            extends
+            <small>extend templates dir</small>
+            <ul>
+                <li>
+                    foo
+                    <small>extend template `foo` root dir</small>
+                    <ul>
+                        <li>
+                            ...
+                            <small>extend template `foo` files</small>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    bar
+                    <small>extend template `bar` root dir</small>
+                    <ul>
+                        <li>
+                            ...
+                            <small>extend template `bar` files</small>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </li>
-      </ul>
-    </li>
-    <li>
-      dollie.js | dollie.json
-      <small>configuration file</small>
-    </li>
-  </ul>
+        <li>
+            dollie.js | dollie.json
+            <small>configuration file</small>
+        </li>
+    </ul>
 </Tree>
 
 ### Dynamic Template Files
 
-Dollie 约定：凡是以 `__template.`开头的字符串作为文件名的文件都将被认为是「动态文件」。动态文件将会被 [EJS](https://ejs.co) 引擎解析，并将一些配置项以 EJS Props 的形式作为变量注入，从而形成目标文件（目标文件的文件名见会被删去 `__template.`）内容。
+Dollie constraint that any file with a string starting with `__template.` as the filename will be considered as a "dynamic file". The dynamic file will be parsed by the [EJS](https://ejs.co) engine and configuration items will be injected as variables in the form of EJS Props to form the target file (the target file will have the `__template.` removed from its filename).
 
-> 当某个以 `.` 开头的文件需要作为模板文件时，请不要忘记忽略 `__template.` 末尾的点号。
+> When a file starting with `.`, please don't forget to ignore the dot at the end of `__template.` when a file starting with `.` needs to be used as a template file.
 >
-> 例如：如果希望将 `.babelrc` 作为模板文件，其文件名将会是 `__template..babelrc`
+> For example, if you want to use `.babelrc` as a template file, the file name will be `__template..babelrc`
 
-例子：
+Example:
 
 ```json
 // __template.package.json
 {
-  "name": "<%= name %>",
-  "dependencies": {
-    // ...
-  },
-  "devDependencies": {
-    // ...
-  },
+    "name": "<%= name %>",
+    "dependencies": {
+        // ...
+    },
+    "devDependencies": {
+        // ...
+    },
 }
 ```
 
-使用 `{ name: 'my-project' }` 注入时，输出文件将会是：
+When inject props using `{ name: 'my-project' }`, the output content of the file will be:
 
 ```json
 // package.json
 {
-  "name": "my-project",
-  "dependencies": {
-    // ...
-  },
-  "devDependencies": {
-    // ...
-  },
+    "name": "my-project",
+    "dependencies": {
+        // ...
+    },
+    "devDependencies": {
+        // ...
+    },
 }
 ```
 
 ### Configuration File
 
-#### 文件类型及优先级
+#### File Types and Priorities
 
-Dollie 提供配置文件来支持可配置化接口。目前 Dollie 会读取脚手架根目录下的 `dollie.json` 或 `dollie.js`（如果有的话）中的配置，以实现将某些行为和操作交给用户决定。
+Dollie provides configuration files to support the configurable interface. Currently Dollie reads configuration from `dollie.json` or `dollie.js` (if available) in the scaffolding root directory to enable certain behaviors and actions to be left to the user's decision.
 
-> 1. `dollie.json` 与 `dollie.js` 唯一的区别在于后者可以获得可编程化配置的支持
-> 2. `dollie.js` 的优先级高于 `dollie.json`，当两者同时存在于一个脚手架时，后者将会被忽略
-> 3. **配置文件是非必需的**。如果脚手架没有必须要使用配置文件的场景（例如：需要用户输入问题的回答），则不需要编写配置文件
+> 1. The only difference between `dollie.json` and `dollie.js` is that the latter can get programmable configuration support
+> 2. `dollie.js` has higher priority than `dollie.json`, and when both are present in a scaffold, the latter will be ignored
+> 3. **Configuration files are non-required**. If there are no scenarios where the scaffold must use a configuration file (e.g., requiring the user to enter an answer to a question), then a configuration file is not required
 
-#### 交互问题
+#### Interact Questions
 
-Dollie 通过 [Inquirer.js](https://github.com/SBoudrias/Inquirer.js#readme) 在 Interactive 模式下实现与用户的交互。当用户回答完问题后，其输入的结果将会作为 Props 与当前脚手架绑定，用于后续注入模板文件。
+Dollie interacts with the user in Interactive mode via [Inquirer.js](https://github.com/SBoudrias/Inquirer.js#readme). After the user answers the question, the result of their input is bound to the current scaffold as props for subsequent injection into the template file.
 
-例子：
+Example:
 
 ```json
 {
-  "questions": [
-    {
-      "name": "license",
-      "message": "Please select a license",
-      "type": "list",
-      "choices": [
+    "questions": [
         {
-          "value": "mit",
-          "name": "MIT"
-        },
-        {
-          "value": "apache-2",
-          "name": "Apache License V2.0"
-        },
-        {
-          "value": "bsd",
-          "name": "BSD"
+            "name": "license",
+            "message": "Please select a license",
+            "type": "list",
+            "choices": [
+                {
+                    "value": "mit",
+                    "name": "MIT"
+                },
+                {
+                    "value": "apache-2",
+                    "name": "Apache License V2.0"
+                },
+                {
+                    "value": "bsd",
+                    "name": "BSD"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
 ```
 
-如果用户选择了第二项，则当前脚手架的 Props 将会是：
+If the user selects the second option, the current props for the scaffold will be:
 
 ```js
 { license: 'apache-2' };
 ```
 
-## 上传模板
+## Upload Template
 
-Dollie 仅允许从互联网上拉取模板，并且目前仅支持 ZIP 类型的模板文件。因此，在编写好模板后，请将模板使用 ZIP 压缩并上传到互联网中，同时请确保向 Dollie 提供一个可以访问的 URL。
+Dollie only allows templates to be pulled from the Internet and currently only supports templates of the ZIP format. Therefore, once you have written your template, please compress it in a ZIP file and upload it to the Internet, and make sure you provide Dollie with an accessible URL.
 
-Dollie 内置对使用 GitHub 和 GitLab 托管模板的支持，并为其分别提供了[内置 Origin 函数](/zh-CN/api#内置-origins)。你可以直接将你编写好的模板提交给 GitHub 或 GitLab 托管。Dollie 的 GitHub 和 GitLab Origin 函数支持将模板仓库私有化（需要分别提供对应的 Access Token），对 GitLab 支持定义自托管服务域名等。因此，**通过 GitHub 或 GitLab 上传并托管模板可以满足绝大部分使用场景**，但 Dollie 仍然允许你注册[自定义的 Origin 函数](/zh-CN/guide/advanced#%E7%BC%96%E5%86%99-origin-%E5%87%BD%E6%95%B0)。
+Dollie has built-in support for hosting templates using GitHub and GitLab, and provides a [built-in Origin function](/zh-CN/api#内置-origins) for each. You can submit your templates directly to GitHub or GitLab, Dollie's GitHub and GitLab Origin functions support making template repositories private (with separate access tokens), defining self-hosted service domains for GitLab, and more. So, **uploading and hosting templates via GitHub or GitLab will work for most scenarios**, but Dollie still allows you to [register custom Origin functions](/zh-CN/guide/advanced#%E7%BC%96%E5%86%99-origin-%E5%87%BD%E6%95%B0).
 
-## 使用模板
+## Use Templates
 
-### 模板名称解析规则
+### Template Name Resolution Rules
 
 在使用模板时，Dollie 将会要求用户输入一个 `string` 类型的参数，我们把它叫做模板上下文 ID。这个参数的用途有：
 
