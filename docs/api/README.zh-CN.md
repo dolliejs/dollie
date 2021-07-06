@@ -63,8 +63,8 @@ Dollie `Generator` 配置。
 interface DollieGeneratorConfig {
     // Origin 配置
     origin?: DollieOriginConfig;
-    // 自定义 Origin 函数列表，键对应的值可以是路径也可以是 Origin 函数
-    origins?: DollieOriginMap;
+    // Origin 函数列表
+    origins?: DollieOrigin[];
     // 加载器配置，用于拉取模板、读取自定义 Origin 函数等
     loader?: LoaderConfig;
     // 向用户获取模板问题的回答
@@ -84,7 +84,7 @@ interface DollieGeneratorConfig {
 - [`ConflictSolveResult`](/zh-CN/api#conflictresolveresult)
 - [`ConflictSolverData`](/zh-CN/api#conflictresolverdata)
 - [`DollieOriginConfig`](/zh-CN/api#dollieoriginconfig)
-- [`DollieOriginMap`](/zh-CN/api#dollieoriginmap)
+- [`DollieOrigin`](/zh-CN/api#dollieorigin)
 
 #### `DollieConfig`
 
@@ -291,22 +291,109 @@ Dollie Origin 函数列表，键名为函数名称，值为 Origin 函数或文�
 type DollieOriginMap = Record<string, string | DollieOriginHandler>;
 ```
 
+依赖类型：
+
+- [`DollieOriginHandler`](/zh-CN/api#dollieoriginhandler)
+
 #### `DollieOriginConfig`
+
+当作形式参数传递给各个 Origin 函数的类型，由各个 Origin 函数自行读取解析，可以是任意键值对。
+
+```typescript
+type DollieOriginConfig = Record<string, any>;
+```
 
 #### `DollieOriginHandler`
 
+Origin 函数，这个函数必须返回指定的 Origin 信息，以供生成器使用。
+
+```typescript
+type DollieOriginHandler = (
+    // 上下文 ID
+    id: string,
+    // 由函数自身定义的配置项，可以是任意键值对
+    config: DollieOriginConfig,
+    // 一个 `Got` 实例，用于帮助 Origin 函数发送请求
+    request: Got,
+) => Promise<DollieOriginInfo>;
+```
+
+依赖类型：
+
+- [`DollieOriginConfig`](/zh-CN/api#dollieoriginconfig)
+- [`DollieOriginInfo`](/zh-CN/api#dollieorigininfo)
+
 #### `DollieOrigin`
+
+Dollie Origin 函数列表项。
+
+```typescript
+interface DollieOrigin {
+    // Origin 函数名称
+    name: string;
+    // Origin 函数体
+    handler: DollieOriginHandler;
+};
+```
+
+依赖类型：
+
+- [`DollieOriginHandler`](/zh-CN/api#dollieoriginhandler)
 
 #### `DollieOriginInfo`
 
+标准的、可被 Dollie 生成器理解的 Origin 信息。用作 Origin 函数返回值。
+
+```typescript
+interface DollieOriginInfo {
+    // 供生成器拉取模板的最终 URL
+    url: string;
+    // 生成器拉取模板时所使用的 HTTP 请求头
+    headers?: DollieOriginHeaders;
+}
+```
+
+依赖类型：
+
+- [`DollieOriginHeaders`](/zh-CN/api#dollieoriginheaders)
+
 #### `DollieOriginHeaders`
 
-#### `DollieOriginConfig`
+生成器拉取模板时所使用的 HTTP 请求头。
+
+```typescript
+type DollieOriginHeaders = Record<string, any>;
+```
 
 ### 内置 Origin 函数
 
 #### `github`
 
+配置项：
+
+- `token: string` 在 Dollie 生成器拉取私有 GitHub 仓库时作为认证使用
+
 #### `gitlab`
 
+配置项：
+
+- `token: string` 在 Dollie 生成器拉取私有 GitLab 仓库时作为认证使用
+- `host: string` 当模板存储于自托管形式的 GitLab 服务时，指定域名
+- `protocol: string` 当模板存储于自托管形式的 GitLab 服务时，指定协议类型，支持 `http` 和 `https`
+
 ### `loadOrigins(config: DollieOriginMap): Promise<DollieOrigin[]>`
+
+根据所提供的 Dollie Origin 函数键值对加载所有 Origin 函数，并返回 Dollie 生成器可以理解的数据。
+
+参数：
+
+- `config: DollieOriginMap` Origin 函数键值对配置
+
+返回值：
+
+`Promise<DollieOrigin[]>`
+
+依赖类型：
+
+- [`DollieOrigin`](/zh-CN/api#dollieorigin)
+- [`DollieOriginMap`](/zh-CN/api#dollieoriginmap)
