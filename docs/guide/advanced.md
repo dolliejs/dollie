@@ -118,30 +118,30 @@ When the user selects `'MobX'`, `mobx` will be recognized by Dollie and used as 
 
 Dollie defines two fields in the `files` field of the template configuration file: `merge` and `delete`. For all of these fields, Dollie accepts an array of strings as the value of each field, where the elements of the array are [Glob-style](https://en.wikipedia.org/wiki/Glob_(programming)) regular expressions used to match the relative path of the template file (relative to the project root directory, hereinafter referred to as "relative path").
 
-在生命周期内，Dollie 会遍历已生成的模板文件，若某个文件的相对路径在数组中匹配到了至少一次，那么 Dollie 将会对这个文件采取对应的策略。
+During the lifecycle, Dollie iterates through the generated project files and if the relative path of a file matches at least once in the array, then Dollie will take the corresponding policy for that file.
 
-对于上述两个字段，其含义分别如下：
+For each of the two fields above, the meaning is as follows:
 
 ### `files.merge`
 
-Dollie 约定在增量覆盖时，所有扩展模板中的文件将会按照顺序依次覆盖主模板中的同名文件。但大多数情况下，模板的创建者和使用者都不希望已有的扩展模板对主模板同名文件的更改被新的扩展模板中的同名文件覆盖掉——他们希望保留每个扩展模板对同一文件的**所有更改**。
+Dollie specifies that during incremental overwriting, all files in the extend template will overwrite the files of the same name in the main template in order. In most cases, however, the creators and users of the template do not want the changes made by existing extend template to the main template's file with the same name to be overwritten by the file with the same name in other extend template - they want to **keep all the changes made by each extend template to the same file**.
 
-当扩展模板将文件写入目标目录时，如果文件名能匹配到该项配置中的某一条正则表达式，Dollie 将会记录其内容与文件初始内容的 Diff 结果，形成增量表（Patch Table），在最终写入文件内容时将该文件名下所有这样的增量表合并后作用到初始内容上。
+When the extension template writes a file to the target directory, if the file name matches one of the regular expressions in the configuration, Dollie will record the Diff result between its content and the initial content of the file, forming a patch table that will be merged with all such incremental tables under the file name and applied to the initial content when the file is finally written.
 
 ### `files.delete`
 
-在增量覆盖时，模板的创建者和使用者有时希望在某一个扩展模板生成完成后，删去已生成的某些文件，例如：一个 React 项目中如果使用了加入 TypeScript 支持的扩展模板，那么这个扩展模板就需要执行删除目录中使用 JavaScript 编写的代码文件。因此 `files.delete` 就能派上用场。
+In the case of incremental overlays, the creator and user of a template sometimes want to delete some of the generated files after an extended template has been generated, for example, if a React project uses an extension template that adds TypeScript support, then the extension template needs to delete the code files written in JavaScript in the directory. This is where `files.delete` comes in handy.
 
-> 请注意：
-> - Dollie 每次运行时，所有模板的上述两项配置中的值都会被叠加。
+> Attention
+> - Dollie overlays the values in the above two configurations for all templates (including main template and extend templates)  every time
 
 ## `cleanups` Queue
 
-Dollie 允许用户定义一些清理函数，用于在 Dollie 生成最终文件结果之前对已生成的项目目录结构和文件内容进行操作。例如，在模板根目录的 `dollie.js` 中可以编写如下内容：
+Dollie allows users to define some cleanup functions for manipulating the generated project directory structure and file contents before Dollie generates the final file results. For example, the following could be written in dollie.js in the template root directory:
 
 ```js
 module.exports = {
-    // ...主模板其他配置
+    // ...other main template configuration
     cleanups: [
         async function(context) {
             if (context.exists('tsconfig.json')) {
@@ -153,19 +153,19 @@ module.exports = {
 };
 ```
 
-上述清理函数的作用是：在 Dollie 生成项目代码文件和目录结构之后，运行上述函数，如果项目中存在 `tsconfig.json`，则删除老旧的 JavaScript 文件。
+What the above cleanup function does is: after Dollie generates the project code file and directory structure, run the above function and delete the old JavaScript file if` tsconfig.json` exists in the project.
 
-> 请注意：
-> - 清理函数配置在 JSON 类型的配置文件中无效
-> - Dollie 同时对主模板和扩展模板提供清理函数的支持
+> Attention
+> - The cleanup function configuration is not valid in the JSON type configuration file
+> - Dollie provides support for cleanup functions for both main and extend templates
 
-## 编写 Origin 函数
+## Write Origin Functions
 
-### 文件内容
+### File Content
 
-Dollie 仅接受 JavaScript 文件形式，在文件中必须使用 `module.exports` 导出 `Function` 类型的值。这个被导出的函数必须返回一个对象，其中 `url` 字段是一个字符串，它是必需的；`headers` 是一个键值对，用来设置 HTTP 请求头，它是非必需的。
+Dollie accepts only JavaScript files, in which values of type `Function` must be exported using `module.exports`. The exported function must return an object, where the `url` field is a string, which is required, and `headers` is a key-value pair that sets the HTTP request headers, which is not required.
 
-以 Dollie 内置的[ GitHub Origin 函数](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/github.ts)为例，它的内容（JS 转写后的）如下：
+As an example, Dollie's built-in[ GitHub Origin function](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/github.ts) looks like this (after the JS transformation):
 
 ```js
 const _ = require('lodash');
@@ -188,13 +188,13 @@ module.exports = async (id, config = {}) => {
 };
 ```
 
-### 文件存放位置
+### File Storage Location
 
-Origin 函数文件可以存放在能通过 HTTP 或 HTTPS 协议的 URL 被访问到的互联网位置，也可以存放在本地文件系统中（在 Node.js 有权限读取这些文件的前提下）。
+Origin function files can be stored in an Internet location that can be accessed via URLs over the HTTP or HTTPS protocols, or on the local filesystem (only in the case that Node.js has permission to read these files).
 
-### 注册 Origin 函数
+### Register an Origin Function
 
-在创建 `Context` 实例时，可以通过 `Generator` 配置向 Dollie 传递一个以 Origin 函数名称为键、以 Origin 函数 URL 的键值对注册 Origin 函数，配置项路径为 `generator.origins`：
+When creating a `Context` instance, you can register an origin function by passing a key-value pair to Dollie with the origin function name as the key and the URL of the origin function via the `Generator` configuration at `generator.origins`:
 
 ```js
 const context = new Context('foo', 'example_origin:bar', {
@@ -206,14 +206,14 @@ const context = new Context('foo', 'example_origin:bar', {
 });
 ```
 
-### 设置参数
+### Setup Parameters
 
-在创建 `Context` 实例时，可以通过 `Generator` 配置向 Dollie 传递一个键值对来设置 Origin 函数的参数，配置项路径为 `generator.origin`：
+When creating a `Context` instance, the parameters of the origin function can be set by passing a key-value pair to Dollie via the `Generator` configuration at `generator.origin`:
 
 ```js
 const context = new Context('foo', 'example_origin:bar', {
     generator: {
-        // ...生成器其他配置
+        // ...other generator configuration
         origin: {
             foo: 'bar',
         },
@@ -221,43 +221,43 @@ const context = new Context('foo', 'example_origin:bar', {
 });
 ```
 
-`{ foo: 'bar' }` 将会被作为第二个形式参数在 Dollie 调用 Origin 函数时传入。
+`{ foo: 'bar' }` will be passed as a second formal parameter when Dollie calls the origin function.
 
-## 处理文件冲突
+## Handling File Conflict
 
-### 为什么会产生冲突
+### Why Conflict Arises
 
-由于 Dollie 支持通过扩展模板对项目代码增量覆盖，当多个扩展模板同时从某一文件的同一行开始增加内容时，Dollie 无法判定增加的内容是否全部需要保留。因此 Dollie 会将这种情况判定为冲突，将所有扩展模板对此处增加的内容叠加起来作为合并区块，并标记这个合并区块为冲突区块标记，然后交由用户决定区块内每一行的保留与否。
+Since Dollie supports incremental overlays of project code via extend templates, when multiple extend templates add content from the same line of a file at the same time, Dollie cannot determine if all the content added needs to be retained. So Dollie will determine this as a conflict, overlay all the additions made by the extend templates as a merge block, mark the merge block as a conflict block marker, and then leave it up to the user to decide whether to keep each line in the block or not.
 
-### 接收 Dollie Core 抛出的冲突
+### Receive Conflicts Thrown by Dollie Core
 
-在实例化 `Context` 时，可以向 `generator.conflictSolver` 传入一个函数，以当前冲突区块作为回调形式参数传递，并返回解决后的合并区块：
+When instantiating a `Context`, a function can be passed to `generator.conflictSolver` that passes the current conflict block as a callback form parameter and returns the resolved merged block:
 
 ```js
 const context = new Context('foo', 'example_origin:bar', {
     generator: {
-        // ...生成器其他配置
+        // ...other generator configuration
         conflictSolver: async function(data) {
             const { block } = data;
             const { values } = block;
-            // 获取冲突双方的每一行内容
+            // get every line of content from both sides of the conflict
             const { former, current } = values;
-            // 将所有需要保留的行都 push 到 `current` 中
+            // push all rows that need to be preserved to `current`
             return block;
         },
     },
 });
 ```
 
-此外，如果这个函数的返回值为 `'ignored'`，则代表放弃处理本次冲突。
+In addition, if the return value of this function is `'ignored'`, it means that the handling of this conflict is abandoned.
 
-> 请注意：
-> - 在增量覆盖时，每遇到一个冲突，Dollie 都会执行一次 `generator.conflictSolver` 函数
-> - 在一个文件中，可能存在不止一处冲突
-> - 如果上述函数返回值为 `null`，Dollie 会再一次抛出同样的冲突信息，直到函数返回值不再是 `null`
+> Attention:
+> - During incremental overlay, Dollie executes the `generator.conflictSolver` function once for each conflict encountered
+> - There may be more than one conflict in a file
+> - If the above function returns a `null` value, Dollie will throw the same conflict message again until the function returns a value that is no longer `null`
 
-### 向用户获取解决方案
+### Get Solutions from Users
 
-上文提到，Dollie 在遇到冲突后，会抛出冲突，通过 `generator.conflictSolver` 可以实现带有冲突区块信息的回调。处理冲突属于用户中断操作，因此需要交由用户代理完成（事实上，上文所述的所有内容都是围绕着用户代理的实现展开的）。
+As mentioned above, Dollie throws a conflict when it encounters one, and a callback with information about the conflicting block can be implemented via `generator.conflictSolver`. Conflict handling is a user-interrupt operation and therefore needs to be left to the user agent (in fact, everything described above revolves around the implementation of the user agent).
 
-在一般情况下，`generator.conflictSolver` 可以承担向用户获取解决方案的责任。最简单的做法是将回调的形式参数中的冲突的每一行都打印在控制台中，由用户决定保留哪几行，并向用户代理输入。用户代理根据用户的输入解析成新的合并区块并返回给 Dollie，从而实现从用户侧获取冲突的解决方案。
+In the general case, `generator.conflictSolver` can take the responsibility of getting the solution from the user. The simplest way to do this is to print each line of the conflict in the callback's formal parameters in the console and let the user decide which lines to keep and enter them to the user agent. The user agent parses the user's input into a new merge block and returns it to Dollie, thereby fetching the solution to the conflict from the user's side.
