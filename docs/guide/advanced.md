@@ -4,46 +4,46 @@ toc: 'menu'
 title: 'Advanced Usages'
 ---
 
-# 进阶用法
+# Advanced Usages
 
-## 编写扩展模板
+## Write an Extend Template
 
-### 主要使用场景
+### General Usage Scenarios
 
-- 主模板需要扩充多个维度的功能（例如：React 主模板可能需要添加 TypeScript、Sass/Less/Stylus 预处理器、React Router、状态管理等功能或模块）
-- 主模板只用于提供基础项目文件，而将其他代表各个模块或功能的文件存放于扩展模板中
+- The main template needs to be expanded with multiple dimensions (e.g. React main template may need to add features or modules such as TypeScript, Sass/Less/Stylus preprocessor, React Router, state management, etc.)
+- The main template is only used to provide the base project files, while other files representing individual modules or functions are stored in the extend template
 
-### 存放位置
+### Storage Location
 
-在模板根目录中，建立一个名为 `extends` 的目录，在这个目录内存放所有扩展模板的目录。Dollie 将扩展模板目录名作为扩展模板的名称，并且大小写敏感。
+In the template root directory, create a directory named `extends` where all extend templates are stored. Dollie uses the extend template directory name as the name of the extend template and is case-sensitive.
 
-例如，一个名为 `foo` 的扩展模板应该存放于模板根目录下的 `extends/foo` 目录中。
+For example, an extend template named `foo` should be stored in the `extends/foo` directory in the root of the template.
 
-### 注册扩展模板配置
+### Register Extend Template Configuration
 
-在模板配置文件中可以为所有扩展模板注册配置，除 `extendTemplates` 外，扩展模板的配置项与主模板配置项并无二致。在模板根目录的配置文件中的 `extendTemplates` 字段内添加以扩展模板名称（即扩展模板目录名）为键、以配置项为值的键值对即可注册扩展模板的配置。
+You can register configurations for all extend templates in the template configuration file, and the configuration items for extend templates are the same as the main template configuration items except for `extendTemplates`. You can register the configuration of an extend template by adding a key-value pair with the extend template name (i.e., extend template directory name) as the key and the configuration item as the value in the `extendTemplates` field in the configuration file of the template root directory.
 
-例如，有一个名为 `foo` 扩展模板在配置文件中应该像下面的代码一样注册配置：
+For example, there is a template named `foo` extend in the configuration file that should register the configuration like the following code:
 
 ```json
 {
     "questions": [
-        // ...主模板问题
+        // ...main template questions
     ],
-    // ...主模板其他配置
+    // ...other main template questions
     "extendTemplates": {
         "foo": {
-            // ...foo 扩展模板的配置
+            // ...foo extend template configuration
         }
     }
 }
 ```
 
-## 识别扩展模板
+## Identify Extend Templates
 
-### 通过输入识别
+### Identify by Inputs
 
-在主模板或扩展模板的 `questions` 字段中，如果某个问题的 `name` 字段为 `$EXTEND$` 且 `type` 字段为 `input`，用户对这个问题的回答内容将会被 Dollie 识别为扩展模板名称。例如：
+If a `question` has a `name` field of `$EXTEND$` and a `type` field of `input` in the questions field of the main template or extend template, the user's answer to this question will be recognized by Dollie as the extend template name. For example:
 
 ```json
 {
@@ -57,11 +57,11 @@ title: 'Advanced Usages'
 }
 ```
 
-例如，如果用户输入 `less`，Dollie 将会识别并将 `less` 作为本次生命周期中所依赖的扩展模板。
+For example, if the user types `less`, Dollie will recognize and use `less` as the extend template to rely on during this lifecycle.
 
-### 通过确认结果识别
+### Identify by Confirmination Result
 
-在主模板或扩展模板的 `questions` 字段中，如果某个问题的 `name` 字段为 `$EXTEND:{name}$` 且 `type` 字段为 `confirm`，当用户选择 `y` 后，Dollie 会将 `{name}` 识别为扩展模板名称，否则 Dollie 不会采取任何识别扩展模板的措施。例如：
+In the `questions` field of the main or extend template, if the `name` field of a question is `$EXTEND:{name}$` and the `type` field is `confirm`, Dollie will recognize `{name}` as the extend template name when the user selects `y`. Otherwise, Dollie will not take any to identify the extend template. Example:
 
 ```json
 {
@@ -75,11 +75,11 @@ title: 'Advanced Usages'
 }
 ```
 
-当用户确认时，Dollie 会将 `typescript` 识别并作为本次生命周期中所依赖的扩展模板，当用户拒绝时，Dollie 不会采取任何行动。
+When the user confirms, Dollie identifies the `typescript` and uses it as an extend template relied on in this lifecycle, and Dollie takes no action when the user rejects it.
 
-### 通过列表/多选识别
+### Identify by List/Multi-selection
 
-在主模板或扩展模板的 `questions` 字段中，如果某个问题的 `name` 字段为 `$EXTEND$` 且 `type` 字段为 `list` 或 `checkbox`，用户所有选中选项中的 `value` 字段都将会被 Dollie 识别并作为本次生命周期所依赖的扩展模板。例如：
+In the `questions` field of the main or extend template, if the `name` field of a question is `$EXTEND$` and the type field is `list` or `checkbox`, the `value` field of all the user's selected options will be recognized by Dollie and used as the extend template on which this lifecycle depends. Example:
 
 ```json
 {
@@ -107,16 +107,16 @@ title: 'Advanced Usages'
 }
 ```
 
-当用户选择 `'MobX'` 时，`mobx` 将会被 Dollie 识别并作为本次生命周期所依赖的扩展模板。
+When the user selects `'MobX'`, `mobx` will be recognized by Dollie and used as the extend template that this lifecycle relies on.
 
-> 请注意：
-> - `$EXTEND$` 在 Dollie 中是**大小写敏感的**
-> - 对于返回值为 `'null'`、空值的问题，Dollie 不会识别为任何扩展模板，因此**请不要将扩展模板命名为 `'null'`**
-> - 当采用列表或多选方式识别扩展模板时，请注意不要混淆 `choices` 中的 `name` 和 `value`
+> Attention:
+> - `$EXTEND$` is case-sensitive in Dollie
+> - For questions with answers of `'null'`, null values, Dollie will not recognize any extend templates, so please **do not name extend templates as `'null'`**
+> - When using list or multiple choice to identify extended templates, be careful not to confuse `name` and `value` in `choices`
 
-## 文件行为配置
+## File Actions Configure
 
-Dollie 在模板配置文件中的 `files` 字段内定义了两个字段：`merge` 和 `delete`。对于上述所有字段，Dollie 都接受一个字符串数组作为每个字段的值，其中，数组元素为 [Glob 风格](https://en.wikipedia.org/wiki/Glob_(programming)) 的正则表达式用于匹配模板文件的相对路径（相对于项目根目录，以下简称“相对路径”）。
+Dollie defines two fields in the `files` field of the template configuration file: `merge` and `delete`. For all of these fields, Dollie accepts an array of strings as the value of each field, where the elements of the array are [Glob-style](https://en.wikipedia.org/wiki/Glob_(programming)) regular expressions used to match the relative path of the template file (relative to the project root directory, hereinafter referred to as "relative path").
 
 在生命周期内，Dollie 会遍历已生成的模板文件，若某个文件的相对路径在数组中匹配到了至少一次，那么 Dollie 将会对这个文件采取对应的策略。
 
@@ -135,7 +135,7 @@ Dollie 约定在增量覆盖时，所有扩展模板中的文件将会按照顺�
 > 请注意：
 > - Dollie 每次运行时，所有模板的上述两项配置中的值都会被叠加。
 
-## 清理函数队列（`cleanups`）
+## `cleanups` Queue
 
 Dollie 允许用户定义一些清理函数，用于在 Dollie 生成最终文件结果之前对已生成的项目目录结构和文件内容进行操作。例如，在模板根目录的 `dollie.js` 中可以编写如下内容：
 
