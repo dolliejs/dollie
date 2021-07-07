@@ -21,10 +21,13 @@ import {
   ContextError,
 } from './errors';
 import {
-  DollieOrigin, loadOrigins,
+  DollieOrigin,
 } from '@dollie/origins';
 import { Volume } from 'memfs';
-import { loadTemplate, readTemplateEntities } from './loader';
+import {
+  loadTemplate as loadTemplateFromOrigin,
+  readTemplateEntities,
+} from './loader';
 import path from 'path';
 import {
   EXTEND_TEMPLATE_LABEL_PREFIX,
@@ -50,10 +53,16 @@ import { GlobMatcher } from './matchers';
 import { createHttpInstance } from './http';
 
 class Generator {
+  // name of template that to be used
   public templateName: string;
+  // selected origin id
   public templateOrigin: string;
+  // virtual file system instance
   protected volume: FileSystem;
+  // template config, read from `dollie.js` or `dollie.json`
   protected templateConfig: DollieTemplateConfig = {};
+  // the table who stores all files
+  // key is relative pathname, value is the diff changes
   protected cacheTable: CacheTable = {};
   protected mergeTable: MergeTable = {};
   protected binaryTable: BinaryTable = {};
@@ -66,6 +75,12 @@ class Generator {
   private matcher: GlobMatcher;
   private messageHandler: MessageHandler;
 
+  /**
+   * Generator constructor
+   * @param {string} projectName name of project that to be generated
+   * @param {string} templateOriginName origin context id, read by generator
+   * @param {DollieGeneratorConfig} config generator configuration
+   */
   public constructor(
     protected projectName: string,
     private templateOriginName: string,
@@ -92,6 +107,7 @@ class Generator {
   public async initialize() {
     this.origins = _.get(this, 'config.origins') || [];
 
+    // parse the origin id and template id
     if (_.isString(this.templateOriginName)) {
       if (!this.templateOriginName.includes(':')) {
         this.templateOrigin = 'github';
@@ -118,6 +134,7 @@ class Generator {
   public async loadTemplate() {
     this.messageHandler(`Start downloading template from ${this.templateOrigin}:${this.templateName}`);
 
+    // match and use the correct origin handler function
     const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
     if (!origin) {
       throw new ContextError(`origin name \`${this.templateOrigin}\` not found`);
@@ -127,6 +144,7 @@ class Generator {
       throw new ContextError(`origin \`${this.templateOrigin}\` has a wrong handler type`);
     }
 
+    // get url and headers from origin handler
     const { url, headers } = await origin.handler(
       this.templateName,
       _.get(this.config, 'origin') || {},
@@ -137,7 +155,8 @@ class Generator {
       throw new ContextError(`origin \`${this.templateOrigin}\` url parsed with errors`);
     }
 
-    const duration = await loadTemplate(url, this.volume, {
+    // download template file to this.volume
+    const duration = await loadTemplateFromOrigin(url, this.volume, {
       headers,
       ...({
         timeout: 90000,
@@ -155,6 +174,10 @@ class Generator {
     return duration;
   }
 
+  /**
+   * get all props from main template and each extend template
+   * @returns {TemplatePropsItem[]}
+   */
   public async queryAllTemplateProps() {
     while (this.pendingTemplateLabels.length !== 0) {
       const currentPendingExtendTemplateLabel = this.pendingTemplateLabels.shift();
@@ -167,11 +190,18 @@ class Generator {
         );
       }
     }
+
+    // get glob file patterns and create matcher
     await this.generateFilePatterns();
     this.matcher = new GlobMatcher(this.filePatterns);
+
     return _.clone(this.templatePropsList);
   }
 
+  /**
+   * copy
+   * @returns {void}
+   */
   public copyTemplateFileToCacheTable() {
     this.messageHandler('Generating template files...');
 
