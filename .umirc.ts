@@ -51,6 +51,8 @@ export default defineConfig({
     '.__dumi-default-menu[data-mode=\'site\'] .__dumi-default-menu-list { margin-top: 50px; }',
     '@media (min-width: 960px) { div[data-show-sidemenu="true"] .__dumi-default-layout-content { padding-left: 10%; padding-right: 10%; } }',
     '@media (min-width: 1680px) { div[data-show-sidemenu="true"] .__dumi-default-layout-content { padding-left: 26%; padding-right: 26%; } }',
+    '.markdown blockquote { border-left-color: #844d28 !important; }',
+    '.markdown *:not(pre) code { color: #844d28 !important; }'
   ],
   favicon: '/public/images/favicon.ico',
   resolve: {

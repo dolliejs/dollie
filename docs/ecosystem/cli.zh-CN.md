@@ -16,7 +16,7 @@ Dollie CLI 是一个基于 Dollie Core API 开发的具有完整功能的用户�
 >
 > Dollie CLI 3.x 需要 [Node.js](http://nodejs.org) v10.x 或更高版本。
 
-使用下列命令安装 Dollie CLI
+使用下列命令安装 Dollie CLI：
 
 ```bash
 npm install @dollie/cli -g
@@ -70,7 +70,7 @@ dollie init github:dolliejs/template-react test
 
 ### 解决文件冲突
 
-正如上文所说的，如果 Dollie 发现有任何一个文件存在冲突的情况，将会由 Dollie 核心组件抛出依次抛出冲突信息，CLI 将会接收这些信息并向用户发送中断以寻求用户的反馈，最终将用户的选择返回给 Dollie 核心组件。
+正如上文所说的，如果 Dollie 发现有任何一个文件存在冲突的情况，将会由 Dollie 核心组件依次抛出冲突信息，CLI 将会接收这些信息并向用户发送中断以寻求用户的反馈，最终将用户的选择返回给 Dollie 核心组件。
 
 我们还是以上面的例子为基础，展示 Dollie CLI 提供解决冲突的方式。我们在回答模板问题时，选择 TypeScript、Less 和 Redux 技术栈，在生成项目代码时，上述选择将会同时向 `package.json` 和 `src/App.tsx` 的同一行之后添加各自的内容，从而导致冲突的产生：
 
@@ -82,10 +82,10 @@ CLI 提供 3 种解决冲突的方式：选择需要保留的冲突组、逐行�
 
 #### 选择需要保留的冲突组
 
-Dollie 会将冲突的行全部放置于 `current` 数组中，并在 CLI 提示时为每一行添加 `[current]` 前缀。Dollie 会在使用这种方式选择需要保留的行时，会向用户提供两种选择：
+Dollie 会将冲突的行全部放置于 `values.current` 数组中，并在 CLI 提示时为每一行添加 `[current]` 前缀。Dollie 会在使用这种方式选择需要保留的行时，会向用户提供两种选择：
 
-- 保留所有行
-- 丢弃所有行
+- 保留所有冲突组
+- 丢弃所有冲突组
 
 ![cli-conflict-select-group.jpg](/public/images/cli-conflict-select-group.jpg)
 
@@ -141,7 +141,7 @@ interface CLIConfig {
 }
 ```
 
-Dollie 只允许用户以 [Lodash `get` 风格](https://lodash.com/docs#set)设置配置项。例如，如果希望修改加载器使用的本地代理的 URL，可以执行下面的命令：
+Dollie 只允许用户以 [Lodash `set` 风格](https://lodash.com/docs#set)设置配置项。例如，如果希望修改加载器使用的本地代理的 URL，可以执行下面的命令：
 
 ```bash
 dollie config set loader.httpProxyUrl http://127.0.0.1:1086
