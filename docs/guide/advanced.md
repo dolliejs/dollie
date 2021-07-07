@@ -126,11 +126,11 @@ For each of the two fields above, the meaning is as follows:
 
 Dollie specifies that during incremental overwriting, all files in the extend template will overwrite the files of the same name in the main template in order. In most cases, however, the creators and users of the template do not want the changes made by existing extend template to the main template's file with the same name to be overwritten by the file with the same name in other extend template - they want to **keep all the changes made by each extend template to the same file**.
 
-When the extension template writes a file to the target directory, if the file name matches one of the regular expressions in the configuration, Dollie will record the Diff result between its content and the initial content of the file, forming a patch table that will be merged with all such incremental tables under the file name and applied to the initial content when the file is finally written.
+When the extend template writes a file to the target directory, if the file name matches one of the regular expressions in the configuration, Dollie will record the Diff result between its content and the initial content of the file, forming a patch table that will be merged with all such incremental tables under the file name and applied to the initial content when the file is finally written.
 
 ### `files.delete`
 
-In the case of incremental overlays, the creator and user of a template sometimes want to delete some of the generated files after an extended template has been generated, for example, if a React project uses an extension template that adds TypeScript support, then the extension template needs to delete the code files written in JavaScript in the directory. This is where `files.delete` comes in handy.
+In the case of incremental overlays, the creator and user of a template sometimes want to delete some of the generated files after an extended template has been generated, for example, if a React project uses an extend template that adds TypeScript support, then the extend template needs to delete the code files written in JavaScript in the directory. This is where `files.delete` comes in handy.
 
 > Attention
 > - Dollie overlays the values in the above two configurations for all templates (including main template and extend templates)  every time

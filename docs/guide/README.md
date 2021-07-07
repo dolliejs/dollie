@@ -29,7 +29,7 @@ Dollie's official [CLI tool](/en-US/ecosystem/cli) `@dollie/cli` is an implement
 
 Since Dollie only allows pulling templates from remote locations, but it's a bit of a hassle to ask the user for a URL every time, Dollie provides an Origin mechanism to help you generate URLs and HTTP request headers with short strings for Dollie to choose the right Origin function and pull the templates.
 
-Dollie has two built-in Origin functions, [GitHub](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/github.ts) and [GitLab](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/gitlab.ts), that can help you pull templates from GitHub and GitLab repositories respectively. After the user provides a template name string, Dollie will select the appropriate Origin function to parse the template name according to [certain rules](/zh-CN/guide/basic#模板名称解析规则), form the URL, and pull the template from Origin.
+Dollie has two built-in Origin functions, [GitHub](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/github.ts) and [GitLab](https://github.com/dolliejs/dollie/blob/master/packages/@dollie/origins/src/handlers/gitlab.ts), that can help you pull templates from GitHub and GitLab repositories respectively. After the user provides a template name string, Dollie will select the appropriate Origin function to parse the template name according to [certain rules](/guide/basic#template-name-resolution-rules), form the URL, and pull the template from Origin.
 
 ### Lifecycle
 

@@ -145,7 +145,7 @@ If the user selects the second option, the current props for the scaffold will b
 
 Dollie only allows templates to be pulled from the Internet and currently only supports templates of the ZIP format. Therefore, once you have written your template, please compress it in a ZIP file and upload it to the Internet, and make sure you provide Dollie with an accessible URL.
 
-Dollie has built-in support for hosting templates using GitHub and GitLab, and provides a [built-in Origin function](/zh-CN/api#内置-origins) for each. You can submit your templates directly to GitHub or GitLab, Dollie's GitHub and GitLab Origin functions support making template repositories private (with separate access tokens), defining self-hosted service domains for GitLab, and more. So, **uploading and hosting templates via GitHub or GitLab will work for most scenarios**, but Dollie still allows you to [register custom Origin functions](/zh-CN/guide/advanced#%E7%BC%96%E5%86%99-origin-%E5%87%BD%E6%95%B0).
+Dollie has built-in support for hosting templates using GitHub and GitLab, and provides a [built-in Origin function](/api#built-in-origin-functions) for each. You can submit your templates directly to GitHub or GitLab, Dollie's GitHub and GitLab Origin functions support making template repositories private (with separate access tokens), defining self-hosted service domains for GitLab, and more. So, **uploading and hosting templates via GitHub or GitLab will work for most scenarios**, but Dollie still allows you to [register custom Origin functions](/guide/advanced#register-an-origin-function).
 
 ## Use Templates
 

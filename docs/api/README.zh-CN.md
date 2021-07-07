@@ -193,7 +193,7 @@ interface ConflictSolverData extends ConflictBlockMetadata {
 
 用户处理冲突后返回的冲突解决方案。
 
-- `MergeBlock`：对 `ConflictSolverData` 中的 `block` 解决完冲突。
+- `MergeBlock`：对 `ConflictSolverData` 中的 `block` 解决完冲突后的结果。
 
 ```typescript
 type ConflictSolveResult = MergeBlock | 'ignored' | null;
