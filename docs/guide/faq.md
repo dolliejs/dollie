@@ -4,10 +4,10 @@ toc: 'menu'
 title: 'FAQ'
 ---
 
-# 常见问题
+# FAQ
 
-## 通过调用 `Context` 来实现生成项目代码仍然觉得很麻烦，有没有更简便的办法？
+## I still find it troublesome to generate project code by instantiating `Context`, is there an easier way?
 
-## 可以将 `@dollie/core` 用于编写 Web 端项目代码生成系统吗？
+## Can `@dollie/core` be used to write a web-side project code generation system?
 
-## 如果我不希望我的模板公开，有什么方法可以做到吗？
+## If I don't want my template to be public, is there any way to do that?
