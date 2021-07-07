@@ -157,7 +157,7 @@ Dollie 内置对使用 GitHub 和 GitLab 托管模板的支持，并为其分别
 - `Generator` 调用 Origin 函数，将字符串传递给 Origin 函数
 - Origin 函数根据输入的字符串和内部逻辑生成相应的 URL 和 HTTP 请求头，返回给 `Generator`
 
-可被 Dollie 理解的模板上下文 ID 的格式为：`{origin}:{id}`，`origin` 用于帮助 `Generator` 选择 Origin 函数。该字段必须完全匹配[已注册的 Origin 函数名称](/zh-CN/guide/advanced#添加自定义-origin-函数)，并且是大小写敏感的。若 `Generator` 无法匹配到 Origin 函数，将会抛出错误并终止后续流程；如果用户没有传递 `origin` 给 `Generator`，`Generator` 将会使用内置的 Origin 函数处理。
+可被 Dollie 理解的模板上下文 ID 的格式为：`{origin}:{id}`，`origin` 用于帮助 `Generator` 选择 Origin 函数。该字段必须完全匹配[已注册的 Origin 函数名称](/zh-CN/guide/advanced#添加自定义-origin-函数)，并且是大小写敏感的。若 `Generator` 无法匹配到 Origin 函数，将会抛出错误并终止后续流程；如果用户没有传递上下文 ID 给 `Generator`，`Generator` 将会使用内置的 Origin 函数处理。
 
 当 `Generator` 匹配到 Origin 函数时，将会调用这个函数，并将 `id` 作为形式参数传递给函数。此外，`Generator` 会接收 Origin 函数的执行结果，即模板 ZIP 文件的 URL 以及 HTTP 请求头，并继续后续流程。
 
@@ -191,7 +191,7 @@ const context = new Context('foo', 'dolliejs/template-react', {
 
 ### 生成项目代码
 
-上下文创建完成后，创建一个异步函数，在函数中调用 `Context.prototype.generate` 方法：
+上下文创建完成后，创建一个异步函数，在函数中调用 [`Context.prototype.generate`](/zh-CN/api#contextprototypegenerate-dolliegeneratorresult) 方法：
 
 ```javascript
 async function run() {
@@ -208,4 +208,4 @@ run();
 
 基于前文中提到的使用流程，根据大部分用户的需求，我们基于 Dollie 核心组件开发了一套开箱即用的命令行工具：Dollie CLI（包名：`@dollie/cli`）并纳入了 Dollie 的生态系统中，它能实现上述一切功能，并最终将你通过 Dollie 生成的项目代码目录结构和文件内容写入你的文件系统中。
 
-你可以访问[这篇文档](/zh-CN/ecosystem#cli)进一步了解 Dollie CLI 的使用方法。
+你可以访问[这篇文档](/zh-CN/ecosystem/cli)进一步了解 Dollie CLI 的使用方法。
