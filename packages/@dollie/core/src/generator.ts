@@ -65,13 +65,14 @@ class Generator {
   // key is relative pathname, value is the diff changes
   protected cacheTable: CacheTable = {};
   protected mergeTable: MergeTable = {};
+  // store binary pathname in virtual file system
   protected binaryTable: BinaryTable = {};
-  protected conflicts: ConflictItem[] = [];
+  // origins list
   protected origins: DollieOrigin[] = [];
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];
-  private filePatterns: Record<string, string[]> = {};
+  // glob pathname matcher
   private matcher: GlobMatcher;
   private messageHandler: MessageHandler;
 
@@ -192,14 +193,16 @@ class Generator {
     }
 
     // get glob file patterns and create matcher
-    await this.generateFilePatterns();
-    this.matcher = new GlobMatcher(this.filePatterns);
+    const patterns = await this.generateFilePatterns();
+    this.matcher = new GlobMatcher(patterns);
 
     return _.clone(this.templatePropsList);
   }
 
   /**
-   * copy
+   * traverse all files, and get the contents from them
+   * get the diff changes from the initial content of current file
+   * and then push diff changes to cacheTable
    * @returns {void}
    */
   public copyTemplateFileToCacheTable() {
@@ -215,20 +218,30 @@ class Generator {
 
     for (const templateId of templateIds) {
       const templatePropsItem = this.templatePropsList.find((item) => item.label === templateId);
+
       if (!templatePropsItem) {
         continue;
       }
+
       const { label, props } = templatePropsItem;
       let templateStartPathname: string;
+
+      /**
+       * template label format:
+       * main template: `main`
+       * extend template: `extend:{name}`
+       */
       if (label === 'main') {
         templateStartPathname = this.mainTemplatePathname();
       } else if (label.startsWith(EXTEND_TEMPLATE_LABEL_PREFIX)) {
+        // slice extend template label to get the id of current extend template
         const extendTemplateId = label.slice(EXTEND_TEMPLATE_LABEL_PREFIX.length);
         templateStartPathname = this.extendTemplatePathname(extendTemplateId);
       }
 
       if (!templateStartPathname) { continue; }
 
+      // traverse template structure and get all entities
       const entities = readTemplateEntities(this.volume, templateStartPathname);
 
       for (const entity of entities) {
@@ -249,6 +262,7 @@ class Generator {
           const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
           let currentFileContent: string;
 
+          // detect if current file is a template file
           if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
             currentFileContent = ejs.render(fileRawContent, _.merge(mainTemplateProps, props));
           } else {
@@ -266,7 +280,9 @@ class Generator {
             || this.cacheTable[currentFileRelativePathname].length === 0
             || !_.isArray(this.cacheTable[currentFileRelativePathname])
           ) {
+            // if cacheTable does not have a record for current file
             this.cacheTable[currentFileRelativePathname] = [];
+            // set initial diff changes
             currentFileDiffChanges = diff(currentFileContent);
           } else {
             const originalFileDiffChanges = this.cacheTable[currentFileRelativePathname][0];
@@ -301,10 +317,13 @@ class Generator {
         } else {
           const originalDiffChanges = diffs[0];
           const forwardDiffChangesGroup = diffs.slice(1);
+          // merge diff changes if current file is written more than once
           const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
           this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
         }
       } else {
+        // if current file does not match patterns in `merge`
+        // then get the content from the last diff changes
         this.mergeTable[entityPathname] = parseDiffToMergeBlocks(_.last(diffs));
       }
     }
@@ -452,13 +471,17 @@ class Generator {
   }
 
   private async generateFilePatterns() {
+    const patterns = {};
+
     for (const type of ['merge', 'delete']) {
-      this.filePatterns[type] = await getFileConfigGlobs(
+      patterns[type] = await getFileConfigGlobs(
         this.templateConfig,
         this.targetedExtendTemplateIds,
         type,
       );
     }
+
+    return patterns;
   }
 
   private getConflictedFileDataList() {
