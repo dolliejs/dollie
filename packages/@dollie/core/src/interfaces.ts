@@ -62,7 +62,7 @@ export interface TemplateEntity {
 export type DeleteConfigHandler = (
   templateConfig: DollieTemplateConfig,
   targets: string[],
-) => string | string[];
+) => Promise<string | string[]>;
 
 export interface DollieTemplateFileConfig {
   merge?: string[];

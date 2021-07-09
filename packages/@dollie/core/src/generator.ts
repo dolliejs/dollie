@@ -329,6 +329,10 @@ class Generator {
     }
   }
 
+  /**
+   * check for conflicted blocks and throw them to user to get solved blocks
+   * @returns {void}
+   */
   public async resolveConflicts() {
     const { conflictsSolver } = this.config;
 
@@ -358,6 +362,13 @@ class Generator {
         index: currentIndex,
         content: parseMergeBlocksToText(this.mergeTable[pathname]),
       });
+
+      /**
+       * deal with the return value from `conflictsSolver`:
+       * - null: user skips current block, throw again
+       * - 'ignored': user ignores current block, continue
+       * - MergeBlock: user solves current block, overwrite `mergeTable`
+       */
       if (_.isNull(result)) {
         remainedConflictedFileDataList.unshift({ pathname, index });
       } else if (result === 'ignored') {

@@ -1,13 +1,23 @@
 import { diffLines } from 'diff';
 import _ from 'lodash';
-import { DiffChange, MergeBlock, PatchTable } from './interfaces';
+import {
+  DiffChange,
+  MergeBlock,
+  PatchTable,
+} from './interfaces';
 
+/**
+ * diff two files line by line, and return the changes
+ * @param {string} originalContent
+ * @param {string} currentContent
+ * @returns {DiffChange[]}
+ */
 const diff = (originalContent: string, currentContent?: string): DiffChange[] => {
   const changes = diffLines(originalContent, currentContent || originalContent);
   const result: DiffChange[] = [];
   let lineNumber = 0;
 
-  const splitChanges = changes.reduce((result, currentItem) => {
+  const splitChanges: DiffChange[] = changes.reduce((result, currentItem) => {
     const lines = (currentItem.value.endsWith('\n')
       ? currentItem.value.slice(0, -1)
       : currentItem.value
@@ -17,16 +27,23 @@ const diff = (originalContent: string, currentContent?: string): DiffChange[] =>
 
   while (splitChanges.length !== 0) {
     const currentSplitChange = splitChanges.shift();
-    if (!currentSplitChange.added) {
-      result.push({ ...currentSplitChange, lineNumber: lineNumber++ });
-    } else {
-      result.push({ ...currentSplitChange, lineNumber: lineNumber - 1 });
-    }
+    result.push({
+      ...currentSplitChange,
+      lineNumber: !currentSplitChange.added
+        ? lineNumber++
+        : lineNumber - 1,
+    });
   }
 
   return result;
 };
 
+/**
+ * merge two diff changes to one and check for conflicts
+ * @param {DiffChange[]} originalChanges
+ * @param {DiffChange[][]} diffList
+ * @returns {DiffChange[]}
+ */
 const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffChange[] => {
   if (!originalChanges) {
     return [];
@@ -39,6 +56,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
   const originalDiff = Array.from(originalChanges);
   const patchTable: PatchTable = {};
 
+  // traverse diffList and put all lines to `patchTable`
   for (const currentDiff of diffList) {
     for (const change of currentDiff) {
       if (change.added) {
@@ -50,6 +68,8 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
         }
         patchTable[change.lineNumber].changes.push(change);
       } else {
+        // if current line is removed, then ADD THE REMOVE TAG
+        // to the same line in `originalDiff`
         if (change.removed) {
           originalDiff.splice(change.lineNumber, 1, change);
         }
@@ -61,12 +81,16 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
       .map((change) => change.lineNumber);
 
     for (const matchedLineNumber of _.uniq(addedChangeLineNumbers)) {
+      // every time add a line to a same line in original content
+      // current lineNumber will increase
       patchTable[matchedLineNumber].modifyLength += 1;
     }
   }
 
   for (const patchIndex of Object.keys(patchTable)) {
     const currentPatchItem = patchTable[patchIndex];
+    // if the times of adding lines in current line more than one
+    // it should be marked as `conflict`
     if (currentPatchItem.modifyLength > 1) {
       currentPatchItem.changes = currentPatchItem.changes.map((change) => ({
         ...change,
@@ -77,6 +101,8 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
   }
 
   const blocks: DiffChange[][] = [];
+
+  // reduce all lines
   const patches = Object.keys(patchTable).map(
     (patchIndex) => patchTable[patchIndex],
   );
@@ -87,6 +113,10 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
 
   lineNumbers.unshift(-1);
 
+  /**
+   * this step will split all rows into alternating
+   * "original" - "patch" - "original" arrays
+   */
   for (const [index, lineNumber] of lineNumbers.entries()) {
     const nextLineNumber = lineNumbers[index + 1];
     if (nextLineNumber === undefined) {
@@ -96,6 +126,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
     }
   }
 
+  // reduce the blocks and get the merged diff changes
   return blocks.reduce((currentResult, currentBlock) => {
     const currentPatchItem = patches.shift();
 
