@@ -53,7 +53,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
     return originalChanges;
   }
 
-  const originalDiff = Array.from(originalChanges);
+  let originalDiff = Array.from(originalChanges);
   const patchTable: PatchTable = {};
 
   // traverse diffList and put all lines to `patchTable`
@@ -71,7 +71,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
         // if current line is removed, then ADD THE REMOVE TAG
         // to the same line in `originalDiff`
         if (change.removed) {
-          originalDiff.splice(change.lineNumber, 1, change);
+          originalDiff = _.set(originalDiff, [change.lineNumber, 'removed'], true);
         }
       }
     }
