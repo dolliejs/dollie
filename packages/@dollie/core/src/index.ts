@@ -1,27 +1,27 @@
 import Context from './context';
 import {
-  parseDiffToMergeBlocks,
-  parseFileTextToMergeBlocks,
-  parseMergeBlocksToText,
+    parseDiffToMergeBlocks,
+    parseFileTextToMergeBlocks,
+    parseMergeBlocksToText,
 } from './diff';
 
 export {
-  Context,
-  parseDiffToMergeBlocks,
-  parseFileTextToMergeBlocks,
-  parseMergeBlocksToText,
+    Context,
+    parseDiffToMergeBlocks,
+    parseFileTextToMergeBlocks,
+    parseMergeBlocksToText,
 };
 
 export {
-  DollieConfig,
-  ConflictSolveResult,
-  MergeBlock,
-  ConflictSolverData,
+    DollieConfig,
+    ConflictSolveResult,
+    MergeBlock,
+    ConflictSolverData,
 } from './interfaces';
 
 export default {
-  Context,
-  parseDiffToMergeBlocks,
-  parseFileTextToMergeBlocks,
-  parseMergeBlocksToText,
+    Context,
+    parseDiffToMergeBlocks,
+    parseFileTextToMergeBlocks,
+    parseMergeBlocksToText,
 };

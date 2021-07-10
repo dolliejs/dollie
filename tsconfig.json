@@ -1,11 +1,16 @@
 {
-  "files": [],
-  "compilerOptions": {
-    "allowJs": true
-  },
-  "references": [
-    { "path": "packages/@dollie/cli" },
-    { "path": "packages/@dollie/core" },
-    { "path": "packages/@dollie/origins" }
-  ]
+    "files": [],
+    "compilerOptions": {
+        "allowJs": true
+    },
+    "references": [{
+            "path": "packages/@dollie/cli"
+        },
+        {
+            "path": "packages/@dollie/core"
+        },
+        {
+            "path": "packages/@dollie/origins"
+        }
+    ]
 }

@@ -3,7 +3,7 @@ import init from './init';
 import origin from './origin';
 
 export default {
-  config,
-  init,
-  origin,
+    config,
+    init,
+    origin,
 };

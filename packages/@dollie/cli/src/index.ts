@@ -10,8 +10,8 @@ initializeConfig();
 const config = readConfig();
 
 const packageJsonContent =
-  fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf-8')
-  || '{}';
+    fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf-8')
+    || '{}';
 const packageJson = JSON.parse(packageJsonContent);
 
 const program = new commander.Command();
@@ -19,10 +19,10 @@ const program = new commander.Command();
 program.version(packageJson.version || 'unknown');
 
 for (const commandKey of Object.keys(commands)) {
-  const commandGenerator = commands[commandKey];
-  if (_.isFunction(commandGenerator)) {
-    program.addCommand(commandGenerator(config));
-  }
+    const commandGenerator = commands[commandKey];
+    if (_.isFunction(commandGenerator)) {
+        program.addCommand(commandGenerator(config));
+    }
 }
 
 program.parse(process.argv);
