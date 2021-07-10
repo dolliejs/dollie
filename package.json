@@ -1,31 +1,31 @@
 {
-  "private": true,
-  "scripts": {
-    "watch:cli": "cd packages/@dollie/cli && npm run build:watch",
-    "watch:core": "cd packages/@dollie/core && npm run build:watch",
-    "watch:origins": "cd packages/@dollie/origins && npm run build:watch",
-    "watch": "concurrently \"npm:watch:*\"",
-    "docs:start": "dumi dev",
-    "docs:build": "dumi build",
-    "docs:deploy": "node scripts/docs.js",
-    "checksum": "node scripts/check.js",
-    "publish": "node scripts/publish.js"
-  },
-  "devDependencies": {
-    "@types/jest": "^26.0.23",
-    "@types/node": "^15.12.2",
-    "@typescript-eslint/eslint-plugin": "^4.27.0",
-    "@typescript-eslint/parser": "^4.27.0",
-    "aliyun-oss-deploy": "^0.1.5",
-    "antd": "^4.16.6",
-    "babel-eslint": "^10.1.0",
-    "concurrently": "^6.2.0",
-    "dumi": "^1.1.22",
-    "eslint": "^7.28.0",
-    "eslint-config-alloy": "^4.1.0",
-    "jest": "^27.0.4",
-    "lerna": "^4.0.0",
-    "md5-file": "^5.0.0",
-    "typescript": "^3.7.7"
-  }
+    "private": true,
+    "scripts": {
+        "watch:cli": "cd packages/@dollie/cli && npm run build:watch",
+        "watch:core": "cd packages/@dollie/core && npm run build:watch",
+        "watch:origins": "cd packages/@dollie/origins && npm run build:watch",
+        "watch": "concurrently \"npm:watch:*\"",
+        "docs:start": "dumi dev",
+        "docs:build": "dumi build",
+        "docs:deploy": "node scripts/docs.js",
+        "checksum": "node scripts/check.js",
+        "publish": "node scripts/publish.js"
+    },
+    "devDependencies": {
+        "@types/jest": "^26.0.23",
+        "@types/node": "^15.12.2",
+        "@typescript-eslint/eslint-plugin": "^4.27.0",
+        "@typescript-eslint/parser": "^4.27.0",
+        "aliyun-oss-deploy": "^0.1.5",
+        "antd": "^4.16.6",
+        "babel-eslint": "^10.1.0",
+        "concurrently": "^6.2.0",
+        "dumi": "^1.1.22",
+        "eslint": "^7.28.0",
+        "eslint-config-alloy": "^4.1.0",
+        "jest": "^27.0.4",
+        "lerna": "^4.0.0",
+        "md5-file": "^5.0.0",
+        "typescript": "^3.7.7"
+    }
 }

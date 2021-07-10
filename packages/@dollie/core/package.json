@@ -1,57 +1,57 @@
 {
-  "name": "@dollie/core",
-  "version": "3.0.0",
-  "description": "Core of Dollie",
-  "author": "lenconda <i@lenconda.top>",
-  "homepage": "https://github.com/lenconda/dollie#readme",
-  "license": "MIT",
-  "main": "lib/index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lenconda/dollie.git"
-  },
-  "scripts": {
-    "build": "rimraf ./lib && tsc",
-    "build:watch": "tsc --watch",
-    "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "typings": "lib/index.d.ts",
-  "bugs": {
-    "url": "https://github.com/lenconda/dollie/issues"
-  },
-  "files": [
-    "lib",
-    "package.json",
-    "README.md",
-    "LICENSE"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@dollie/origins": "^3.0.0",
-    "@types/ejs": "^3.0.6",
-    "decompress": "^4.2.1",
-    "diff": "^5.0.0",
-    "ejs": "^3.1.6",
-    "got": "^11.8.2",
-    "inquirer": "^8.1.1",
-    "isbinaryfile": "^4.0.8",
-    "lodash": "^4.17.21",
-    "memfs": "^3.2.2",
-    "minimatch": "^3.0.4",
-    "require-from-string": "^2.0.2",
-    "tunnel": "^0.0.6"
-  },
-  "devDependencies": {
-    "@types/diff": "^5.0.0",
-    "@types/fs-extra": "^9.0.11",
-    "@types/inquirer": "^7.3.1",
-    "@types/lodash": "^4.14.170",
-    "@types/minimatch": "^3.0.4",
-    "@types/node": "^15.12.2",
-    "@types/require-from-string": "^1.2.0",
-    "fs-extra": "^10.0.0",
-    "rimraf": "^3.0.2"
-  }
+    "name": "@dollie/core",
+    "version": "3.0.0",
+    "description": "Core of Dollie",
+    "author": "lenconda <i@lenconda.top>",
+    "homepage": "https://github.com/lenconda/dollie#readme",
+    "license": "MIT",
+    "main": "lib/index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/lenconda/dollie.git"
+    },
+    "scripts": {
+        "build": "rimraf ./lib && tsc",
+        "build:watch": "tsc --watch",
+        "test": "echo \"Error: run tests from root\" && exit 1"
+    },
+    "typings": "lib/index.d.ts",
+    "bugs": {
+        "url": "https://github.com/lenconda/dollie/issues"
+    },
+    "files": [
+        "lib",
+        "package.json",
+        "README.md",
+        "LICENSE"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "@dollie/origins": "^3.0.0",
+        "@types/ejs": "^3.0.6",
+        "decompress": "^4.2.1",
+        "diff": "^5.0.0",
+        "ejs": "^3.1.6",
+        "got": "^11.8.2",
+        "inquirer": "^8.1.1",
+        "isbinaryfile": "^4.0.8",
+        "lodash": "^4.17.21",
+        "memfs": "^3.2.2",
+        "minimatch": "^3.0.4",
+        "require-from-string": "^2.0.2",
+        "tunnel": "^0.0.6"
+    },
+    "devDependencies": {
+        "@types/diff": "^5.0.0",
+        "@types/fs-extra": "^9.0.11",
+        "@types/inquirer": "^7.3.1",
+        "@types/lodash": "^4.14.170",
+        "@types/minimatch": "^3.0.4",
+        "@types/node": "^15.12.2",
+        "@types/require-from-string": "^1.2.0",
+        "fs-extra": "^10.0.0",
+        "rimraf": "^3.0.2"
+    }
 }
