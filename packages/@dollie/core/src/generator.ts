@@ -2,7 +2,6 @@ import {
   BinaryTable,
   CacheTable,
   ConflictBlockMetadata,
-  ConflictItem,
   DiffChange,
   DollieGeneratorConfig,
   DollieExtendTemplateConfig,
@@ -114,7 +113,10 @@ class Generator {
         this.templateOrigin = 'github';
         this.templateName = this.templateOriginName;
       } else {
-        [this.templateOrigin = 'github', this.templateName] = this.templateOriginName.split(':');
+        [
+          this.templateOrigin = 'github',
+          this.templateName,
+        ] = this.templateOriginName.split(':');
       }
     }
 
