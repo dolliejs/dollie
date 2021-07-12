@@ -15,7 +15,7 @@ nav:
 
 Dollie (IPA: *[dɒli]*), which was inspired by the world's first cloned sheep *Dolly* (pronounce the same as *Dollie*).
 
-Dollie is a suite of engineering project efficiency tools designed to reduce the time and development costs of writing and maintaining templates to improve the efficiency of project start-ups and the reusability of engineering code. dollie separates generator logic from templates, thereby significantly reducing costs in all areas.
+Dollie is a suite of engineering project efficiency tools designed to reduce the time and development costs of writing and maintaining templates to improve the efficiency of project start-ups and the reusability of engineering code. Dollie separates generator logic from templates, thereby significantly reducing costs in all areas.
 
 ### How Dollie Works
 

@@ -397,3 +397,39 @@ type DollieOriginHeaders = Record<string, any>;
 
 - [`DollieOrigin`](/zh-CN/api#dollieorigin)
 - [`DollieOriginMap`](/zh-CN/api#dollieoriginmap)
+
+## 模板配置
+
+```typescript
+interface DollieTemplateConfig {
+    // 主模板问题
+    questions?: DollieQuestion[];
+    // 主模板文件行为配置
+    files?: DollieTemplateFileConfig;
+    // 主模板 cleanup 函数
+    cleanups?: DollieTemplateCleanUpFunction[];
+    // 扩展模板配置
+    extendTemplates?: DollieExtendTemplateConfig;
+}
+```
+
+依赖类型：
+
+```typescript
+// 扩展模板配置
+type DollieExtendTemplateConfig = Record<string, Omit<DollieTemplateConfig, 'extendTemplates'>>;
+// cleanup 函数
+type DollieTemplateCleanUpFunction = (data: DollieTemplateCleanupData) => MergeTable;
+// Dollie 文件行为策略函数
+type DeleteConfigHandler = (
+    // 模板配置内容
+    templateConfig: DollieTemplateConfig,
+    // 已命中的扩展模板列表
+    targets: string[],
+) => Promise<string | string[]>;
+
+interface DollieTemplateFileConfig {
+    merge?: string[];
+    delete?: (string | DeleteConfigHandler)[];
+}
+```

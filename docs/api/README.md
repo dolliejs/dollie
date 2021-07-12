@@ -397,3 +397,40 @@ Depended types:
 
 - [`DollieOrigin`](/api#dollieorigin)
 - [`DollieOriginMap`](/api#dollieoriginmap)
+
+## Template Configurations
+
+```typescript
+interface DollieTemplateConfig {
+    // main template questions
+    questions?: DollieQuestion[];
+    // main template file behavior configuration
+    files?: DollieTemplateFileConfig;
+    // main template cleanup functions
+    cleanups?: DollieTemplateCleanUpFunction[];
+    // extend template configurations
+    extendTemplates?: DollieExtendTemplateConfig;
+}
+```
+
+Depended types:
+
+```typescript
+// extend template configuration
+type DollieExtendTemplateConfig = Record<string, Omit<DollieTemplateConfig, 'extendTemplates'>>;
+// cleanup functions
+type DollieTemplateCleanUpFunction = (data: DollieTemplateCleanupData) => MergeTable;
+// Dollie file behavior handler function
+type DeleteConfigHandler = (
+    // template configuration content
+    templateConfig: DollieTemplateConfig,
+    // list of hit extension templates
+    targets: string[],
+) => Promise<string | string[]>;
+
+interface DollieTemplateFileConfig {
+    merge?: string[];
+    delete?: (string | DeleteConfigHandler)[];
+}
+```
+
