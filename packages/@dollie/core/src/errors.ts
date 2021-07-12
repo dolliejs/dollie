@@ -25,11 +25,11 @@ class HTTPTimeoutError extends Error {
 }
 
 class DollieError extends Error {
-  public code: string;
+    public code: string;
 
-  public constructor(message: string) {
-      super(message);
-  }
+    public constructor(message: string) {
+        super(message);
+    }
 }
 
 export {
