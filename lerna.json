@@ -1,6 +1,6 @@
 {
-    "packages": [
-        "packages/@dollie/*"
-    ],
-    "version": "3.0.1"
+  "packages": [
+    "packages/@dollie/*"
+  ],
+  "version": "3.0.1"
 }
