@@ -2,19 +2,19 @@ import githubOrigin from './handlers/github';
 import gitlabOrigin from './handlers/gitlab';
 
 export {
-    githubOrigin,
-    gitlabOrigin,
+  githubOrigin,
+  gitlabOrigin,
 };
 
 export {
-    DollieOriginConfig,
-    DollieOriginHeaders,
-    DollieOriginInfo,
-    DollieOriginHandler,
-    DollieOrigin,
-    DollieOriginMap,
+  DollieOriginConfig,
+  DollieOriginHeaders,
+  DollieOriginInfo,
+  DollieOriginHandler,
+  DollieOrigin,
+  DollieOriginMap,
 } from './interfaces';
 
 export {
-    loadOrigins,
+  loadOrigins,
 } from './loader';
