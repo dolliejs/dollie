@@ -11,42 +11,42 @@ export default (async (id, config = {}, request, deps) => {
 
   let cache = false;
 
-  let [repository, checkout = ''] = id.split('@');
+  const [repository, checkout = ''] = id.split('@');
 
   if (!repository) {
     return null;
   }
 
-  if (!checkout) {
-    try {
-      let branchRequestBody = (await request(
+  let sha = '';
+
+  try {
+    let branchRequestBody = (await request(
+      'https://api.github.com/repos/' +
+      repository +
+      `/branches/${checkout || 'master'}`,
+    )).body;
+
+    sha = _.get(JSON.parse(branchRequestBody), 'commit.sha') || '';
+  } catch (e) {
+    if (!sha || sha.length === 0) {
+      const commitsRequestBody = (await request(
         'https://api.github.com/repos/' +
         repository +
-        '/branches/master',
+        '/commits',
       )).body;
 
-      if (!branchRequestBody) {
-        const commitsRequestBody = (await request(
-          'https://api.github.com/repos/' +
-          repository +
-          '/commits',
-        )).body;
+      if (_.isString(commitsRequestBody)) {
+        const commits = JSON.parse(commitsRequestBody);
 
-        if (_.isString(commitsRequestBody)) {
-          const commits = JSON.parse(commitsRequestBody);
-
-          if (_.isArray(commits)) {
-            checkout = _.get(_.first(commits), 'sha') || '';
-          }
+        if (_.isArray(commits)) {
+          sha = _.get(_.first(commits), 'sha') || '';
         }
-      } else {
-        checkout = _.get(JSON.parse(branchRequestBody), 'commit.sha') || '';
       }
+    }
 
-      if (checkout.length > 0) {
-        cache = true;
-      }
-    } catch {}
+    if (sha.length > 0) {
+      cache = true;
+    }
   }
 
   const token = config.token || '';
@@ -55,7 +55,7 @@ export default (async (id, config = {}, request, deps) => {
     url: 'https://api.github.com/repos/' +
       repository +
       '/zipball' +
-      (checkout ? `/${checkout}` : ''),
+      (sha ? `/${sha}` : ''),
     headers: token
       ? {
         'Authorization': `token ${token}`,
