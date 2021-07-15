@@ -14,7 +14,7 @@ import {
   TemplatePropsItem,
   MessageHandler,
 } from './interfaces';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import {
   InvalidInputError,
   ContextError,
@@ -60,6 +60,7 @@ import {
 import {
   createHttpInstance,
 } from './http';
+import fs from 'fs';
 
 class Generator {
   // name of template that to be used
@@ -162,11 +163,17 @@ class Generator {
       this.templateName,
       _.get(this.config, 'origin') || {},
       createHttpInstance(_.get(this.config, 'loader') || {}),
+      {
+        fs,
+        lodash: _,
+      },
     );
 
     if (!_.isString(url) || !url) {
       throw new ContextError(`origin \`${this.templateOrigin}\` url parsed with errors`);
     }
+
+    this.messageHandler(`Template URL parsed: ${url}`);
 
     // download template file to this.volume
     const duration = await loadTemplateFromOrigin(url, this.volume, {
