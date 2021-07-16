@@ -162,6 +162,4 @@ export interface DollieConfig {
   onStatusChange?: StatusChangeHandler;
   onError?: ErrorHandler;
   onMessage?: MessageHandler;
-  setCache?: SetCacheHandler;
-  getCache?: GetCacheHandler;
 }

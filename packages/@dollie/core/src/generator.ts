@@ -183,6 +183,7 @@ class Generator {
 
     const {
       getCache,
+      setCache = _.noop,
     } = this.config;
 
     if (_.isFunction(getCache)) {
@@ -201,9 +202,11 @@ class Generator {
       });
     }
 
-    if (!data || !_.isBuffer) {
+    if (!data || !_.isBuffer(data)) {
       throw new DollieError('No template file found, exiting...');
     }
+
+    setCache(url, data);
 
     const endTimestamp = Date.now();
 
@@ -271,16 +274,22 @@ class Generator {
   public copyTemplateFileToCacheTable() {
     this.messageHandler('Generating template files...');
 
-    const mainTemplateProps = this.templatePropsList.find((item) => item.label === 'main') || {};
+    const mainTemplateProps =
+      this.templatePropsList.find((item) => item.label === 'main') ||
+      {};
 
     if (!mainTemplateProps) {
       return;
     }
 
-    const templateIds = ['main'].concat(this.targetedExtendTemplateIds.map((id) => `extend:${id}`));
+    const templateIds = ['main'].concat(
+      this.targetedExtendTemplateIds.map((id) => `extend:${id}`),
+    );
 
     for (const templateId of templateIds) {
-      const templatePropsItem = this.templatePropsList.find((item) => item.label === templateId);
+      const templatePropsItem = this.templatePropsList.find(
+        (item) => item.label === templateId,
+      );
 
       if (!templatePropsItem) {
         continue;
