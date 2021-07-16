@@ -18,6 +18,7 @@ import * as _ from 'lodash';
 import {
   InvalidInputError,
   ContextError,
+  DollieError,
 } from './errors';
 import {
   DollieOrigin,
@@ -180,13 +181,29 @@ class Generator {
 
     let data: Buffer;
 
-    data = await loadRemoteTemplate(url, {
-      headers,
-      ...({
-        timeout: 90000,
-      }),
-      ...this.config.loader,
-    });
+    const {
+      getCache,
+    } = this.config;
+
+    if (_.isFunction(getCache)) {
+      data = await getCache(url);
+    }
+
+    if (_.isBuffer(data)) {
+      this.messageHandler('hit cache for current template');
+    } else {
+      data = await loadRemoteTemplate(url, {
+        headers,
+        ...({
+          timeout: 90000,
+        }),
+        ...this.config.loader,
+      });
+    }
+
+    if (!data || !_.isBuffer) {
+      throw new DollieError('No template file found, exiting...');
+    }
 
     const endTimestamp = Date.now();
 
