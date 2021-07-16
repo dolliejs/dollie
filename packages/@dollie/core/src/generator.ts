@@ -26,7 +26,7 @@ import {
   Volume,
 } from 'memfs';
 import {
-  loadTemplate as loadTemplateFromOrigin,
+  loadRemoteTemplate,
   readTemplateEntities,
 } from './loader';
 import path from 'path';
@@ -61,6 +61,7 @@ import {
   createHttpInstance,
 } from './http';
 import fs from 'fs';
+import decompress from 'decompress';
 
 class Generator {
   // name of template that to be used
@@ -175,14 +176,40 @@ class Generator {
 
     this.messageHandler(`Template URL parsed: ${url}`);
 
-    // download template file to this.volume
-    const duration = await loadTemplateFromOrigin(url, this.volume, {
+    const startTimestamp = Date.now();
+
+    let data: Buffer;
+
+    data = await loadRemoteTemplate(url, {
       headers,
       ...({
         timeout: 90000,
       }),
       ...this.config.loader,
     });
+
+    const endTimestamp = Date.now();
+
+    await new Promise<void>((resolve) => {
+      decompress(data).then((files) => {
+        for (const file of files) {
+          const { type, path: filePath, data } = file;
+          if (type === 'directory') {
+            this.volume.mkdirSync(this.getAbsolutePath(filePath), {
+              recursive: true,
+            });
+          } else if (type === 'file') {
+            this.volume.writeFileSync(this.getAbsolutePath(filePath), data, {
+              encoding: 'utf8',
+            });
+          }
+        }
+
+        resolve();
+      });
+    });
+
+    const duration = endTimestamp - startTimestamp;
 
     this.messageHandler(`Template downloaded in ${duration}ms`);
     this.messageHandler('Parsing template config...');
@@ -666,6 +693,11 @@ class Generator {
         return result;
       }, {} as DollieExtendTemplateConfig),
     } as DollieTemplateConfig;
+  }
+
+  private getAbsolutePath(pathname: string) {
+    const relativePathname = pathname.split('/').slice(1).join('/');
+    return path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, relativePathname);
   }
 }
 

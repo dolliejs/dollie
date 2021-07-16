@@ -27,30 +27,16 @@ import {
 } from './http';
 
 /**
- * download zipped fill from to file system and extract it to file system
+ * download file from remote origin
  * @param {string} url
- * @param {FileSystem} fileSystem
  * @param {GotOptions} options
- * @returns {void}
+ * @returns {Promise<Buffer>}
  */
-const downloadCompressedFile = async (
+const downloadFile = async (
   url: string,
-  fileSystem: FileSystem,
   options: GotOptions = {},
-) => {
-  const startTimestamp = Date.now();
-
+): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
-    // prepare destination path for virtual file system
-    fileSystem.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, {
-      recursive: true,
-    });
-
-    const getAbsolutePath = (filePath) => {
-      const relativePathname = filePath.split('/').slice(1).join('/');
-      return path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, relativePathname);
-    };
-
     const downloader = createHttpInstance(_.merge(
       options || {}, {
         isStream: true,
@@ -79,24 +65,7 @@ const downloadCompressedFile = async (
     downloader.on('end', () => {
       // concat all buffer chunks to one buffer
       const fileBuffer = Buffer.concat(fileBufferChunks);
-
-      decompress(fileBuffer).then((files) => {
-        for (const file of files) {
-          const { type, path: filePath, data } = file;
-          if (type === 'directory') {
-            fileSystem.mkdirSync(getAbsolutePath(filePath), {
-              recursive: true,
-            });
-          } else if (type === 'file') {
-            fileSystem.writeFileSync(getAbsolutePath(filePath), data, {
-              encoding: 'utf8',
-            });
-          }
-        }
-        return;
-      }).then(() => {
-        resolve(Date.now() - startTimestamp);
-      });
+      resolve(fileBuffer);
     });
   });
 };
@@ -104,18 +73,15 @@ const downloadCompressedFile = async (
 /**
  * download template from origin
  * @param {string} url
- * @param {FileSystem} fileSystem
  * @param {GotOptions} options
  * @returns {void}
  */
-const loadTemplate = async (
+const loadRemoteTemplate = async (
   url: string,
-  fileSystem: FileSystem = fs,
   options: LoaderConfig = {},
 ) => {
-  const traverse = async function(
+  const download = async function(
     url: string,
-    fileSystem: FileSystem = fs,
     retries = 0,
     options: LoaderConfig = {},
   ) {
@@ -125,20 +91,11 @@ const loadTemplate = async (
     } = options;
 
     try {
-      return await downloadCompressedFile(
-        url,
-        fileSystem,
-        originalOptions,
-      );
+      return await downloadFile(url, originalOptions);
     } catch (error) {
       if (error.code === 'E_TEMPLATE_TIMEOUT' || error instanceof HTTPTimeoutError) {
         if (retries < maximumRetryCount) {
-          return await traverse(
-            url,
-            fileSystem,
-            retries + 1,
-            options,
-          );
+          return await download(url, retries + 1, options);
         } else {
           throw new Error(error?.message || 'download template timed out');
         }
@@ -148,7 +105,7 @@ const loadTemplate = async (
     }
   };
 
-  return await traverse(url, fileSystem, 0, options);
+  return (await download(url, 0, options)) as Buffer;
 };
 
 /**
@@ -215,7 +172,6 @@ const readTemplateEntities = (
 };
 
 export {
-  downloadCompressedFile,
-  loadTemplate,
+  loadRemoteTemplate,
   readTemplateEntities,
 };
