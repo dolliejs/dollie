@@ -191,7 +191,7 @@ class Generator {
     }
 
     if (_.isBuffer(data)) {
-      this.messageHandler('hit cache for current template');
+      this.messageHandler('Hit cache for current template');
     } else {
       data = await loadRemoteTemplate(url, {
         headers,
