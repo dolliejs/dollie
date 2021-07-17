@@ -7,6 +7,7 @@ hero:
     - text: Get Started
       link: /guide
     - text: Learn CLI
+      link: /ecosystem/cli
 features:
   - title: Cloud Based
     desc: By hosting templates in the cloud and the design of separated templates and generators, the flexibility of upgrading and iterating templates is greatly enhanced
