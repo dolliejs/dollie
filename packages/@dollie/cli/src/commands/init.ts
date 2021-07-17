@@ -22,6 +22,7 @@ import figlet from 'figlet';
 import {
   loadOrigins,
 } from '../../../origins/lib';
+import { getCacheFromFilesystem, setCacheToFilesystem } from '../utils/cache';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -257,6 +258,12 @@ export default (config: DollieCLIConfigSchema) => {
                 infoLogger.log(message);
                 return Promise.resolve();
               });
+            },
+            setCache: (url, data) => {
+              setCacheToFilesystem(url, data);
+            },
+            getCache: async (url) => {
+              return getCacheFromFilesystem(url);
             },
           },
           onMessage: (message) => infoLogger.log(message),

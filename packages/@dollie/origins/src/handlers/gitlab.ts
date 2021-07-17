@@ -1,11 +1,16 @@
-import _ from 'lodash';
-import got from 'got';
 import { DollieOriginHandler } from '../interfaces';
 
-export default (async (id, config = {}, request = got) => {
+export default (async (id, config = {}, request, deps) => {
   if (!id) {
     return null;
   }
+
+  const {
+    lodash: _,
+  } = deps;
+
+  let cache = false;
+  let sha = '';
 
   const {
     protocol = 'https',
@@ -37,11 +42,35 @@ export default (async (id, config = {}, request = got) => {
 
   if (!targetProject) { return null; }
 
+  const projectId = targetProject.id;
+
+  try {
+    const commitsRequestURL = protocol +
+      '://' +
+      host +
+      '/api/v4/projects/' +
+      projectId +
+      '/repository/commits';
+
+    let commitsRequestBody = (await request(`${commitsRequestURL}?ref=${checkout || 'master'}`)).body;
+
+    if (!_.isString(commitsRequestBody) || commitsRequestBody === '[]') {
+      commitsRequestBody = (await request('commitsRequestURL')).body;
+    }
+
+    sha = _.get(_.first(JSON.parse(commitsRequestBody)), 'id') || '';
+
+    if (sha.length > 0) {
+      cache = true;
+    }
+  } catch {}
+
   return {
     headers,
     url: 'https://gitlab.com/api/v4/projects/' +
-      targetProject.id +
+      projectId +
       '/repository/archive.zip' +
-      (checkout ? `?sha=${checkout}` : ''),
+      (sha ? `?sha=${sha}` : ''),
+    cache,
   };
 }) as DollieOriginHandler;

@@ -3,6 +3,7 @@ import {
   DEFAULT_CONFIG,
   CONFIG_DIR,
   SYSTEM_CONFIG_PATHNAME,
+  CACHE_DIR,
 } from './constants';
 
 const initializeConfig = () => {
@@ -36,6 +37,16 @@ const initializeConfig = () => {
   if (!systemConfigFileStat.isFile()) {
     fs.removeSync(SYSTEM_CONFIG_PATHNAME);
     writeSystemConfig();
+  }
+
+  if (!fs.existsSync(CACHE_DIR)) {
+    fs.mkdirpSync(CACHE_DIR);
+  } else {
+    const stat = fs.statSync(CACHE_DIR);
+    if (!stat.isDirectory()) {
+      fs.removeSync(CACHE_DIR);
+      fs.mkdirpSync(CACHE_DIR);
+    }
   }
 };
 

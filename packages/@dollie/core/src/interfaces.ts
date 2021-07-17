@@ -50,6 +50,8 @@ export interface DollieGeneratorConfig {
   getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
   onMessage?: MessageHandler;
+  setCache?: SetCacheHandler;
+  getCache?: GetCacheHandler;
 }
 
 export interface PatchTableItem {
@@ -152,6 +154,8 @@ export interface DollieContextStatusMap {
 export type StatusChangeHandler = (status: DollieContextStatusMap) => void;
 export type ErrorHandler = (error: DollieError) => void;
 export type MessageHandler = (message: string) => void;
+export type SetCacheHandler = (label: string, data: Buffer) => void;
+export type GetCacheHandler = (label: string) => Promise<Buffer>;
 
 export interface DollieConfig {
   generator?: DollieGeneratorConfig;

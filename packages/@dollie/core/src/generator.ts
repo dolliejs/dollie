@@ -14,10 +14,11 @@ import {
   TemplatePropsItem,
   MessageHandler,
 } from './interfaces';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import {
   InvalidInputError,
   ContextError,
+  DollieError,
 } from './errors';
 import {
   DollieOrigin,
@@ -26,7 +27,7 @@ import {
   Volume,
 } from 'memfs';
 import {
-  loadTemplate as loadTemplateFromOrigin,
+  loadRemoteTemplate,
   readTemplateEntities,
 } from './loader';
 import path from 'path';
@@ -60,6 +61,8 @@ import {
 import {
   createHttpInstance,
 } from './http';
+import fs from 'fs';
+import decompress from 'decompress';
 
 class Generator {
   // name of template that to be used
@@ -162,20 +165,71 @@ class Generator {
       this.templateName,
       _.get(this.config, 'origin') || {},
       createHttpInstance(_.get(this.config, 'loader') || {}),
+      {
+        fs,
+        lodash: _,
+      },
     );
 
     if (!_.isString(url) || !url) {
       throw new ContextError(`origin \`${this.templateOrigin}\` url parsed with errors`);
     }
 
-    // download template file to this.volume
-    const duration = await loadTemplateFromOrigin(url, this.volume, {
-      headers,
-      ...({
-        timeout: 90000,
-      }),
-      ...this.config.loader,
+    this.messageHandler(`Template URL parsed: ${url}`);
+
+    const startTimestamp = Date.now();
+
+    let data: Buffer;
+
+    const {
+      getCache,
+      setCache = _.noop,
+    } = this.config;
+
+    if (_.isFunction(getCache)) {
+      data = await getCache(url);
+    }
+
+    if (_.isBuffer(data)) {
+      this.messageHandler('Hit cache for current template');
+    } else {
+      data = await loadRemoteTemplate(url, {
+        headers,
+        ...({
+          timeout: 90000,
+        }),
+        ...this.config.loader,
+      });
+    }
+
+    if (!data || !_.isBuffer(data)) {
+      throw new DollieError('No template file found, exiting...');
+    }
+
+    setCache(url, data);
+
+    const endTimestamp = Date.now();
+
+    await new Promise<void>((resolve) => {
+      decompress(data).then((files) => {
+        for (const file of files) {
+          const { type, path: filePath, data } = file;
+          if (type === 'directory') {
+            this.volume.mkdirSync(this.getAbsolutePath(filePath), {
+              recursive: true,
+            });
+          } else if (type === 'file') {
+            this.volume.writeFileSync(this.getAbsolutePath(filePath), data, {
+              encoding: 'utf8',
+            });
+          }
+        }
+
+        resolve();
+      });
     });
+
+    const duration = endTimestamp - startTimestamp;
 
     this.messageHandler(`Template downloaded in ${duration}ms`);
     this.messageHandler('Parsing template config...');
@@ -220,16 +274,22 @@ class Generator {
   public copyTemplateFileToCacheTable() {
     this.messageHandler('Generating template files...');
 
-    const mainTemplateProps = this.templatePropsList.find((item) => item.label === 'main') || {};
+    const mainTemplateProps =
+      this.templatePropsList.find((item) => item.label === 'main') ||
+      {};
 
     if (!mainTemplateProps) {
       return;
     }
 
-    const templateIds = ['main'].concat(this.targetedExtendTemplateIds.map((id) => `extend:${id}`));
+    const templateIds = ['main'].concat(
+      this.targetedExtendTemplateIds.map((id) => `extend:${id}`),
+    );
 
     for (const templateId of templateIds) {
-      const templatePropsItem = this.templatePropsList.find((item) => item.label === templateId);
+      const templatePropsItem = this.templatePropsList.find(
+        (item) => item.label === templateId,
+      );
 
       if (!templatePropsItem) {
         continue;
@@ -659,6 +719,11 @@ class Generator {
         return result;
       }, {} as DollieExtendTemplateConfig),
     } as DollieTemplateConfig;
+  }
+
+  private getAbsolutePath(pathname: string) {
+    const relativePathname = pathname.split('/').slice(1).join('/');
+    return path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, relativePathname);
   }
 }
 

@@ -8,3 +8,5 @@ export const SYSTEM_CONFIG_FILENAME = 'config.json';
 
 export const SYSTEM_CONFIG_PATHNAME = path.resolve(CONFIG_DIR, SYSTEM_CONFIG_FILENAME);
 export const DEFAULT_CONFIG = {};
+
+export const CACHE_DIR = path.resolve(CONFIG_DIR, 'cache');

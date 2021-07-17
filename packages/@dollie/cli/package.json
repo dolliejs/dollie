@@ -34,6 +34,7 @@
     "@dollie/core": "^3.0.1",
     "@dollie/origins": "^3.0.1",
     "chalk": "^4.1.1",
+    "cli-table3": "^0.6.0",
     "commander": "^7.2.0",
     "figlet": "^1.5.0",
     "fs-extra": "^10.0.0",
