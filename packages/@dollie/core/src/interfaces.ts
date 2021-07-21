@@ -1,4 +1,5 @@
 import {
+  OriginHandler,
   Origin,
   OriginConfig,
 } from '@dollie/origins';
@@ -47,6 +48,7 @@ export interface GeneratorConfig {
   origin?: OriginConfig;
   origins?: Origin[];
   loader?: LoaderConfig;
+  originHandler?: OriginHandler;
   getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
   onMessage?: MessageHandler;
