@@ -13,7 +13,7 @@ export {
 };
 
 export {
-  DollieConfig,
+  Config,
   ConflictSolveResult,
   MergeBlock,
   ConflictSolverData,

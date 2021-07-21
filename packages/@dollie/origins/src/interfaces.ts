@@ -4,7 +4,7 @@ import {
 import * as lodash from 'lodash';
 import * as fs from 'fs';
 
-export type DollieOriginConfig = Record<string, any>;
+export type OriginConfig = Record<string, any>;
 export type DollieOriginHeaders = Record<string, any>;
 export type DollieOriginMap = Record<string, string | DollieOriginHandler>;
 
@@ -21,12 +21,12 @@ export interface OriginHandlerDependencies {
 
 export type DollieOriginHandler = (
   id: string,
-  config: DollieOriginConfig,
+  config: OriginConfig,
   request: Got,
   deps: OriginHandlerDependencies,
 ) => Promise<DollieOriginInfo>;
 
-export interface DollieOrigin {
+export interface Origin {
   name: string;
   handler: DollieOriginHandler;
 };

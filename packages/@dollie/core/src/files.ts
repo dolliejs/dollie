@@ -1,18 +1,18 @@
 import {
   DeleteConfigHandler,
-  DollieTemplateConfig,
+  TemplateConfig,
 } from './interfaces';
 import _ from 'lodash';
 
 /**
  * read config file and accumulate all file patterns
- * @param {DollieTemplateConfig} config
+ * @param {TemplateConfig} config
  * @param {string[]} targets
  * @param {string} type
  * @returns
  */
 const getFileConfigGlobs = async (
-  config: DollieTemplateConfig,
+  config: TemplateConfig,
   // targeted extend templates
   targets: string[],
   // enum: `merge` or `delete`
