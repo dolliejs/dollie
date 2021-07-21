@@ -1,6 +1,6 @@
 import {
-  DollieOrigin,
-  DollieOriginConfig,
+  Origin,
+  OriginConfig,
 } from '@dollie/origins';
 import {
   Change,
@@ -13,14 +13,14 @@ import {
   Options as GotOptions,
 } from 'got';
 import {
-  Answers as DollieAnswers,
+  Answers as InquirerAnswers,
   DistinctQuestion,
 } from 'inquirer';
 import {
   DollieError,
 } from './errors';
 
-export type DollieQuestion<T extends DollieAnswers = DollieAnswers> = DistinctQuestion<T>;
+export type Question<T extends InquirerAnswers = InquirerAnswers> = DistinctQuestion<T>;
 
 export interface DiffChange extends Change {
   conflicted?: boolean;
@@ -43,11 +43,11 @@ export type LoaderConfig = LoaderOptions & GotOptions;
 
 export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 
-export interface DollieGeneratorConfig {
-  origin?: DollieOriginConfig;
-  origins?: DollieOrigin[];
+export interface GeneratorConfig {
+  origin?: OriginConfig;
+  origins?: Origin[];
   loader?: LoaderConfig;
-  getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
+  getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
   onMessage?: MessageHandler;
   setCache?: SetCacheHandler;
@@ -73,16 +73,16 @@ export interface TemplateEntity {
 }
 
 export type DeleteConfigHandler = (
-  templateConfig: DollieTemplateConfig,
+  templateConfig: TemplateConfig,
   targets: string[],
 ) => Promise<string | string[]>;
 
-export interface DollieTemplateFileConfig {
+export interface TemplateFileConfig {
   merge?: string[];
   delete?: (string | DeleteConfigHandler)[];
 }
 
-export interface DollieTemplateCleanupData {
+export interface TemplateCleanupData {
   addFile: (pathname: string, content: string) => void;
   addTextFile: (pathname: string, content: string) => void;
   addBinaryFile: (pathname: string, content: Buffer) => void;
@@ -92,14 +92,14 @@ export interface DollieTemplateCleanupData {
   getBinaryFileBuffer: (pathname: string) => Buffer;
 }
 
-export type DollieTemplateCleanUpFunction = (data: DollieTemplateCleanupData) => MergeTable;
-export type DollieExtendTemplateConfig = Record<string, Omit<DollieTemplateConfig, 'extendTemplates'>>;
+export type TemplateCleanUpFunction = (data: TemplateCleanupData) => MergeTable;
+export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
 
-export interface DollieTemplateConfig {
-  questions?: DollieQuestion[];
-  files?: DollieTemplateFileConfig;
-  cleanups?: DollieTemplateCleanUpFunction[];
-  extendTemplates?: DollieExtendTemplateConfig;
+export interface TemplateConfig {
+  questions?: Question[];
+  files?: TemplateFileConfig;
+  cleanups?: TemplateCleanUpFunction[];
+  extendTemplates?: ExtendTemplateConfig;
 }
 
 export interface ParsedProps {
@@ -109,7 +109,7 @@ export interface ParsedProps {
 
 export interface TemplatePropsItem {
   label: string;
-  props: DollieAnswers;
+  props: InquirerAnswers;
 }
 
 export interface MergeBlock {
@@ -141,24 +141,24 @@ export interface ConflictSolverData extends ConflictBlockMetadata {
   total: number;
 }
 
-export interface DollieGeneratorResult {
+export interface GeneratorResult {
   files: Record<string, string | Buffer>;
   conflicts: string[];
 }
 
-export type DollieContextStatus = 'pending' | 'running' | 'finished';
-export interface DollieContextStatusMap {
-  [key: string]: DollieContextStatus;
+export type ContextStatus = 'pending' | 'running' | 'finished';
+export interface ContextStatusMap {
+  [key: string]: ContextStatus;
 }
 
-export type StatusChangeHandler = (status: DollieContextStatusMap) => void;
+export type StatusChangeHandler = (status: ContextStatusMap) => void;
 export type ErrorHandler = (error: DollieError) => void;
 export type MessageHandler = (message: string) => void;
 export type SetCacheHandler = (label: string, data: Buffer) => void;
 export type GetCacheHandler = (label: string) => Promise<Buffer>;
 
-export interface DollieConfig {
-  generator?: DollieGeneratorConfig;
+export interface Config {
+  generator?: GeneratorConfig;
   onStatusChange?: StatusChangeHandler;
   onError?: ErrorHandler;
   onMessage?: MessageHandler;

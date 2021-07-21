@@ -4,8 +4,8 @@ import {
 } from './errors';
 import Generator from './generator';
 import {
-  DollieConfig,
-  DollieContextStatusMap,
+  Config,
+  ContextStatusMap,
   ErrorHandler,
   MessageHandler,
   StatusChangeHandler,
@@ -17,12 +17,12 @@ class Context {
     private messageHandler: MessageHandler;
     private statusChangeHandler: StatusChangeHandler;
     private lifecycleList: string[] = ['bootstrap', 'load', 'write', 'conflict', 'end'];
-    private statusMap: DollieContextStatusMap;
+    private statusMap: ContextStatusMap;
 
     public constructor(
       protected projectName: string,
       private templateOriginName: string,
-      private config: DollieConfig = {},
+      private config: Config = {},
     ) {
       const { onStatusChange, onError, onMessage } = config;
       this.errorHandler = _.isFunction(onError) ? onError : _.noop;
@@ -93,7 +93,7 @@ class Context {
       return this.lifecycleList.reduce((result, lifecycleName) => {
         result[lifecycleName] = 'pending';
         return result;
-      }, {} as DollieContextStatusMap);
+      }, {} as ContextStatusMap);
     }
 
     private updateRunningStatus(lifecycleName: string) {
@@ -120,7 +120,7 @@ class Context {
           result[currentLifecycleName] = 'pending';
         }
         return result;
-      }, {} as DollieContextStatusMap);
+      }, {} as ContextStatusMap);
 
       this.statusChangeHandler(this.statusMap);
     }

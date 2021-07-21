@@ -1,10 +1,10 @@
 import {
-  DollieGeneratorResult,
+  GeneratorResult,
 } from '@dollie/core/lib/interfaces';
 import fs from 'fs-extra';
 import path from 'path';
 
-const writeGeneratedFiles = (data: DollieGeneratorResult, projectName: string) => {
+const writeGeneratedFiles = (data: GeneratorResult, projectName: string) => {
   const { files = {} } = data;
   const destinationPathname = path.resolve(process.cwd(), projectName);
 

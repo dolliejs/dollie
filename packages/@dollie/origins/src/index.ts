@@ -7,11 +7,11 @@ export {
 };
 
 export {
-  DollieOriginConfig,
+  OriginConfig,
   DollieOriginHeaders,
   DollieOriginInfo,
   DollieOriginHandler,
-  DollieOrigin,
+  Origin,
   DollieOriginMap,
 } from './interfaces';
 

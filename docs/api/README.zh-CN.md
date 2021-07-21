@@ -27,12 +27,12 @@ type MessageHandler = (message: string) => void;
 type ErrorHandler = (error: Error) => void;
 ```
 
-#### `DollieAnswers`
+#### `InquirerAnswers`
 
 Inquirer 问题回答格式。
 
 ```typescript
-type DollieAnswers = Record<string, any>;
+type InquirerAnswers = Record<string, any>;
 ```
 
 #### `LoaderConfig`
@@ -55,20 +55,20 @@ interface LoaderOptions extends HttpOptions {
 type LoaderConfig = LoaderOptions & GotOptions;
 ```
 
-#### `DollieGeneratorConfig`
+#### `GeneratorConfig`
 
 Dollie `Generator` 配置。
 
 ```typescript
-interface DollieGeneratorConfig {
+interface GeneratorConfig {
     // Origin 配置
-    origin?: DollieOriginConfig;
+    origin?: OriginConfig;
     // Origin 函数列表
-    origins?: DollieOrigin[];
+    origins?: Origin[];
     // 加载器配置，用于拉取模板、读取自定义 Origin 函数等
     loader?: LoaderConfig;
     // 向用户获取模板问题的回答
-    getTemplateProps?: (questions: DollieQuestion[]) => Promise<DollieAnswers>;
+    getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
     // 向用户报告冲突并获取冲突的解决方案
     conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
     // 接收并处理从 Dollie 上下文中发出的消息
@@ -79,21 +79,21 @@ interface DollieGeneratorConfig {
 依赖类型：
 
 - [`MessageHandler`](/zh-CN/api#messagehandler)
-- [`DollieAnswers`](/zh-CN/api#dollieanswers)
+- [`InquirerAnswers`](/zh-CN/api#dollieanswers)
 - [`LoaderConfig`](/zh-CN/api#loaderconfig)
 - [`ConflictSolveResult`](/zh-CN/api#conflictresolveresult)
 - [`ConflictSolverData`](/zh-CN/api#conflictresolverdata)
-- [`DollieOriginConfig`](/zh-CN/api#dollieoriginconfig)
-- [`DollieOrigin`](/zh-CN/api#dollieorigin)
+- [`OriginConfig`](/zh-CN/api#dollieoriginconfig)
+- [`Origin`](/zh-CN/api#dollieorigin)
 
-#### `DollieConfig`
+#### `Config`
 
 Dollie `Context` 配置。
 
 ```typescript
-interface DollieConfig {
+interface Config {
     // `Generator` 配置
-    generator?: DollieGeneratorConfig;
+    generator?: GeneratorConfig;
     // 生命周期状态变更接收函数
     onStatusChange?: StatusChangeHandler;
     // 错误信息接收函数
@@ -105,7 +105,7 @@ interface DollieConfig {
 
 依赖类型：
 
-- [`DollieGeneratorConfig`](/zh-CN/api#dolliegeneratorconfig)
+- [`GeneratorConfig`](/zh-CN/api#dolliegeneratorconfig)
 - [`StatusChangeHandler`](/zh-CN/api#statuschangehandler)
 - [`ErrorHandler`](/zh-CN/api#errorhandler)
 - [`MessageHandler`](/zh-CN/api#messagehandler)
@@ -115,28 +115,28 @@ interface DollieConfig {
 上下文运行时状态变更接收函数。
 
 ```typescript
-type StatusChangeHandler = (status: DollieContextStatusMap) => void;
+type StatusChangeHandler = (status: ContextStatusMap) => void;
 ```
 
 依赖类型：
 
-- [`DollieContextStatusMap`](/zh-CN/api#dolliecontextstatusmap)
+- [`ContextStatusMap`](/zh-CN/api#dolliecontextstatusmap)
 
-#### `DollieContextStatusMap`
+#### `ContextStatusMap`
 
 上下文生命周期函数执行状态表，键名为生命周期函数名，值为上下文运行时状态。
 
 ```typescript
-interface DollieContextStatusMap {
-    [key: string]: DollieContextStatus;
+interface ContextStatusMap {
+    [key: string]: ContextStatus;
 }
 ```
 
 依赖类型：
 
-- [`DollieContextStatus`](/zh-CN/api#dolliecontextstatus)
+- [`ContextStatus`](/zh-CN/api#dolliecontextstatus)
 
-#### `DollieContextStatus`
+#### `ContextStatus`
 
 上下文运行时状态：
 
@@ -145,7 +145,7 @@ interface DollieContextStatusMap {
 - `finished`：已结束
 
 ```typescript
-type DollieContextStatus = 'pending' | 'running' | 'finished';
+type ContextStatus = 'pending' | 'running' | 'finished';
 ```
 
 #### `MergeBlock`
@@ -199,12 +199,12 @@ interface ConflictSolverData extends ConflictBlockMetadata {
 type ConflictSolveResult = MergeBlock | 'ignored' | null;
 ```
 
-#### `DollieGeneratorResult`
+#### `GeneratorResult`
 
 Dollie 生成器生成的结果。
 
 ```typescript
-interface DollieGeneratorResult {
+interface GeneratorResult {
     // 文件列表，键名为文件路径，值为文件内容。
     // 如果是文本文件，值的类型为 string，如果是二进制文件，则值的类型为 Buffer
     files: Record<string, string | Buffer>;
@@ -234,7 +234,7 @@ interface DiffChange extends Change {
 
 ### `Context`
 
-#### `constructor(projectName: string, templateOriginName: string, config: DollieConfig)`
+#### `constructor(projectName: string, templateOriginName: string, config: Config)`
 
 Dollie `Context` 的构造函数，在实例化 `Context` 时，需要传递如下参数：
 
@@ -244,15 +244,15 @@ Dollie `Context` 的构造函数，在实例化 `Context` 时，需要传递如�
 
 依赖类型：
 
-- [`DollieConfig`](/zh-CN/api#dollieconfig)
+- [`Config`](/zh-CN/api#dollieconfig)
 
-#### `Context.prototype.generate(): DollieGeneratorResult`
+#### `Context.prototype.generate(): GeneratorResult`
 
 通过调用此方法，可以启动 Dollie 上下文的生命周期，最后返回 Dollie 生成器生成的项目代码文件数据。
 
 依赖类型：
 
-- [`DollieGeneratorResult`](/zh-CN/api#dolliegeneratorresult)
+- [`GeneratorResult`](/zh-CN/api#dolliegeneratorresult)
 
 ### `parseDiffToMergeBlocks(changes: DiffChange[]): MergeBlock[]`
 
@@ -295,12 +295,12 @@ type DollieOriginMap = Record<string, string | DollieOriginHandler>;
 
 - [`DollieOriginHandler`](/zh-CN/api#dollieoriginhandler)
 
-#### `DollieOriginConfig`
+#### `OriginConfig`
 
 当作形式参数传递给各个 Origin 函数的类型，由各个 Origin 函数自行读取解析，可以是任意键值对。
 
 ```typescript
-type DollieOriginConfig = Record<string, any>;
+type OriginConfig = Record<string, any>;
 ```
 
 #### `DollieOriginHandler`
@@ -312,7 +312,7 @@ type DollieOriginHandler = (
     // 上下文 ID
     id: string,
     // 由函数自身定义的配置项，可以是任意键值对
-    config: DollieOriginConfig,
+    config: OriginConfig,
     // 一个 `Got` 实例，用于帮助 Origin 函数发送请求
     request: Got,
 ) => Promise<DollieOriginInfo>;
@@ -320,15 +320,15 @@ type DollieOriginHandler = (
 
 依赖类型：
 
-- [`DollieOriginConfig`](/zh-CN/api#dollieoriginconfig)
+- [`OriginConfig`](/zh-CN/api#dollieoriginconfig)
 - [`DollieOriginInfo`](/zh-CN/api#dollieorigininfo)
 
-#### `DollieOrigin`
+#### `Origin`
 
 Dollie Origin 函数列表项。
 
 ```typescript
-interface DollieOrigin {
+interface Origin {
     // Origin 函数名称
     name: string;
     // Origin 函数体
@@ -381,7 +381,7 @@ type DollieOriginHeaders = Record<string, any>;
 - `host: string` 当模板存储于自托管形式的 GitLab 服务时，指定域名
 - `protocol: string` 当模板存储于自托管形式的 GitLab 服务时，指定协议类型，支持 `http` 和 `https`
 
-### `loadOrigins(config: DollieOriginMap): Promise<DollieOrigin[]>`
+### `loadOrigins(config: DollieOriginMap): Promise<Origin[]>`
 
 根据所提供的 Dollie Origin 函数键值对加载所有 Origin 函数，并返回 Dollie 生成器可以理解的数据。
 
@@ -391,25 +391,25 @@ type DollieOriginHeaders = Record<string, any>;
 
 返回值：
 
-`Promise<DollieOrigin[]>`
+`Promise<Origin[]>`
 
 依赖类型：
 
-- [`DollieOrigin`](/zh-CN/api#dollieorigin)
+- [`Origin`](/zh-CN/api#dollieorigin)
 - [`DollieOriginMap`](/zh-CN/api#dollieoriginmap)
 
 ## 模板配置
 
 ```typescript
-interface DollieTemplateConfig {
+interface TemplateConfig {
     // 主模板问题
-    questions?: DollieQuestion[];
+    questions?: Question[];
     // 主模板文件行为配置
-    files?: DollieTemplateFileConfig;
+    files?: TemplateFileConfig;
     // 主模板 cleanup 函数
-    cleanups?: DollieTemplateCleanUpFunction[];
+    cleanups?: TemplateCleanUpFunction[];
     // 扩展模板配置
-    extendTemplates?: DollieExtendTemplateConfig;
+    extendTemplates?: ExtendTemplateConfig;
 }
 ```
 
@@ -417,18 +417,18 @@ interface DollieTemplateConfig {
 
 ```typescript
 // 扩展模板配置
-type DollieExtendTemplateConfig = Record<string, Omit<DollieTemplateConfig, 'extendTemplates'>>;
+type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
 // cleanup 函数
-type DollieTemplateCleanUpFunction = (data: DollieTemplateCleanupData) => MergeTable;
+type TemplateCleanUpFunction = (data: TemplateCleanupData) => MergeTable;
 // Dollie 文件行为策略函数
 type DeleteConfigHandler = (
     // 模板配置内容
-    templateConfig: DollieTemplateConfig,
+    templateConfig: TemplateConfig,
     // 已命中的扩展模板列表
     targets: string[],
 ) => Promise<string | string[]>;
 
-interface DollieTemplateFileConfig {
+interface TemplateFileConfig {
     merge?: string[];
     delete?: (string | DeleteConfigHandler)[];
 }

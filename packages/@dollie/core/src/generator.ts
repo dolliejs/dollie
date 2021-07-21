@@ -3,12 +3,12 @@ import {
   CacheTable,
   ConflictBlockMetadata,
   DiffChange,
-  DollieGeneratorConfig,
-  DollieExtendTemplateConfig,
-  DollieGeneratorResult,
-  DollieQuestion,
-  DollieTemplateCleanUpFunction,
-  DollieTemplateConfig,
+  GeneratorConfig,
+  ExtendTemplateConfig,
+  GeneratorResult,
+  Question,
+  TemplateCleanUpFunction,
+  TemplateConfig,
   FileSystem,
   MergeTable,
   TemplatePropsItem,
@@ -21,7 +21,7 @@ import {
   DollieError,
 } from './errors';
 import {
-  DollieOrigin,
+  Origin,
 } from '@dollie/origins';
 import {
   Volume,
@@ -72,7 +72,7 @@ class Generator {
   // virtual file system instance
   protected volume: FileSystem;
   // template config, read from `dollie.js` or `dollie.json`
-  protected templateConfig: DollieTemplateConfig = {};
+  protected templateConfig: TemplateConfig = {};
   // the table who stores all files
   // key is relative pathname, value is the diff changes
   protected cacheTable: CacheTable = {};
@@ -80,7 +80,7 @@ class Generator {
   // store binary pathname in virtual file system
   protected binaryTable: BinaryTable = {};
   // origins list
-  protected origins: DollieOrigin[] = [];
+  protected origins: Origin[] = [];
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];
@@ -92,12 +92,12 @@ class Generator {
    * Generator constructor
    * @param {string} projectName name of project that to be generated
    * @param {string} templateOriginName origin context id, read by generator
-   * @param {DollieGeneratorConfig} config generator configuration
+   * @param {GeneratorConfig} config generator configuration
    */
   public constructor(
     protected projectName: string,
     private templateOriginName: string,
-    private config: DollieGeneratorConfig = {},
+    private config: GeneratorConfig = {},
   ) {
     this.templateName = '';
     this.templateOrigin = '';
@@ -470,7 +470,7 @@ class Generator {
         const currentCleanups = _.get(this.templateConfig, `extendTemplates.${templateId}.cleanups`) || [];
         return result.concat(currentCleanups);
       }, []))
-      .filter((cleanup) => _.isFunction(cleanup)) as DollieTemplateCleanUpFunction[];
+      .filter((cleanup) => _.isFunction(cleanup)) as TemplateCleanUpFunction[];
 
     const addFile = (pathname: string, content: string) => {
       if (!clonedTables.mergeTable[pathname]) {
@@ -528,7 +528,7 @@ class Generator {
     });
   }
 
-  public getResult(): DollieGeneratorResult {
+  public getResult(): GeneratorResult {
     let files = Object.keys(this.mergeTable).reduce((result, pathname) => {
       result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
       return result;
@@ -660,21 +660,21 @@ class Generator {
     }
 
     if (!configFileName) {
-      return {} as DollieTemplateConfig;
+      return {} as TemplateConfig;
     }
 
     const dollieConfigFileContent = this.readTemplateFileBuffer(configFileName).toString();
 
     if (configFileName.endsWith('.json')) {
       try {
-        return JSON.parse(dollieConfigFileContent) as DollieTemplateConfig;
+        return JSON.parse(dollieConfigFileContent) as TemplateConfig;
       } catch {
-        return {} as DollieTemplateConfig;
+        return {} as TemplateConfig;
       }
     } else if (configFileName.endsWith('.js')) {
-      return (requireFromString(dollieConfigFileContent) || {}) as DollieTemplateConfig;
+      return (requireFromString(dollieConfigFileContent) || {}) as TemplateConfig;
     } else {
-      return {} as DollieTemplateConfig;
+      return {} as TemplateConfig;
     }
   }
 
@@ -690,7 +690,7 @@ class Generator {
       }
     };
 
-    const modifyQuestionName = (questions: DollieQuestion[] = []) => {
+    const modifyQuestionName = (questions: Question[] = []) => {
       return questions.map((question) => {
         const { name } = question;
         if (name.startsWith(`${EXTEND_TEMPLATE_PREFIX}`) && name.endsWith('$')) {
@@ -705,7 +705,7 @@ class Generator {
 
     const config = this.getTemplateConfig();
 
-    const extendTemplates = (_.get(config, 'extendTemplates') || {}) as DollieExtendTemplateConfig;
+    const extendTemplates = (_.get(config, 'extendTemplates') || {}) as ExtendTemplateConfig;
 
     return {
       ...config,
@@ -715,10 +715,10 @@ class Generator {
         result[templateId] = {
           ...currentExtendTemplateConfig,
           questions: modifyQuestionName(_.get(currentExtendTemplateConfig, 'questions')),
-        } as Omit<DollieTemplateConfig, 'extendTemplates'>;
+        } as Omit<TemplateConfig, 'extendTemplates'>;
         return result;
-      }, {} as DollieExtendTemplateConfig),
-    } as DollieTemplateConfig;
+      }, {} as ExtendTemplateConfig),
+    } as TemplateConfig;
   }
 
   private getAbsolutePath(pathname: string) {
