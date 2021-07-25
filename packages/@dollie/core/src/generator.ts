@@ -21,7 +21,7 @@ import {
   DollieError,
 } from './errors';
 import {
-  Origin,
+  Origin, OriginHandler,
 } from '@dollie/origins';
 import {
   Volume,
@@ -150,18 +150,25 @@ class Generator {
   public async loadTemplate() {
     this.messageHandler(`Start downloading template from ${this.templateOrigin}:${this.templateName}`);
 
-    // match and use the correct origin handler function
-    const origin = this.origins.find((origin) => origin.name === this.templateOrigin);
-    if (!origin) {
-      throw new ContextError(`origin name \`${this.templateOrigin}\` not found`);
+    const {
+      originHandler,
+    } = this.config;
+
+    let handler: OriginHandler;
+
+    if (originHandler) {
+      handler = originHandler;
+    } else {
+      // match and use the correct origin handler function
+      handler = _.get(this.origins.find((origin) => origin.name === this.templateOrigin), 'handler');
     }
 
-    if (!_.isFunction(origin.handler)) {
+    if (!_.isFunction(handler)) {
       throw new ContextError(`origin \`${this.templateOrigin}\` has a wrong handler type`);
     }
 
     // get url and headers from origin handler
-    const { url, headers } = await origin.handler(
+    const { url, headers } = await handler(
       this.templateName,
       _.get(this.config, 'origin') || {},
       createHttpInstance(_.get(this.config, 'loader') || {}),
