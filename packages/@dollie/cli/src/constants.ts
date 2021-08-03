@@ -10,3 +10,6 @@ export const SYSTEM_CONFIG_PATHNAME = path.resolve(CONFIG_DIR, SYSTEM_CONFIG_FIL
 export const DEFAULT_CONFIG = {};
 
 export const CACHE_DIR = path.resolve(CONFIG_DIR, 'cache');
+
+export const ORIGIN_CONFIG_FILENAME = 'origin.json';
+export const ORIGIN_CONFIG_PATHNAME = path.resolve(CONFIG_DIR, ORIGIN_CONFIG_FILENAME);

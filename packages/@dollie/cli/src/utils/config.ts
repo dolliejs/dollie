@@ -5,13 +5,11 @@ import {
 } from '@dollie/core';
 import { SYSTEM_CONFIG_PATHNAME } from '../constants';
 
-interface DollieCLIConfigSchema {
-  origin?: Record<string, string>;
-  origins?: Record<string, string>;
+interface CLIConfigSchema {
   loader?: LoaderConfig;
 }
 
-const readConfig = (): DollieCLIConfigSchema => {
+const readConfig = (): CLIConfigSchema => {
   if (
     !fs.existsSync(SYSTEM_CONFIG_PATHNAME) ||
     !fs.statSync(SYSTEM_CONFIG_PATHNAME).isFile()
@@ -55,5 +53,5 @@ const writeConfig = (key: string, value: any) => {
 export {
   readConfig,
   writeConfig,
-  DollieCLIConfigSchema,
+  CLIConfigSchema,
 };

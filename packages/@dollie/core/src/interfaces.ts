@@ -45,6 +45,7 @@ export type LoaderConfig = LoaderOptions & GotOptions;
 export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 
 export interface GeneratorConfig {
+  // configuration items for selected origin handler
   origin?: OriginConfig;
   origins?: Origin[];
   loader?: LoaderConfig;

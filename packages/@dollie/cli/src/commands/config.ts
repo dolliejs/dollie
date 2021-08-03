@@ -1,11 +1,11 @@
 import commander from 'commander';
 import _ from 'lodash';
 import {
-  DollieCLIConfigSchema,
+  CLIConfigSchema,
   writeConfig,
 } from '../utils/config';
 
-export default (config: DollieCLIConfigSchema) => {
+export default (config: CLIConfigSchema) => {
   const command = new commander.Command('config');
 
   command.description('manage CLI configurations');

@@ -9,9 +9,13 @@ import {
 } from './utils/config';
 import fs from 'fs';
 import path from 'path';
+import {
+  readOriginConfig,
+} from './utils/origins';
 
 initializeConfig();
 const config = readConfig();
+const originConfig = readOriginConfig();
 
 const packageJsonContent =
   fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf-8') || '{}';
@@ -24,7 +28,7 @@ program.version(packageJson.version || 'unknown');
 for (const commandKey of Object.keys(commands)) {
   const commandGenerator = commands[commandKey];
   if (_.isFunction(commandGenerator)) {
-    program.addCommand(commandGenerator(config));
+    program.addCommand(commandGenerator(config, originConfig));
   }
 }
 

@@ -1,13 +1,16 @@
 import commander from 'commander';
 import _ from 'lodash';
 import {
-  DollieCLIConfigSchema,
-  writeConfig,
-  readConfig,
+  CLIConfigSchema,
 } from '../utils/config';
 import Table from 'cli-table3';
+import {
+  OriginConfigSchema,
+  registerOrigin,
+  deleteRegisteredOrigin,
+} from '../utils/origins';
 
-export default (config: DollieCLIConfigSchema) => {
+export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
   const command = new commander.Command('origin');
 
   command.description('manage template origins');
@@ -18,7 +21,7 @@ export default (config: DollieCLIConfigSchema) => {
     .description('add a template origins')
     .arguments('[name] [pathname]')
     .action((name: string, pathname: string) => {
-      writeConfig(`origins.${name}`, pathname);
+      registerOrigin(name, pathname);
     });
 
   command
@@ -26,16 +29,7 @@ export default (config: DollieCLIConfigSchema) => {
     .description('delete a template origin from origins')
     .arguments('[name]')
     .action((name: string) => {
-      const origins = _.get(config, 'origins') || {};
-      writeConfig(
-        'origins',
-        Object.keys(origins).reduce((result, currentName) => {
-          if (name !== currentName) {
-            result[name] = origins[name];
-          }
-          return result;
-        }, {}),
-      );
+      deleteRegisteredOrigin(name);
     });
 
   command
@@ -46,7 +40,7 @@ export default (config: DollieCLIConfigSchema) => {
         github: '<internal>',
         gitlab: '<internal>',
       } as Record<string, string>;
-      const { origins: customOrigins = {} } = readConfig();
+      const { origins: customOrigins = {} } = originConfig;
 
       const table = new Table({
         head: ['ID', 'Source'],
@@ -62,6 +56,10 @@ export default (config: DollieCLIConfigSchema) => {
     });
 
   // TODO: `use` command
+  command
+    .command('use')
+    .description('select and use an appropriate origin handler')
+    .arguments('[id]');
 
   return command;
 };

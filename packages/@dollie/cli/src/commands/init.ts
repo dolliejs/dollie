@@ -1,6 +1,6 @@
 import commander from 'commander';
 import {
-  DollieCLIConfigSchema,
+  CLIConfigSchema,
 } from '../utils/config';
 import {
   Context,
@@ -22,7 +22,13 @@ import figlet from 'figlet';
 import {
   loadOrigins,
 } from '../../../origins/lib';
-import { getCacheFromFilesystem, setCacheToFilesystem } from '../utils/cache';
+import {
+  getCacheFromFilesystem,
+  setCacheToFilesystem,
+} from '../utils/cache';
+import {
+  OriginConfigSchema,
+} from '../utils/origins';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -230,7 +236,7 @@ const conflictsSolver = async (
   }
 };
 
-export default (config: DollieCLIConfigSchema) => {
+export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
   const command = new commander.Command('init');
 
   command
@@ -246,8 +252,8 @@ export default (config: DollieCLIConfigSchema) => {
 
         const context = new Context(name, template, {
           generator: {
-            origins: await loadOrigins(config.origins || {}),
-            origin: config.origin || {},
+            origins: await loadOrigins(originConfig.origins || {}),
+            origin: originConfig.origin || {},
             loader: _.get(config, 'loader'),
             getTemplateProps: async (questions) => {
               const answers = await inquirer.prompt(questions);
