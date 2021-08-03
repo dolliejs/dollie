@@ -108,7 +108,7 @@ const conflictsSolver = async (
     }
 
     case 'simple': {
-      const {result} = (await inquirer.prompt(
+      const { result } = (await inquirer.prompt(
         [
           {
             name: 'result',

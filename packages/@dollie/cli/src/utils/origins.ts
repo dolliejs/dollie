@@ -3,6 +3,9 @@ import _ from 'lodash';
 import {
   ORIGIN_CONFIG_PATHNAME,
 } from '../constants';
+import {
+  readJson,
+} from './read-json';
 
 export interface OriginConfigSchema {
   origin?: Record<string, string>;
@@ -11,20 +14,7 @@ export interface OriginConfigSchema {
 }
 
 export const readOriginConfig = (key?: string): OriginConfigSchema => {
-  const content = fs.readFileSync(ORIGIN_CONFIG_PATHNAME).toString() || '{}';
-  let config: OriginConfigSchema;
-
-  try {
-    config = JSON.parse(content) as OriginConfigSchema;
-  } catch {
-    config = {};
-  }
-
-  return (
-    key && _.isString(key)
-      ? config[key]
-      : config
-  );
+  return readJson(ORIGIN_CONFIG_PATHNAME, key);
 };
 
 const writeOriginConfig = (key: string, value: any) => {

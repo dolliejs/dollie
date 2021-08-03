@@ -2,7 +2,7 @@ import commands from './commands';
 import commander from 'commander';
 import _ from 'lodash';
 import {
-  initializeConfig,
+  initialize,
 } from './init';
 import {
   readConfig,
@@ -13,7 +13,7 @@ import {
   readOriginConfig,
 } from './utils/origins';
 
-initializeConfig();
+initialize();
 const config = readConfig();
 const originConfig = readOriginConfig();
 
