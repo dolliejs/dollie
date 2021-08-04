@@ -32,6 +32,7 @@ const setCacheToFilesystem = (url: string, data: Buffer) => {
 };
 
 export {
+  getCacheDir,
   getCacheFromFilesystem,
   setCacheToFilesystem,
 };
