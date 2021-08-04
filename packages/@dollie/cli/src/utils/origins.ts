@@ -45,13 +45,16 @@ export const switchSelectedOrigin = (newOriginId: string) => {
     return;
   }
 
+  const internalOriginHandlerIdList = ['github', 'gitlab'];
+
   const origins = readOriginConfig('origins');
 
   if (newOriginId === DEFAULT_ORIGIN_ID) {
     writeOriginConfig('selectedOriginId', '');
+    return;
   }
 
-  if (!origins[newOriginId]) {
+  if (internalOriginHandlerIdList.indexOf(newOriginId) === -1 && !origins[newOriginId]) {
     return;
   }
 
