@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import _ from 'lodash';
 import {
   ORIGIN_CONFIG_PATHNAME,
+  DEFAULT_ORIGIN_ID,
 } from '../constants';
 import {
   readJson,
@@ -13,7 +14,7 @@ export interface OriginConfigSchema {
   selectedOriginId?: string;
 }
 
-export const readOriginConfig = (key?: string): OriginConfigSchema => {
+export const readOriginConfig = (key?: string): any => {
   return readJson(ORIGIN_CONFIG_PATHNAME, key);
 };
 
@@ -45,6 +46,10 @@ export const switchSelectedOrigin = (newOriginId: string) => {
   }
 
   const origins = readOriginConfig('origins');
+
+  if (newOriginId === DEFAULT_ORIGIN_ID) {
+    writeOriginConfig('selectedOriginId', '');
+  }
 
   if (!origins[newOriginId]) {
     return;

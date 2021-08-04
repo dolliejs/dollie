@@ -20,14 +20,14 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import {
-  loadOrigins,
+  loadOrigins, OriginHandler, Origin,
 } from '../../../origins/lib';
 import {
   getCacheFromFilesystem,
   setCacheToFilesystem,
 } from '../utils/cache';
 import {
-  OriginConfigSchema,
+  OriginConfigSchema, readOriginConfig,
 } from '../utils/origins';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
@@ -250,11 +250,21 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
 
         infoLogger.log('Loading origins...');
 
+        const origins = await loadOrigins(originConfig.origins || {});
+
+        let selectedOrigin: Origin;
+        const selectedOriginHandlerId = readOriginConfig('selectedOriginId');
+
+        if (selectedOriginHandlerId) {
+          selectedOrigin = origins.find((origin) => origin.name === selectedOriginHandlerId);
+        }
+
         const context = new Context(name, template, {
           generator: {
-            origins: await loadOrigins(originConfig.origins || {}),
+            origins,
             origin: originConfig.origin || {},
             loader: _.get(config, 'loader'),
+            originHandler: _.get(selectedOrigin, 'handler'),
             getTemplateProps: async (questions) => {
               const answers = await inquirer.prompt(questions);
               return answers;

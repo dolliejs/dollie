@@ -22,6 +22,9 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
     .description('add a template origins')
     .arguments('[name] [pathname]')
     .action((name: string, pathname: string) => {
+      if (name === 'default') {
+        return;
+      }
       registerOrigin(name, pathname);
     });
 

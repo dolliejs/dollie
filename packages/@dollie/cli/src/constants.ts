@@ -13,3 +13,5 @@ export const CACHE_DIR = path.resolve(CONFIG_DIR, 'cache');
 
 export const ORIGIN_CONFIG_FILENAME = 'origin.json';
 export const ORIGIN_CONFIG_PATHNAME = path.resolve(CONFIG_DIR, ORIGIN_CONFIG_FILENAME);
+
+export const DEFAULT_ORIGIN_ID = 'default';
