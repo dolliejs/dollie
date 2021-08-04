@@ -40,6 +40,10 @@ export const deleteRegisteredOrigin = (id: string) => {
 };
 
 export const switchSelectedOrigin = (newOriginId: string) => {
+  if (!newOriginId) {
+    return;
+  }
+
   const origins = readOriginConfig('origins');
 
   if (!origins[newOriginId]) {

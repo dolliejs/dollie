@@ -8,6 +8,7 @@ import {
   OriginConfigSchema,
   registerOrigin,
   deleteRegisteredOrigin,
+  switchSelectedOrigin,
 } from '../utils/origins';
 
 export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
@@ -55,11 +56,13 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
       console.log(table.toString());
     });
 
-  // TODO: `use` command
   command
     .command('use')
     .description('select and use an appropriate origin handler')
-    .arguments('[id]');
+    .arguments('[id]')
+    .action((id: string) => {
+      switchSelectedOrigin(id);
+    });
 
   return command;
 };
