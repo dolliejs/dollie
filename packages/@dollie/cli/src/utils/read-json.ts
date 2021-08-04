@@ -20,7 +20,7 @@ export const readJson = (pathname: string, key?: string): any => {
 
   return (
     key && _.isString(key)
-      ? config[key]
+      ? _.get(config, key)
       : config
   );
 };
