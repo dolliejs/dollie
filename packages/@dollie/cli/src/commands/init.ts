@@ -259,9 +259,15 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
           selectedOrigin = origins.find((origin) => origin.name === selectedOriginHandlerId);
         }
 
+        const originHandler = _.get(selectedOrigin, 'handler');
+
         const context = new Context(name, template, {
           generator: {
-            origins,
+            ...(
+              !originHandler || !_.isFunction(originHandler)
+                ? { origins }
+                : {}
+            ),
             origin: originConfig.origin || {},
             loader: _.get(config, 'loader'),
             originHandler: _.get(selectedOrigin, 'handler'),
