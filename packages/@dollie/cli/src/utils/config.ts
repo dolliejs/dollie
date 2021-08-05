@@ -3,29 +3,24 @@ import _ from 'lodash';
 import {
   LoaderConfig,
 } from '@dollie/core';
-import { SYSTEM_CONFIG_PATHNAME } from '../constants';
+import {
+  SYSTEM_CONFIG_PATHNAME,
+} from '../constants';
+import {
+  readJson,
+} from './read-json';
 
-interface DollieCLIConfigSchema {
-  origin?: Record<string, string>;
-  origins?: Record<string, string>;
+interface CLIConfigSchema {
   loader?: LoaderConfig;
+  cache?: CacheConfig;
 }
 
-const readConfig = (): DollieCLIConfigSchema => {
-  if (
-    !fs.existsSync(SYSTEM_CONFIG_PATHNAME) ||
-    !fs.statSync(SYSTEM_CONFIG_PATHNAME).isFile()
-  ) {
-    return {};
-  }
+interface CacheConfig {
+  dir?: string;
+}
 
-  const content = fs.readFileSync(SYSTEM_CONFIG_PATHNAME).toString();
-
-  try {
-    return JSON.parse(content);
-  } catch {
-    return {};
-  }
+const readConfig = (key?: string): any => {
+  return readJson(SYSTEM_CONFIG_PATHNAME, key);
 };
 
 const writeConfig = (key: string, value: any) => {
@@ -38,11 +33,13 @@ const writeConfig = (key: string, value: any) => {
 
   const content = fs.readFileSync(SYSTEM_CONFIG_PATHNAME).toString();
 
-  let parsedConfig;
+  let parsedConfig: CLIConfigSchema;
 
   try {
     parsedConfig = JSON.parse(content);
-  } catch {}
+  } catch {
+    parsedConfig = {};
+  }
 
   if (!parsedConfig) {
     return;
@@ -55,5 +52,5 @@ const writeConfig = (key: string, value: any) => {
 export {
   readConfig,
   writeConfig,
-  DollieCLIConfigSchema,
+  CLIConfigSchema,
 };

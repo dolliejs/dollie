@@ -2,12 +2,12 @@ import commander from 'commander';
 import _ from 'lodash';
 import Table from 'cli-table3';
 import fs from 'fs-extra';
-import {
-  CACHE_DIR,
-} from '../constants';
 import path from 'path';
+import { getCacheDir } from '../utils/cache';
 
 export default () => {
+  const cacheDir = getCacheDir();
+
   const command = new commander.Command('cache');
 
   command.description('manage CLI cache');
@@ -19,7 +19,7 @@ export default () => {
       let cachedTemplateLabels: string[] = [];
 
       try {
-        cachedTemplateLabels = fs.readdirSync(CACHE_DIR);
+        cachedTemplateLabels = fs.readdirSync(cacheDir);
       } catch {}
 
       if (cachedTemplateLabels.length > 0) {
@@ -43,7 +43,7 @@ export default () => {
       let cachedTemplateLabels: string[] = [];
 
       try {
-        cachedTemplateLabels = fs.readdirSync(CACHE_DIR);
+        cachedTemplateLabels = fs.readdirSync(cacheDir);
       } catch {}
 
       const templateLabel = cachedTemplateLabels[index];
@@ -52,19 +52,19 @@ export default () => {
         return;
       }
 
-      fs.removeSync(path.resolve(CACHE_DIR, templateLabel));
+      fs.removeSync(path.resolve(cacheDir, templateLabel));
     });
 
   command
     .command('clear')
     .description('clear all cached templates')
     .action(() => {
-      if (!fs.existsSync(CACHE_DIR)) {
+      if (!fs.existsSync(cacheDir)) {
         return;
       }
 
-      fs.removeSync(CACHE_DIR);
-      fs.mkdirpSync(CACHE_DIR);
+      fs.removeSync(cacheDir);
+      fs.mkdirpSync(cacheDir);
     });
 
   return command;

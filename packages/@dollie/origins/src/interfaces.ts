@@ -5,12 +5,12 @@ import * as lodash from 'lodash';
 import * as fs from 'fs';
 
 export type OriginConfig = Record<string, any>;
-export type DollieOriginHeaders = Record<string, any>;
-export type DollieOriginMap = Record<string, string | DollieOriginHandler>;
+export type OriginHeaders = Record<string, any>;
+export type OriginMap = Record<string, string | OriginHandler>;
 
-export interface DollieOriginInfo {
+export interface OriginInfo {
   url: string;
-  headers?: DollieOriginHeaders;
+  headers?: OriginHeaders;
   cache?: boolean;
 }
 
@@ -19,14 +19,14 @@ export interface OriginHandlerDependencies {
   fs: typeof fs;
 }
 
-export type DollieOriginHandler = (
+export type OriginHandler = (
   id: string,
   config: OriginConfig,
   request: Got,
   deps: OriginHandlerDependencies,
-) => Promise<DollieOriginInfo>;
+) => Promise<OriginInfo>;
 
 export interface Origin {
   name: string;
-  handler: DollieOriginHandler;
+  handler: OriginHandler;
 };

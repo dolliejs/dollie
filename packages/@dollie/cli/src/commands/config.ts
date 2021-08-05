@@ -1,11 +1,15 @@
 import commander from 'commander';
 import _ from 'lodash';
 import {
-  DollieCLIConfigSchema,
+  CLIConfigSchema,
   writeConfig,
+  readConfig,
 } from '../utils/config';
+import { CACHE_DIR } from '../constants';
+import fs from 'fs-extra';
+import path from 'path';
 
-export default (config: DollieCLIConfigSchema) => {
+export default (config: CLIConfigSchema) => {
   const command = new commander.Command('config');
 
   command.description('manage CLI configurations');
@@ -15,7 +19,19 @@ export default (config: DollieCLIConfigSchema) => {
     .description('set value to CLI configuration item')
     .arguments('[key] [value]')
     .action((key: string, value: string) => {
-      writeConfig(key, value);
+      const relativePathKeyList = ['cache.dir'];
+      let configValue: string = value;
+
+      if (relativePathKeyList.indexOf(key) !== -1) {
+        configValue = path.resolve(process.cwd(), value);
+      }
+
+      if (key === 'cache.dir') {
+        const cacheDir = readConfig('cache.dir') || CACHE_DIR;
+        fs.removeSync(cacheDir);
+      }
+
+      writeConfig(key, configValue);
     });
 
   command

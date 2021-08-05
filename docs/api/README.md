@@ -283,17 +283,17 @@ Depended types:
 
 ### Types & Interfaces
 
-#### `DollieOriginMap`
+#### `OriginMap`
 
 Dollie origin function list, with the key as function name and the value as origin function or file path. The file path can be either a relative path to the local file system or an Internet URL.
 
 ```typescript
-type DollieOriginMap = Record<string, string | DollieOriginHandler>;
+type OriginMap = Record<string, string | OriginHandler>;
 ```
 
 Depended types:
 
-- [`DollieOriginHandler`](/api#dollieoriginhandler)
+- [`OriginHandler`](/api#dollieoriginhandler)
 
 #### `OriginConfig`
 
@@ -303,25 +303,25 @@ The type passed to each origin function as a formal parameter is read and resolv
 type OriginConfig = Record<string, any>;
 ```
 
-#### `DollieOriginHandler`
+#### `OriginHandler`
 
 The origin function, which must return the specified origin information for use by the generator.
 
 ```typescript
-type DollieOriginHandler = (
+type OriginHandler = (
     // context ID
     id: string,
     // a configuration item defined by the function itself, which can be any key-value pair
     config: OriginConfig,
     // a `Got` instance to help the Origin function send requests
     request: Got,
-) => Promise<DollieOriginInfo>;
+) => Promise<OriginInfo>;
 ```
 
 Depended types:
 
 - [`OriginConfig`](/api#dollieoriginconfig)
-- [`DollieOriginInfo`](/api#dollieorigininfo)
+- [`OriginInfo`](/api#dollieorigininfo)
 
 #### `Origin`
 
@@ -332,37 +332,37 @@ interface Origin {
     // origin function name
     name: string;
     // origin function body
-    handler: DollieOriginHandler;
+    handler: OriginHandler;
 };
 ```
 
 Depended types:
 
-- [`DollieOriginHandler`](/api#dollieoriginhandler)
+- [`OriginHandler`](/api#dollieoriginhandler)
 
-#### `DollieOriginInfo`
+#### `OriginInfo`
 
 Standard, understandable origin information for Dollie generators. Used as the origin function return value.
 
 ```typescript
-interface DollieOriginInfo {
+interface OriginInfo {
     // The final URL for the generator to pull the template
     url: string;
     // the HTTP request header used by the generator to pull the template
-    headers?: DollieOriginHeaders;
+    headers?: OriginHeaders;
 }
 ```
 
 Depended types:
 
-- [`DollieOriginHeaders`](/api#dollieoriginheaders)
+- [`OriginHeaders`](/api#dollieoriginheaders)
 
-#### `DollieOriginHeaders`
+#### `OriginHeaders`
 
 The HTTP request header used by the generator to pull the template.
 
 ```typescript
-type DollieOriginHeaders = Record<string, any>;
+type OriginHeaders = Record<string, any>;
 ```
 
 ### Built-in Origin Functions
@@ -381,13 +381,13 @@ Configuration items:
 - `host: string` Specify the domain name when the template is stored in a self-hosted GitLab service
 - `protocol: string` When storing templates in a self-hosted GitLab service, specify the protocol type, which supports `http` and `https`.
 
-### `loadOrigins(config: DollieOriginMap): Promise<Origin[]>`
+### `loadOrigins(config: OriginMap): Promise<Origin[]>`
 
 Loads all origin functions based on the provided Dollie origin function key-value pairs and returns data that the Dollie generator can understand.
 
 Parameters:
 
-- `config: DollieOriginMap` Origin function key-value pair configuration
+- `config: OriginMap` Origin function key-value pair configuration
 
 Return value:
 
@@ -396,7 +396,7 @@ Return value:
 Depended types:
 
 - [`Origin`](/api#dollieorigin)
-- [`DollieOriginMap`](/api#dollieoriginmap)
+- [`OriginMap`](/api#dollieoriginmap)
 
 ## Template Configurations
 

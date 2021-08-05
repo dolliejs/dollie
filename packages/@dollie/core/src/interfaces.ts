@@ -1,4 +1,5 @@
 import {
+  OriginHandler,
   Origin,
   OriginConfig,
 } from '@dollie/origins';
@@ -44,9 +45,11 @@ export type LoaderConfig = LoaderOptions & GotOptions;
 export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 
 export interface GeneratorConfig {
+  // configuration items for selected origin handler
   origin?: OriginConfig;
   origins?: Origin[];
   loader?: LoaderConfig;
+  originHandler?: OriginHandler;
   getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
   conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
   onMessage?: MessageHandler;

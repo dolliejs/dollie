@@ -1,6 +1,6 @@
 import commander from 'commander';
 import {
-  DollieCLIConfigSchema,
+  CLIConfigSchema,
 } from '../utils/config';
 import {
   Context,
@@ -20,9 +20,15 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import {
-  loadOrigins,
+  loadOrigins, OriginHandler, Origin,
 } from '../../../origins/lib';
-import { getCacheFromFilesystem, setCacheToFilesystem } from '../utils/cache';
+import {
+  getCacheFromFilesystem,
+  setCacheToFilesystem,
+} from '../utils/cache';
+import {
+  OriginConfigSchema, readOriginConfig,
+} from '../utils/origins';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -102,7 +108,7 @@ const conflictsSolver = async (
     }
 
     case 'simple': {
-      const {result} = (await inquirer.prompt(
+      const { result } = (await inquirer.prompt(
         [
           {
             name: 'result',
@@ -230,7 +236,7 @@ const conflictsSolver = async (
   }
 };
 
-export default (config: DollieCLIConfigSchema) => {
+export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
   const command = new commander.Command('init');
 
   command
@@ -244,11 +250,27 @@ export default (config: DollieCLIConfigSchema) => {
 
         infoLogger.log('Loading origins...');
 
+        const origins = await loadOrigins(originConfig.origins || {});
+
+        let selectedOrigin: Origin;
+        const selectedOriginHandlerId = readOriginConfig('selectedOriginId');
+
+        if (selectedOriginHandlerId) {
+          selectedOrigin = origins.find((origin) => origin.name === selectedOriginHandlerId);
+        }
+
+        const originHandler = _.get(selectedOrigin, 'handler');
+
         const context = new Context(name, template, {
           generator: {
-            origins: await loadOrigins(config.origins || {}),
-            origin: config.origin || {},
+            ...(
+              !originHandler || !_.isFunction(originHandler)
+                ? { origins }
+                : {}
+            ),
+            origin: originConfig.origin || {},
             loader: _.get(config, 'loader'),
+            originHandler: _.get(selectedOrigin, 'handler'),
             getTemplateProps: async (questions) => {
               const answers = await inquirer.prompt(questions);
               return answers;

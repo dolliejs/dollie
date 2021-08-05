@@ -8,11 +8,11 @@ export {
 
 export {
   OriginConfig,
-  DollieOriginHeaders,
-  DollieOriginInfo,
-  DollieOriginHandler,
+  OriginHeaders,
+  OriginInfo,
+  OriginHandler,
   Origin,
-  DollieOriginMap,
+  OriginMap,
 } from './interfaces';
 
 export {

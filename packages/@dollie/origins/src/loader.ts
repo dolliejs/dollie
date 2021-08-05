@@ -2,7 +2,7 @@ import got from 'got';
 import _ from 'lodash';
 import {
   Origin,
-  DollieOriginMap,
+  OriginMap,
 } from './interfaces';
 import fs from 'fs';
 import requireFromString from 'require-from-string';
@@ -13,7 +13,7 @@ const isUrl = (url: string) => {
   return /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#.*)?$/.test(url);
 };
 
-const loadOrigins = async (config: DollieOriginMap): Promise<Origin[]> => {
+const loadOrigins = async (config: OriginMap): Promise<Origin[]> => {
   const result: Origin[] = [];
 
   for (const name of Object.keys(config)) {

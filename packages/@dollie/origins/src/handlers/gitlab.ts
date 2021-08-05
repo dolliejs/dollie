@@ -1,4 +1,4 @@
-import { DollieOriginHandler } from '../interfaces';
+import { OriginHandler } from '../interfaces';
 
 export default (async (id, config = {}, request, deps) => {
   if (!id) {
@@ -73,4 +73,4 @@ export default (async (id, config = {}, request, deps) => {
       (sha ? `?sha=${sha}` : ''),
     cache,
   };
-}) as DollieOriginHandler;
+}) as OriginHandler;
