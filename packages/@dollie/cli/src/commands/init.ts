@@ -20,7 +20,8 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import {
-  loadOrigins, OriginHandler, Origin,
+  loadOrigins,
+  Origin,
 } from '../../../origins/lib';
 import {
   getCacheFromFilesystem,
@@ -241,8 +242,10 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
 
   command
     .description('init a project with an appropriate template')
-    .arguments('[template] [name]')
-    .action(async (template: string, name: string) => {
+    .arguments('[name]')
+    .option('-t, --template [id]', 'a template ID that can be understood by selected origin handler')
+    .action(async (name: string) => {
+      const { template } = command.opts();
       console.log(figlet.textSync('dollie.js'));
       try {
         const errorLogger = new ErrorLogger();
@@ -263,14 +266,9 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
 
         const context = new Context(name, template, {
           generator: {
-            ...(
-              !originHandler || !_.isFunction(originHandler)
-                ? { origins }
-                : {}
-            ),
             origin: originConfig.origin || {},
             loader: _.get(config, 'loader'),
-            originHandler: _.get(selectedOrigin, 'handler'),
+            originHandler,
             getTemplateProps: async (questions) => {
               const answers = await inquirer.prompt(questions);
               return answers;

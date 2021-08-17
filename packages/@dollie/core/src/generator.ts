@@ -154,14 +154,7 @@ class Generator {
       originHandler,
     } = this.config;
 
-    let handler: OriginHandler;
-
-    if (originHandler) {
-      handler = originHandler;
-    } else {
-      // match and use the correct origin handler function
-      handler = _.get(this.origins.find((origin) => origin.name === this.templateOrigin), 'handler');
-    }
+    const handler = originHandler;
 
     if (!_.isFunction(handler)) {
       throw new ContextError(`origin \`${this.templateOrigin}\` has a wrong handler type`);

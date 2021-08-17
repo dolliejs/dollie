@@ -47,7 +47,6 @@ export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 export interface GeneratorConfig {
   // configuration items for selected origin handler
   origin?: OriginConfig;
-  origins?: Origin[];
   loader?: LoaderConfig;
   originHandler?: OriginHandler;
   getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
