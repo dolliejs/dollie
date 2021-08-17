@@ -243,7 +243,7 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
   command
     .description('init a project with an appropriate template')
     .arguments('[name]')
-    .option('-t, --template [id]', 'a template ID that can be understood by selected origin handler')
+    .requiredOption('-t, --template <id>', 'a template ID that can be understood by selected origin handler')
     .action(async (name: string) => {
       const { template } = command.opts();
       console.log(figlet.textSync('dollie.js'));
