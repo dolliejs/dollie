@@ -159,7 +159,10 @@ export type MessageHandler = (message: string) => void;
 export type SetCacheHandler = (label: string, data: Buffer) => void;
 export type GetCacheHandler = (label: string) => Promise<Buffer>;
 
+export type ContextType = 'project' | 'component';
+
 export interface Config {
+  type?: ContextType;
   generator?: GeneratorConfig;
   onStatusChange?: StatusChangeHandler;
   onError?: ErrorHandler;

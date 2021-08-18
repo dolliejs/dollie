@@ -2,7 +2,8 @@ import _ from 'lodash';
 import {
   DollieError,
 } from './errors';
-import Generator from './generator';
+import Generator from './generators/generator.abstract';
+import ProjectGenerator from './generators/project.generator';
 import {
   Config,
   ContextStatusMap,
@@ -18,6 +19,9 @@ class Context {
     private statusChangeHandler: StatusChangeHandler;
     private lifecycleList: string[] = ['bootstrap', 'load', 'write', 'conflict', 'end'];
     private statusMap: ContextStatusMap;
+    private generatorClassMap: Record<string, typeof Generator> = {
+      project: ProjectGenerator,
+    };
 
     public constructor(
       protected projectName: string,
@@ -52,7 +56,13 @@ class Context {
         templateOriginName,
         config,
       } = this;
-      this.generator = new Generator(projectName, templateOriginName, {
+      const { type = 'project' } = config;
+      const ContextGenerator = this.generatorClassMap[type];
+      if (!(ContextGenerator instanceof Generator)) {
+        this.errorHandler(new DollieError('cannot assign an appropriate generator'));
+        return;
+      }
+      this.generator = new ContextGenerator(projectName, templateOriginName, {
         ...(config.generator || {}),
         onMessage: this.messageHandler,
       });
