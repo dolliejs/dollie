@@ -51,21 +51,21 @@ class ProjectGenerator extends Generator implements Generator {
   /**
    * Generator constructor
    * @param {string} projectName name of project that to be generated
-   * @param {string} templateOriginName origin context id, read by generator
+   * @param {string} templateId origin context id, read by generator
    * @param {GeneratorConfig} config generator configuration
    */
   public constructor(
     projectName: string,
-    templateOriginName: string,
+    templateId: string,
     config: GeneratorConfig = {},
   ) {
-    super(projectName, templateOriginName, config);
+    super(projectName, templateId, config);
     this.pendingTemplateLabels.push('main');
   }
 
   public checkInputs() {
     this.messageHandler('Validating inputs...');
-    if (!this.templateOriginName || !_.isString(this.templateOriginName)) {
+    if (!this.templateId || !_.isString(this.templateId)) {
       throw new InvalidInputError('Parameter `name` should be a string');
     }
     if (!this.projectName || !_.isString(this.projectName)) {
@@ -77,15 +77,15 @@ class ProjectGenerator extends Generator implements Generator {
     this.origins = _.get(this, 'config.origins') || [];
 
     // parse the origin id and template id
-    if (_.isString(this.templateOriginName)) {
-      if (!this.templateOriginName.includes(':')) {
+    if (_.isString(this.templateId)) {
+      if (!this.templateId.includes(':')) {
         this.templateOrigin = 'github';
-        this.templateName = this.templateOriginName;
+        this.templateName = this.templateId;
       } else {
         [
           this.templateOrigin = 'github',
           this.templateName,
-        ] = this.templateOriginName.split(':');
+        ] = this.templateId.split(':');
       }
     }
 

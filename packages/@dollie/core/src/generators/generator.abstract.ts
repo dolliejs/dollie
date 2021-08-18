@@ -52,7 +52,7 @@ abstract class Generator {
 
   public constructor(
     protected projectName: string,
-    protected templateOriginName: string,
+    protected templateId: string,
     protected config: GeneratorConfig = {},
   ) {
     this.templateName = '';

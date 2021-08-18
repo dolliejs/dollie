@@ -96,12 +96,16 @@ export interface TemplateCleanupData {
 
 export type TemplateCleanUpFunction = (data: TemplateCleanupData) => MergeTable;
 export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
+export interface ComponentProps {
+  questions?: Question[];
+}
 
 export interface TemplateConfig {
   questions?: Question[];
   files?: TemplateFileConfig;
   cleanups?: TemplateCleanUpFunction[];
   extendTemplates?: ExtendTemplateConfig;
+  components?: Record<string, ComponentProps>;
 }
 
 export interface ParsedProps {
