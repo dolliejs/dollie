@@ -11,6 +11,7 @@ import {
   GeneratorConfig,
   Question,
   ExtendTemplateConfig,
+  GeneratorResult,
 } from '../interfaces';
 import {
   ContextError,
@@ -256,7 +257,7 @@ abstract class Generator {
   public abstract mergeTemplateFiles(): void;
   public abstract resolveConflicts(): void;
   public abstract runCleanups(): void;
-  public abstract getResult(): void;
+  public abstract getResult(): GeneratorResult;
 }
 
 export default Generator;
