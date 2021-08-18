@@ -41,7 +41,7 @@ import {
 } from '../matchers';
 import Generator from './generator.abstract';
 
-class ProjectGenerator extends Generator {
+class ProjectGenerator extends Generator implements Generator {
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];

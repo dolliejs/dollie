@@ -19,9 +19,6 @@ class Context {
     private statusChangeHandler: StatusChangeHandler;
     private lifecycleList: string[] = ['bootstrap', 'load', 'write', 'conflict', 'end'];
     private statusMap: ContextStatusMap;
-    private generatorClassMap: Record<string, typeof Generator> = {
-      project: ProjectGenerator,
-    };
 
     public constructor(
       protected projectName: string,
@@ -57,15 +54,24 @@ class Context {
         config,
       } = this;
       const { type = 'project' } = config;
-      const ContextGenerator = this.generatorClassMap[type];
-      if (!(ContextGenerator instanceof Generator)) {
-        this.errorHandler(new DollieError('cannot assign an appropriate generator'));
-        return;
+
+      switch (type) {
+        case 'project': {
+          this.generator = new ProjectGenerator(projectName, templateOriginName, {
+            ...(config.generator || {}),
+            onMessage: this.messageHandler,
+          });
+          break;
+        }
+        default: {
+          break;
+        }
       }
-      this.generator = new ContextGenerator(projectName, templateOriginName, {
-        ...(config.generator || {}),
-        onMessage: this.messageHandler,
-      });
+
+      if (!this.generator) {
+        this.errorHandler(new DollieError('Cannot assign an appropriate generator'));
+      }
+
       this.generator.checkInputs();
       await this.generator.initialize();
       this.generator.checkContext();
