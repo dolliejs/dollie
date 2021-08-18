@@ -10,6 +10,9 @@ import {
   deleteRegisteredOrigin,
   switchSelectedOrigin,
 } from '../utils/origins';
+import {
+  DEFAULT_ORIGIN_ID,
+} from '../constants';
 
 export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
   const command = new commander.Command('origin');
@@ -22,7 +25,7 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
     .description('add a template origins')
     .arguments('[name] [pathname]')
     .action((name: string, pathname: string) => {
-      if (name === 'default') {
+      if (name === DEFAULT_ORIGIN_ID) {
         return;
       }
       registerOrigin(name, pathname);

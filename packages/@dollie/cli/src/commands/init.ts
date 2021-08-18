@@ -256,7 +256,7 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
         const origins = await loadOrigins(originConfig.origins || {});
 
         let selectedOrigin: Origin;
-        const selectedOriginHandlerId = readOriginConfig('selectedOriginId');
+        const selectedOriginHandlerId = readOriginConfig('selectedOriginId') || 'github';
 
         if (selectedOriginHandlerId) {
           selectedOrigin = origins.find((origin) => origin.name === selectedOriginHandlerId);
