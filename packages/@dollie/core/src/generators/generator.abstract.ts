@@ -8,10 +8,10 @@ import {
   MergeTable,
   MessageHandler,
   TemplateConfig,
-  GeneratorConfig,
   Question,
   ExtendTemplateConfig,
   GeneratorResult,
+  BaseGeneratorConfig,
 } from '../interfaces';
 import {
   ContextError,
@@ -52,9 +52,8 @@ abstract class Generator {
   protected originHandler: OriginHandler;
 
   public constructor(
-    protected projectName: string,
     protected genericId: string,
-    protected config: GeneratorConfig = {},
+    protected config: BaseGeneratorConfig = {},
   ) {
     this.templateName = '';
     this.templateOrigin = '';

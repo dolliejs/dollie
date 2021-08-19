@@ -41,6 +41,7 @@ import {
 import Generator from './generator.abstract';
 
 class ProjectGenerator extends Generator implements Generator {
+  protected config: GeneratorConfig;
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];
@@ -54,11 +55,11 @@ class ProjectGenerator extends Generator implements Generator {
    * @param {GeneratorConfig} config generator configuration
    */
   public constructor(
-    projectName: string,
+    private projectName: string,
     genericId: string,
     config: GeneratorConfig = {},
   ) {
-    super(projectName, genericId, config);
+    super(genericId, config);
     this.pendingTemplateLabels.push('main');
   }
 

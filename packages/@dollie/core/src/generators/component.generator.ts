@@ -1,15 +1,16 @@
 import {
   GeneratorConfig,
+  FileTable,
 } from '../interfaces';
 import Generator from './generator.abstract';
 
 class ComponentGenerator extends Generator implements Generator {
   public constructor(
-    projectName: string,
     templateId: string,
+    private fileTable: FileTable,
     config: GeneratorConfig = {},
   ) {
-    super(projectName, templateId, config);
+    super(templateId, config);
   }
 
   // TODO: implementation

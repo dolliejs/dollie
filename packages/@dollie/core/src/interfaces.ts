@@ -44,16 +44,20 @@ export type LoaderConfig = LoaderOptions & GotOptions;
 
 export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 
-export interface GeneratorConfig {
-  // configuration items for selected origin handler
-  origin?: OriginConfig;
+export interface BaseGeneratorConfig {
   loader?: LoaderConfig;
+  origin?: OriginConfig;
   originHandler?: OriginHandler;
-  getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
-  conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
-  onMessage?: MessageHandler;
   setCache?: SetCacheHandler;
   getCache?: GetCacheHandler;
+  onMessage?: MessageHandler;
+}
+
+export interface GeneratorConfig extends BaseGeneratorConfig {
+  // configuration items for selected origin handler
+  getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
+  conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
+
 }
 
 export interface PatchTableItem {
@@ -147,8 +151,10 @@ export interface ConflictSolverData extends ConflictBlockMetadata {
   total: number;
 }
 
+export type FileTable = Record<string, string | Buffer>;
+
 export interface GeneratorResult {
-  files: Record<string, string | Buffer>;
+  files: FileTable;
   conflicts: string[];
 }
 
