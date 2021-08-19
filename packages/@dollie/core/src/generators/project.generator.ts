@@ -10,7 +10,6 @@ import {
 import * as _ from 'lodash';
 import {
   InvalidInputError,
-  ContextError,
 } from '../errors';
 import {
   readTemplateEntities,
@@ -51,21 +50,21 @@ class ProjectGenerator extends Generator implements Generator {
   /**
    * Generator constructor
    * @param {string} projectName name of project that to be generated
-   * @param {string} templateId origin context id, read by generator
+   * @param {string} genericId origin context id, read by generator
    * @param {GeneratorConfig} config generator configuration
    */
   public constructor(
     projectName: string,
-    templateId: string,
+    genericId: string,
     config: GeneratorConfig = {},
   ) {
-    super(projectName, templateId, config);
+    super(projectName, genericId, config);
     this.pendingTemplateLabels.push('main');
   }
 
   public checkInputs() {
     this.messageHandler('Validating inputs...');
-    if (!this.templateId || !_.isString(this.templateId)) {
+    if (!this.genericId || !_.isString(this.genericId)) {
       throw new InvalidInputError('Parameter `name` should be a string');
     }
     if (!this.projectName || !_.isString(this.projectName)) {
@@ -74,33 +73,12 @@ class ProjectGenerator extends Generator implements Generator {
   }
 
   public async initialize() {
-    this.origins = _.get(this, 'config.origins') || [];
-
     // parse the origin id and template id
-    if (_.isString(this.templateId)) {
-      if (!this.templateId.includes(':')) {
-        this.templateOrigin = 'github';
-        this.templateName = this.templateId;
-      } else {
-        [
-          this.templateOrigin = 'github',
-          this.templateName,
-        ] = this.templateId.split(':');
-      }
-    }
+    this.templateName = this.genericId;
 
     this.messageHandler('Preparing cache directory...');
     this.volume.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
     this.messageHandler('Initialization finished successfully');
-  }
-
-  public checkContext() {
-    this.messageHandler('Checking runtime context...');
-    const originIds = this.origins.map((origin) => origin.name);
-    const uniqueOriginIds = _.uniq(originIds);
-    if (originIds.length > uniqueOriginIds.length) {
-      throw new ContextError('duplicated origin names');
-    }
   }
 
   /**

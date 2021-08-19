@@ -15,7 +15,6 @@ class ComponentGenerator extends Generator implements Generator {
   // TODO: implementation
   public checkInputs() {}
   public initialize() {}
-  public checkContext() {}
   public queryAllTemplateProps() {}
   public copyTemplateFileToCacheTable() {}
   public deleteFiles() {}

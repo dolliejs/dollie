@@ -1,5 +1,5 @@
 import {
-  Origin,
+  OriginHandler,
 } from '@dollie/origins';
 import {
   BinaryTable,
@@ -47,36 +47,39 @@ abstract class Generator {
   // store binary pathname in virtual file system
   protected binaryTable: BinaryTable = {};
   // origins list
-  protected origins: Origin[] = [];
+  // protected origins: Origin[] = [];
   protected messageHandler: MessageHandler;
+  protected originHandler: OriginHandler;
 
   public constructor(
     protected projectName: string,
-    protected templateId: string,
+    protected genericId: string,
     protected config: GeneratorConfig = {},
   ) {
     this.templateName = '';
     this.templateOrigin = '';
     this.volume = new Volume();
-    const { onMessage: messageHandler = _.noop } = this.config;
+    const {
+      originHandler,
+      onMessage: messageHandler = _.noop,
+    } = this.config;
     this.messageHandler = messageHandler;
+    this.originHandler = originHandler;
+  }
+
+  public async checkContext() {
+    this.messageHandler('Checking runtime context...');
+
+    if (!_.isFunction(this.originHandler)) {
+      throw new ContextError('no origin handler specified');
+    }
   }
 
   public async loadTemplate() {
     this.messageHandler(`Start downloading template from ${this.templateOrigin}:${this.templateName}`);
 
-    const {
-      originHandler,
-    } = this.config;
-
-    const handler = originHandler;
-
-    if (!_.isFunction(handler)) {
-      throw new ContextError(`origin \`${this.templateOrigin}\` has a wrong handler type`);
-    }
-
     // get url and headers from origin handler
-    const { url, headers } = await handler(
+    const { url, headers } = await this.originHandler(
       this.templateName,
       _.get(this.config, 'origin') || {},
       createHttpInstance(_.get(this.config, 'loader') || {}),
@@ -250,7 +253,6 @@ abstract class Generator {
 
   public abstract checkInputs(): void;
   public abstract initialize(): void;
-  public abstract checkContext(): void;
   public abstract queryAllTemplateProps(): void;
   public abstract copyTemplateFileToCacheTable(): void;
   public abstract deleteFiles(): void;
