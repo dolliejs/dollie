@@ -16,7 +16,7 @@ import {
   InfoLogger,
 } from '../logger';
 import _ from 'lodash';
-import inquirer from 'inquirer';
+import inquirer, { Question } from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import {
@@ -30,6 +30,7 @@ import {
 import {
   OriginConfigSchema, readOriginConfig,
 } from '../utils/origins';
+import { HTTPError } from '@dollie/core/lib/errors';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -270,7 +271,7 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
             origin: originConfig.origin || {},
             loader: _.get(config, 'loader'),
             originHandler,
-            getTemplateProps: async (questions) => {
+            getTemplateProps: async (questions: Question[]) => {
               const answers = await inquirer.prompt(questions);
               return answers;
             },
@@ -280,14 +281,14 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
                 return Promise.resolve();
               });
             },
-            setCache: (url, data) => {
+            setCache: (url: string, data: Buffer) => {
               setCacheToFilesystem(url, data);
             },
             getCache: async (url) => {
               return getCacheFromFilesystem(url);
             },
           },
-          onMessage: (message) => infoLogger.log(message),
+          onMessage: (message: string) => infoLogger.log(message),
           onError: (error) => {
             errorLogger.log(error.message);
             process.exit(1);

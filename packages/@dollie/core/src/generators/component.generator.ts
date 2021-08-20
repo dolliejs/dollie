@@ -9,7 +9,9 @@ import {
   diff,
 } from '../diff';
 import {
-  InvalidInputError, ContextError,
+  ParameterInvalidError,
+  ComponentInvalidError,
+  ComponentNotFoundError,
 } from '../errors';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
@@ -32,11 +34,11 @@ class ComponentGenerator extends Generator implements Generator {
     super.checkInputs();
 
     if (!this.fileTable || !_.isObjectLike(this.fileTable)) {
-      throw new InvalidInputError('parameter `fileTable` should be an object');
+      throw new ParameterInvalidError('fileTable');
     }
 
     if (!this.componentId || !_.isString(this.componentId)) {
-      throw new InvalidInputError('parameter `componentId` should be a string');
+      throw new ParameterInvalidError('componentId');
     }
   }
 
@@ -51,11 +53,11 @@ class ComponentGenerator extends Generator implements Generator {
     await super.checkContext();
 
     if (!this.volume.existsSync(this.componentPathname)) {
-      throw new ContextError(`component \`${this.componentPathname}\` not fould`);
+      throw new ComponentNotFoundError(this.componentId);
     }
 
     if (!this.volume.statSync(this.componentPathname).isDirectory()) {
-      throw new ContextError('component in a template should be placed in a folder');
+      throw new ComponentInvalidError(this.componentId);
     }
   }
 

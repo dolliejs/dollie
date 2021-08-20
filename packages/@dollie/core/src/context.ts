@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import {
-  DollieError,
+  ContextError,
 } from './errors';
 import Generator from './generators/generator.abstract';
 import ProjectGenerator from './generators/project.generator';
@@ -25,7 +25,7 @@ class Context {
       private config: Config = {},
     ) {
       const { onStatusChange, onError, onMessage } = config;
-      this.errorHandler = _.isFunction(onError) ? onError : _.noop;
+      this.errorHandler = (_.isFunction(onError) ? onError : _.noop) as ErrorHandler;
       this.messageHandler = _.isFunction(onMessage) ? onMessage : _.noop;
       this.statusChangeHandler = _.isFunction(onStatusChange) ? onStatusChange : _.noop;
       this.statusMap = this.initializeStatus();
@@ -41,7 +41,7 @@ class Context {
         }
         return this.generator.getResult();
       } catch (e) {
-        this.errorHandler(new DollieError(e.message || 'unknown error'));
+        this.errorHandler(e);
       }
     }
 
@@ -67,7 +67,7 @@ class Context {
       }
 
       if (!this.generator) {
-        this.errorHandler(new DollieError('Cannot assign an appropriate generator'));
+        this.errorHandler(new ContextError(undefined, 'Cannot assign an appropriate generator'));
       }
 
       this.generator.checkInputs();
