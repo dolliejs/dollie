@@ -30,7 +30,6 @@ import {
 import {
   OriginConfigSchema, readOriginConfig,
 } from '../utils/origins';
-import { HTTPError } from '@dollie/core/lib/errors';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';

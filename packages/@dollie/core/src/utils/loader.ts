@@ -32,14 +32,8 @@ const downloadFile = async (
   url: string,
   options: GotOptions = {},
 ): Promise<Buffer> => {
-  try {
-    const response = await createHttpInstance(options || {}).get(url);
-    return response.rawBody;
-  } catch (error) {
-    const errorMessage = error.toString();
-    const code = error.code || 'EUNKNOWN';
-    throw new HTTPError(code, errorMessage);
-  }
+  const response = await createHttpInstance(options || {}).get(url);
+  return response.rawBody;
 };
 
 /**
@@ -63,13 +57,14 @@ const loadRemoteTemplate = async (
     } = options;
 
     try {
-      return await downloadFile(url, originalOptions);
+      const result = await downloadFile(url, originalOptions);
+      return result;
     } catch (error) {
       if (error.code === 'ETIMEDOUT') {
         if (retries < maximumRetryCount) {
           return await download(url, retries + 1, options);
         } else {
-          throw new HTTPError(error.code, error?.message || 'Download template timed out');
+          throw new HTTPError(error.code, error.statusCode, error?.message || 'Download template timed out');
         }
       } else {
         throw error;

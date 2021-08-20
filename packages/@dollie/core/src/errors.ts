@@ -25,7 +25,8 @@ export class ContextError extends BaseError {
 
 export class HTTPError extends BaseError {
   public constructor(
-    public httpCode: string | number,
+    public httpCode: string,
+    public statusCode: string | number,
     reason?: string,
   ) {
     super(errorCodeMap.ERR_HTTP, reason);
