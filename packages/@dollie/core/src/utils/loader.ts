@@ -1,14 +1,10 @@
 import {
   Options as GotOptions,
-  RequestError,
 } from 'got';
 import _ from 'lodash';
 import path from 'path';
-import decompress from 'decompress';
 import {
-  DollieError,
-  HTTPNotFoundError,
-  HTTPTimeoutError,
+  HTTPError,
 } from '../errors';
 import fs from 'fs';
 import {
@@ -36,38 +32,8 @@ const downloadFile = async (
   url: string,
   options: GotOptions = {},
 ): Promise<Buffer> => {
-  return new Promise((resolve, reject) => {
-    const downloader = createHttpInstance(_.merge(
-      options || {}, {
-        isStream: true,
-      },
-    )).stream(url);
-
-    const fileBufferChunks = [];
-
-    downloader.on('error', (error: RequestError) => {
-      const errorMessage = error.toString();
-      if (errorMessage.indexOf('404') !== -1) {
-        reject(new HTTPNotFoundError());
-      }
-      if (error.code === 'ETIMEDOUT') {
-        reject(new HTTPTimeoutError());
-      }
-      const otherError = new DollieError(errorMessage);
-      otherError.code = error.code || 'E_UNKNOWN';
-      reject(new Error(errorMessage));
-    });
-
-    downloader.on('data', (chunk) => {
-      fileBufferChunks.push(chunk);
-    });
-
-    downloader.on('end', () => {
-      // concat all buffer chunks to one buffer
-      const fileBuffer = Buffer.concat(fileBufferChunks);
-      resolve(fileBuffer);
-    });
-  });
+  const response = await createHttpInstance(options || {}).get(url);
+  return response.rawBody;
 };
 
 /**
@@ -91,13 +57,14 @@ const loadRemoteTemplate = async (
     } = options;
 
     try {
-      return await downloadFile(url, originalOptions);
+      const result = await downloadFile(url, originalOptions);
+      return result;
     } catch (error) {
-      if (error.code === 'E_TEMPLATE_TIMEOUT' || error instanceof HTTPTimeoutError) {
+      if (error.code === 'ETIMEDOUT') {
         if (retries < maximumRetryCount) {
           return await download(url, retries + 1, options);
         } else {
-          throw new Error(error?.message || 'download template timed out');
+          throw new HTTPError(error.code, error.statusCode, error?.message || 'Download template timed out');
         }
       } else {
         throw error;

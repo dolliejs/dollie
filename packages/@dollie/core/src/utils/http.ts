@@ -1,8 +1,13 @@
-import got, { Got, Options as GotOptions } from 'got';
+import got, {
+  Got,
+  Options as GotOptions,
+  HTTPError as GotHTTPError,
+} from 'got';
 import _ from 'lodash';
 import tunnel from 'tunnel';
 import { RequestOptions } from '../interfaces';
 import { URL } from 'url';
+import { HTTPError } from '../errors';
 
 const generateGotOptions = (options: RequestOptions): GotOptions => {
   const {
@@ -30,6 +35,18 @@ const generateGotOptions = (options: RequestOptions): GotOptions => {
       https: tunnel.httpsOverHttp({ proxy }),
     };
   }
+
+  gotOptions.hooks = {
+    beforeError: [
+      (e) => {
+        const error = e as GotHTTPError;
+        const reason = error?.response?.statusMessage || '';
+        const httpCode = _.snakeCase(reason).toUpperCase();
+        const statusCode = error?.response?.statusCode;
+        return new HTTPError(httpCode, statusCode, reason) as any;
+      },
+    ],
+  };
 
   return gotOptions;
 };

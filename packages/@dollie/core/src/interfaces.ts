@@ -17,7 +17,8 @@ import {
   DistinctQuestion,
 } from 'inquirer';
 import {
-  DollieError,
+  ContextError,
+  HTTPError,
 } from './errors';
 
 export type Question<T extends InquirerAnswers = InquirerAnswers> = DistinctQuestion<T>;
@@ -164,7 +165,7 @@ export interface ContextStatusMap {
 }
 
 export type StatusChangeHandler = (status: ContextStatusMap) => void;
-export type ErrorHandler = (error: DollieError) => void;
+export type ErrorHandler = (error: ContextError | HTTPError) => void;
 export type MessageHandler = (message: string) => void;
 export type SetCacheHandler = (label: string, data: Buffer) => void;
 export type GetCacheHandler = (label: string) => Promise<Buffer>;

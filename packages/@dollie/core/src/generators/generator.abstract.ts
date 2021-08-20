@@ -3,7 +3,6 @@ import {
 } from '@dollie/origins';
 import {
   BinaryTable,
-  CacheTable,
   FileSystem,
   MergeTable,
   MessageHandler,
@@ -13,11 +12,6 @@ import {
   GeneratorResult,
   BaseGeneratorConfig,
 } from '../interfaces';
-import {
-  ContextError,
-  DollieError,
-  InvalidInputError,
-} from '../errors';
 import * as _ from 'lodash';
 import { createHttpInstance } from '../utils/http';
 import fs from 'fs';
@@ -31,12 +25,17 @@ import {
 import path from 'path';
 import requireFromString from 'require-from-string';
 import { Volume } from 'memfs';
+import {
+  ParameterInvalidError,
+  OriginHandlerNotSpecifiedError,
+  URLParseError,
+  TemplateFileNotFound,
+} from '../errors';
 
 abstract class Generator {
   // name of template that to be used
   public templateName: string;
   // selected origin id
-  public templateOrigin: string;
   // virtual file system instance
   protected volume: FileSystem;
   // template config, read from `dollie.js` or `dollie.json`
@@ -54,7 +53,6 @@ abstract class Generator {
     protected config: BaseGeneratorConfig = {},
   ) {
     this.templateName = '';
-    this.templateOrigin = '';
     this.volume = new Volume();
     const {
       originHandler,
@@ -68,11 +66,11 @@ abstract class Generator {
     this.messageHandler('Validating inputs...');
 
     if (!this.genericId || !_.isString(this.genericId)) {
-      throw new InvalidInputError('parameter `name` should be a string');
+      throw new ParameterInvalidError('name');
     }
 
     if (!_.isObjectLike(this.config)) {
-      throw new InvalidInputError('parameter `config` should be an object');
+      throw new ParameterInvalidError('config');
     }
   };
 
@@ -80,12 +78,12 @@ abstract class Generator {
     this.messageHandler('Checking runtime context...');
 
     if (!_.isFunction(this.originHandler)) {
-      throw new ContextError('no origin handler specified');
+      throw new OriginHandlerNotSpecifiedError();
     }
   }
 
   public async loadTemplate() {
-    this.messageHandler(`Start downloading template from ${this.templateOrigin}:${this.templateName}`);
+    this.messageHandler(`Start downloading template ${this.templateName}`);
 
     // get url and headers from origin handler
     const { url, headers } = await this.originHandler(
@@ -99,7 +97,7 @@ abstract class Generator {
     );
 
     if (!_.isString(url) || !url) {
-      throw new ContextError(`origin \`${this.templateOrigin}\` url parsed with errors`);
+      throw new URLParseError();
     }
 
     this.messageHandler(`Template URL parsed: ${url}`);
@@ -130,7 +128,7 @@ abstract class Generator {
     }
 
     if (!data || !_.isBuffer(data)) {
-      throw new DollieError('No template file found, exiting...');
+      throw new TemplateFileNotFound();
     }
 
     setCache(url, data);
