@@ -264,7 +264,7 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
 
         const originHandler = _.get(selectedOrigin, 'handler');
 
-        const context = new Context(name, template, {
+        const context = new Context(template, {
           type: 'project',
           generator: {
             origin: originConfig.origin || {},

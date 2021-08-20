@@ -16,6 +16,7 @@ import {
 import {
   ContextError,
   DollieError,
+  InvalidInputError,
 } from '../errors';
 import * as _ from 'lodash';
 import { createHttpInstance } from '../http';
@@ -40,9 +41,6 @@ abstract class Generator {
   protected volume: FileSystem;
   // template config, read from `dollie.js` or `dollie.json`
   protected templateConfig: TemplateConfig = {};
-  // the table who stores all files
-  // key is relative pathname, value is the diff changes
-  protected cacheTable: CacheTable = {};
   protected mergeTable: MergeTable = {};
   // store binary pathname in virtual file system
   protected binaryTable: BinaryTable = {};
@@ -65,6 +63,18 @@ abstract class Generator {
     this.messageHandler = messageHandler;
     this.originHandler = originHandler;
   }
+
+  public checkInputs() {
+    this.messageHandler('Validating inputs...');
+
+    if (!this.genericId || !_.isString(this.genericId)) {
+      throw new InvalidInputError('parameter `name` should be a string');
+    }
+
+    if (!_.isObjectLike(this.config)) {
+      throw new InvalidInputError('parameter `config` should be an object');
+    }
+  };
 
   public async checkContext() {
     this.messageHandler('Checking runtime context...');
@@ -250,7 +260,6 @@ abstract class Generator {
     )) as Buffer;
   }
 
-  public abstract checkInputs(): void;
   public abstract initialize(): void;
   public abstract queryAllTemplateProps(): void;
   public abstract copyTemplateFileToCacheTable(): void;

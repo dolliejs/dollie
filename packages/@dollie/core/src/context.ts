@@ -21,8 +21,7 @@ class Context {
     private statusMap: ContextStatusMap;
 
     public constructor(
-      protected projectName: string,
-      private templateOriginName: string,
+      private genericId: string,
       private config: Config = {},
     ) {
       const { onStatusChange, onError, onMessage } = config;
@@ -49,15 +48,14 @@ class Context {
     protected async bootstrap() {
       this.updateRunningStatus('bootstrap');
       const {
-        projectName,
-        templateOriginName,
+        genericId,
         config,
       } = this;
       const { type = 'project' } = config;
 
       switch (type) {
         case 'project': {
-          this.generator = new ProjectGenerator(projectName, templateOriginName, {
+          this.generator = new ProjectGenerator(genericId, {
             ...(config.generator || {}),
             onMessage: this.messageHandler,
           });

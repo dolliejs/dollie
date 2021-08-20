@@ -1,6 +1,5 @@
 import {
   OriginHandler,
-  Origin,
   OriginConfig,
 } from '@dollie/origins';
 import {
@@ -51,14 +50,15 @@ export interface BaseGeneratorConfig {
   setCache?: SetCacheHandler;
   getCache?: GetCacheHandler;
   onMessage?: MessageHandler;
-}
-
-export interface GeneratorConfig extends BaseGeneratorConfig {
-  // configuration items for selected origin handler
   getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
-  conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
-
 }
+
+export interface ProjectGeneratorConfig extends BaseGeneratorConfig {
+  // configuration items for selected origin handler
+  conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
+}
+
+export type ComponentGeneratorConfig = BaseGeneratorConfig;
 
 export interface PatchTableItem {
   changes: DiffChange[];
@@ -173,7 +173,7 @@ export type ContextType = 'project' | 'component';
 
 export interface Config {
   type?: ContextType;
-  generator?: GeneratorConfig;
+  generator?: ProjectGeneratorConfig | ComponentGeneratorConfig;
   onStatusChange?: StatusChangeHandler;
   onError?: ErrorHandler;
   onMessage?: MessageHandler;

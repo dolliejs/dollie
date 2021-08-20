@@ -2,15 +2,12 @@ import {
   CacheTable,
   ConflictBlockMetadata,
   DiffChange,
-  GeneratorConfig,
+  ProjectGeneratorConfig,
   GeneratorResult,
   TemplateCleanUpFunction,
   TemplatePropsItem,
 } from '../interfaces';
 import * as _ from 'lodash';
-import {
-  InvalidInputError,
-} from '../errors';
 import {
   readTemplateEntities,
 } from '../loader';
@@ -41,36 +38,27 @@ import {
 import Generator from './generator.abstract';
 
 class ProjectGenerator extends Generator implements Generator {
-  protected config: GeneratorConfig;
+  protected config: ProjectGeneratorConfig;
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];
   // glob pathname matcher
   private matcher: GlobMatcher;
+  // the table who stores all files
+  // key is relative pathname, value is the diff changes
+  private cacheTable: CacheTable = {};
 
   /**
    * Generator constructor
-   * @param {string} projectName name of project that to be generated
    * @param {string} genericId origin context id, read by generator
-   * @param {GeneratorConfig} config generator configuration
+   * @param {ProjectGeneratorConfig} config generator configuration
    */
   public constructor(
-    private projectName: string,
     genericId: string,
-    config: GeneratorConfig = {},
+    config: ProjectGeneratorConfig = {},
   ) {
     super(genericId, config);
     this.pendingTemplateLabels.push('main');
-  }
-
-  public checkInputs() {
-    this.messageHandler('Validating inputs...');
-    if (!this.genericId || !_.isString(this.genericId)) {
-      throw new InvalidInputError('Parameter `name` should be a string');
-    }
-    if (!this.projectName || !_.isString(this.projectName)) {
-      throw new InvalidInputError('Parameter `projectName` should be a string');
-    }
   }
 
   public async initialize() {
