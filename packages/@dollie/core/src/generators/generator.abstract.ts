@@ -19,10 +19,10 @@ import {
   InvalidInputError,
 } from '../errors';
 import * as _ from 'lodash';
-import { createHttpInstance } from '../http';
+import { createHttpInstance } from '../utils/http';
 import fs from 'fs';
 import decompress from 'decompress';
-import { loadRemoteTemplate } from '../loader';
+import { loadRemoteTemplate } from '../utils/loader';
 import {
   EXTEND_TEMPLATE_PREFIX,
   TEMPLATE_CACHE_PATHNAME_PREFIX,

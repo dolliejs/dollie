@@ -9,16 +9,16 @@ import {
   DollieError,
   HTTPNotFoundError,
   HTTPTimeoutError,
-} from './errors';
+} from '../errors';
 import fs from 'fs';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
-} from './constants';
+} from '../constants';
 import {
   FileSystem,
   LoaderConfig,
   TemplateEntity,
-} from './interfaces';
+} from '../interfaces';
 import {
   isBinaryFileSync,
 } from 'isbinaryfile';

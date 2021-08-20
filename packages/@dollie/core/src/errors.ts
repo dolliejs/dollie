@@ -1,13 +1,13 @@
 import _ from 'lodash';
 
 class InvalidInputError extends Error {
-  public constructor(reason) {
+  public constructor(reason: string) {
     super(`Invalid input item${_.isString(reason) ? `: ${reason}` : ''}`);
   }
 }
 
 class ContextError extends Error {
-  public constructor(reason) {
+  public constructor(reason: string) {
     super(`Invalid context${_.isString(reason) ? `: ${reason}` : ''}`);
   }
 }

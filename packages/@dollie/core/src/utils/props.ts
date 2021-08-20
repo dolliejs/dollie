@@ -1,7 +1,7 @@
 import { Answers } from 'inquirer';
 import _ from 'lodash';
-import { EXTEND_TEMPLATE_PREFIX } from './constants';
-import { ParsedProps } from './interfaces';
+import { EXTEND_TEMPLATE_PREFIX } from '../constants';
+import { ParsedProps } from '../interfaces';
 
 const answersParser = (answers: Answers) => {
   return Object.keys(answers).reduce((result, currentKey) => {

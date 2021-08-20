@@ -1,7 +1,7 @@
 import {
   DeleteConfigHandler,
   TemplateConfig,
-} from './interfaces';
+} from '../interfaces';
 import _ from 'lodash';
 
 /**

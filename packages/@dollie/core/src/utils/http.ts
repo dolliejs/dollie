@@ -1,7 +1,7 @@
 import got, { Got, Options as GotOptions } from 'got';
 import _ from 'lodash';
 import tunnel from 'tunnel';
-import { RequestOptions } from './interfaces';
+import { RequestOptions } from '../interfaces';
 import { URL } from 'url';
 
 const generateGotOptions = (options: RequestOptions): GotOptions => {

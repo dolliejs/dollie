@@ -10,7 +10,7 @@ import {
 import * as _ from 'lodash';
 import {
   readTemplateEntities,
-} from '../loader';
+} from '../utils/loader';
 import {
   EXTEND_TEMPLATE_LABEL_PREFIX,
   EXTEND_TEMPLATE_PATHNAME_PREFIX,
@@ -20,7 +20,7 @@ import {
 } from '../constants';
 import {
   answersParser,
-} from '../props';
+} from '../utils/props';
 import {
   diff,
   merge,
@@ -31,10 +31,10 @@ import {
 import ejs from 'ejs';
 import {
   getFileConfigGlobs,
-} from '../files';
+} from '../utils/files';
 import {
   GlobMatcher,
-} from '../matchers';
+} from '../utils/matchers';
 import Generator from './generator.abstract';
 
 class ProjectGenerator extends Generator implements Generator {
