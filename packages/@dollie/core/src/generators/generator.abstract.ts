@@ -89,7 +89,7 @@ abstract class Generator {
     this.messageHandler(`Start downloading template ${this.templateName}`);
 
     // get url and headers from origin handler
-    const { url, headers } = await this.originHandler(
+    const { url, headers, cache = true } = await this.originHandler(
       this.templateName,
       _.get(this.config, 'origin') || {},
       createHttpInstance(_.get(this.config, 'loader') || {}),
@@ -133,7 +133,9 @@ abstract class Generator {
       this.errorHandler(new TemplateFileNotFound());
     }
 
-    setCache(url, data);
+    if (cache) {
+      setCache(url, data);
+    }
 
     const endTimestamp = Date.now();
 
