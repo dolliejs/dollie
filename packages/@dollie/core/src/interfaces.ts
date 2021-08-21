@@ -104,8 +104,12 @@ export interface TemplateCleanupData {
 
 export type TemplateCleanUpFunction = (data: TemplateCleanupData) => MergeTable;
 export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
+
+export type ComponentEntityAlias = Record<string, string>;
+
 export interface ComponentProps {
   questions?: Question[];
+  alias?: ComponentEntityAlias;
 }
 
 export interface TemplateConfig {

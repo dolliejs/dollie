@@ -71,8 +71,8 @@ class Context {
       }
 
       this.generator.checkInputs();
-      await this.generator.initialize();
       this.generator.checkContext();
+      await this.generator.initialize();
       this.updateFinishedStatus('bootstrap');
     }
 
