@@ -6,8 +6,14 @@ import {
 } from './interfaces';
 import fs from 'fs';
 import requireFromString from 'require-from-string';
-import { githubOrigin, gitlabOrigin } from '.';
+import {
+  githubOrigin,
+  gitlabOrigin,
+} from '.';
 import path from 'path';
+import {
+  validateOriginHandlerSource,
+} from './validators';
 
 const isUrl = (url: string) => {
   return /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#.*)?$/.test(url);
@@ -26,10 +32,10 @@ const loadOrigins = async (config: OriginMap): Promise<Origin[]> => {
       });
     } else if (_.isString(pathnameOrHandler)) {
       try {
-        let content: string;
+        let source: string;
 
         if (isUrl(pathnameOrHandler)) {
-          content = (await got(pathnameOrHandler)).body;
+          source = (await got(pathnameOrHandler)).body;
         } else {
           const originHandlerFilePathname = path.resolve(process.cwd(), pathnameOrHandler);
           if (!fs.existsSync(originHandlerFilePathname)) {
@@ -37,15 +43,15 @@ const loadOrigins = async (config: OriginMap): Promise<Origin[]> => {
           }
           const stat = fs.statSync(originHandlerFilePathname);
           if (stat.isFile()) {
-            content = fs.readFileSync(originHandlerFilePathname).toString();
+            source = fs.readFileSync(originHandlerFilePathname).toString();
           }
         }
 
-        if (!content || !_.isString(content)) {
+        if (!source || !_.isString(source) || !validateOriginHandlerSource(source)) {
           continue;
         }
 
-        const handlerFunc = requireFromString(content);
+        const handlerFunc = requireFromString(source);
 
         if (!_.isFunction(handlerFunc)) { continue; }
 

@@ -2,7 +2,6 @@ import {
   Got,
 } from 'got';
 import * as lodash from 'lodash';
-import * as fs from 'fs';
 
 export type OriginConfig = Record<string, any>;
 export type OriginHeaders = Record<string, any>;
@@ -16,7 +15,6 @@ export interface OriginInfo {
 
 export interface OriginHandlerDependencies {
   lodash: typeof lodash;
-  fs: typeof fs;
 }
 
 export type OriginHandler = (

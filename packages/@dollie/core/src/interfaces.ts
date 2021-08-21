@@ -21,6 +21,8 @@ import {
   HTTPError,
 } from './errors';
 
+export type ErrorHandler = (error: ContextError | HTTPError) => void;
+
 export type Question<T extends InquirerAnswers = InquirerAnswers> = DistinctQuestion<T>;
 
 export interface DiffChange extends Change {
@@ -47,11 +49,12 @@ export type ConflictSolveResult = MergeBlock | 'ignored' | null;
 export interface BaseGeneratorConfig {
   loader?: LoaderConfig;
   origin?: OriginConfig;
+  getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
   originHandler?: OriginHandler;
   setCache?: SetCacheHandler;
   getCache?: GetCacheHandler;
   onMessage?: MessageHandler;
-  getTemplateProps?: (questions: Question[]) => Promise<InquirerAnswers>;
+  onError?: ErrorHandler;
 }
 
 export interface ProjectGeneratorConfig extends BaseGeneratorConfig {
@@ -165,7 +168,6 @@ export interface ContextStatusMap {
 }
 
 export type StatusChangeHandler = (status: ContextStatusMap) => void;
-export type ErrorHandler = (error: ContextError | HTTPError) => void;
 export type MessageHandler = (message: string) => void;
 export type SetCacheHandler = (label: string, data: Buffer) => void;
 export type GetCacheHandler = (label: string) => Promise<Buffer>;
@@ -176,6 +178,5 @@ export interface Config {
   type?: ContextType;
   generator?: ProjectGeneratorConfig | ComponentGeneratorConfig;
   onStatusChange?: StatusChangeHandler;
-  onError?: ErrorHandler;
   onMessage?: MessageHandler;
 }

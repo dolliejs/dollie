@@ -11,10 +11,10 @@ import {
   ExtendTemplateConfig,
   GeneratorResult,
   BaseGeneratorConfig,
+  ErrorHandler,
 } from '../interfaces';
 import * as _ from 'lodash';
 import { createHttpInstance } from '../utils/http';
-import fs from 'fs';
 import decompress from 'decompress';
 import { loadRemoteTemplate } from '../utils/loader';
 import {
@@ -46,6 +46,7 @@ abstract class Generator {
   // origins list
   // protected origins: Origin[] = [];
   protected messageHandler: MessageHandler;
+  protected errorHandler: ErrorHandler;
   protected originHandler: OriginHandler;
 
   public constructor(
@@ -57,7 +58,9 @@ abstract class Generator {
     const {
       originHandler,
       onMessage: messageHandler = _.noop,
+      onError: errorHandler = _.noop,
     } = this.config;
+    this.errorHandler = errorHandler;
     this.messageHandler = messageHandler;
     this.originHandler = originHandler;
   }
@@ -66,11 +69,11 @@ abstract class Generator {
     this.messageHandler('Validating inputs...');
 
     if (!this.genericId || !_.isString(this.genericId)) {
-      throw new ParameterInvalidError('name');
+      this.errorHandler(new ParameterInvalidError('name'));
     }
 
     if (!_.isObjectLike(this.config)) {
-      throw new ParameterInvalidError('config');
+      this.errorHandler(new ParameterInvalidError('config'));
     }
   };
 
@@ -78,7 +81,7 @@ abstract class Generator {
     this.messageHandler('Checking runtime context...');
 
     if (!_.isFunction(this.originHandler)) {
-      throw new OriginHandlerNotSpecifiedError();
+      this.errorHandler(new OriginHandlerNotSpecifiedError());
     }
   }
 
@@ -91,13 +94,12 @@ abstract class Generator {
       _.get(this.config, 'origin') || {},
       createHttpInstance(_.get(this.config, 'loader') || {}),
       {
-        fs,
         lodash: _,
       },
     );
 
     if (!_.isString(url) || !url) {
-      throw new URLParseError();
+      this.errorHandler(new URLParseError());
     }
 
     this.messageHandler(`Template URL parsed: ${url}`);
@@ -128,7 +130,7 @@ abstract class Generator {
     }
 
     if (!data || !_.isBuffer(data)) {
-      throw new TemplateFileNotFound();
+      this.errorHandler(new TemplateFileNotFound());
     }
 
     setCache(url, data);

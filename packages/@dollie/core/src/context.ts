@@ -24,25 +24,25 @@ class Context {
       private genericId: string,
       private config: Config = {},
     ) {
-      const { onStatusChange, onError, onMessage } = config;
-      this.errorHandler = (_.isFunction(onError) ? onError : _.noop) as ErrorHandler;
+      const { onStatusChange, onMessage, generator = {} } = config;
       this.messageHandler = _.isFunction(onMessage) ? onMessage : _.noop;
       this.statusChangeHandler = _.isFunction(onStatusChange) ? onStatusChange : _.noop;
       this.statusMap = this.initializeStatus();
+      this.errorHandler = generator.onError;
+
+      if (!this.errorHandler || !_.isFunction(this.errorHandler)) {
+        this.errorHandler = _.noop;
+      }
     }
 
     public async generate() {
-      try {
-        for (const lifecycle of this.lifecycleList) {
-          const lifecycleExecutor = this[lifecycle];
-          if (_.isFunction(lifecycleExecutor)) {
-            await lifecycleExecutor.call(this);
-          }
+      for (const lifecycle of this.lifecycleList) {
+        const lifecycleExecutor = this[lifecycle];
+        if (_.isFunction(lifecycleExecutor)) {
+          await lifecycleExecutor.call(this);
         }
-        return this.generator.getResult();
-      } catch (e) {
-        this.errorHandler(e);
       }
+      return this.generator.getResult();
     }
 
     protected async bootstrap() {

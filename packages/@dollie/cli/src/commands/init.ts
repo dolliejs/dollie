@@ -28,7 +28,8 @@ import {
   setCacheToFilesystem,
 } from '../utils/cache';
 import {
-  OriginConfigSchema, readOriginConfig,
+  OriginConfigSchema,
+  readOriginConfig,
 } from '../utils/origins';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
@@ -269,6 +270,10 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
           generator: {
             origin: originConfig.origin || {},
             loader: _.get(config, 'loader'),
+            onError: (error) => {
+              errorLogger.log(error.message);
+              process.exit(1);
+            },
             originHandler,
             getTemplateProps: async (questions: Question[]) => {
               const answers = await inquirer.prompt(questions);
@@ -288,10 +293,6 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
             },
           },
           onMessage: (message: string) => infoLogger.log(message),
-          onError: (error) => {
-            errorLogger.log(error.message);
-            process.exit(1);
-          },
         });
 
         const result = await context.generate();
