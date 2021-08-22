@@ -5,7 +5,7 @@ import {
   TemplateEntity,
   Question,
 } from '../interfaces';
-import Generator from './generator.abstract';
+import Generator from '../generator.abstract';
 import _ from 'lodash';
 import {
   diff,

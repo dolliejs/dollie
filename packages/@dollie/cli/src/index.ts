@@ -40,15 +40,10 @@ loadOrigins(originConfig.origins).then((origins) => {
 
   program.version(packageJson.version || 'unknown');
 
-  for (const commandKey of Object.keys(commands)) {
-    const commandGenerator = commands[commandKey];
-    if (_.isFunction(commandGenerator)) {
-      program.addCommand(commandGenerator({
-        cliConfig,
-        originConfig,
-        originHandler,
-      }));
-    }
+  for (const commandName of Object.keys(commands)) {
+    const CurrentCommand = commands[commandName];
+    const currentCommand = new CurrentCommand(program, originHandler, cliConfig, originConfig);
+    currentCommand.register();
   }
 
   program.parse(process.argv);

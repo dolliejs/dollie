@@ -1,11 +1,14 @@
-import config from './config';
-import init from './init';
-import origin from './origin';
-import cache from './cache';
+import ConfigCommand from './config.command';
+import InitCommand from './init.command';
+import OriginCommand from './origin.command';
+import CacheCommand from './cache.command';
+import _ from 'lodash';
 
-export default {
-  config,
-  init,
-  origin,
-  cache,
+const commands = {
+  config: ConfigCommand,
+  init: InitCommand,
+  origin: OriginCommand,
+  cache: CacheCommand,
 };
+
+export default commands;

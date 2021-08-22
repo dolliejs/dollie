@@ -1,4 +1,14 @@
 import commander from 'commander';
+import Command from '../command.abstract';
+import figlet from 'figlet';
+import chalk from 'chalk';
+import _ from 'lodash';
+import { writeGeneratedFiles } from '../utils/writer';
+import {
+  getCacheFromFilesystem,
+  setCacheToFilesystem,
+} from '../utils/cache';
+import inquirer, { Question } from 'inquirer';
 import {
   Context,
   ConflictSolverData,
@@ -6,24 +16,16 @@ import {
   parseFileTextToMergeBlocks,
 } from '@dollie/core';
 import {
-  writeGeneratedFiles,
-} from '../utils/writer';
-import {
   ErrorLogger,
   InfoLogger,
 } from '../logger';
-import _ from 'lodash';
-import inquirer, { Question } from 'inquirer';
-import chalk from 'chalk';
-import figlet from 'figlet';
 import {
-  getCacheFromFilesystem,
-  setCacheToFilesystem,
-} from '../utils/cache';
-import { CommandGeneratorContext } from '../interfaces';
-
-export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
-export type ManualResult = 'all' | 'none' | 'former' | 'current';
+  ConflictSolveApproachType,
+  ManualResult,
+} from '../interfaces';
+import { OriginHandler } from '@dollie/origins';
+import { CLIConfigSchema } from '../utils/config';
+import { OriginConfigSchema } from '../utils/origins';
 
 const conflictsSolver = async (
   data: ConflictSolverData,
@@ -228,72 +230,85 @@ const conflictsSolver = async (
   }
 };
 
-export default ({
-  cliConfig,
-  originConfig,
-  originHandler,
-}: CommandGeneratorContext) => {
-  const command = new commander.Command('init');
+class InitCommand extends Command implements Command {
+  public constructor(
+    program: commander.Command,
+    originHandler: OriginHandler,
+    cliConfig: CLIConfigSchema,
+    originConfig: OriginConfigSchema,
+  ) {
+    super('init', program, originHandler, cliConfig, originConfig);
+  }
 
-  command
-    .description('init a project with an appropriate template')
-    .arguments('[name]')
-    .requiredOption('-t, --template <id>', 'a template ID that can be understood by selected origin handler')
-    .action(async (name: string) => {
-      const { template } = command.opts();
-      console.log(figlet.textSync('dollie.js'));
-      try {
-        const errorLogger = new ErrorLogger();
-        const infoLogger = new InfoLogger();
+  protected createCommand(command: commander.Command) {
+    const {
+      cliConfig,
+      originConfig,
+      originHandler,
+    } = this;
 
-        const context = new Context(template, {
-          type: 'project',
-          generator: {
-            origin: originConfig.origin || {},
-            loader: _.get(cliConfig, 'loader'),
-            onError: (error) => {
-              errorLogger.log(error.message);
-              process.exit(1);
-            },
-            originHandler,
-            getTemplateProps: async (questions: Question[]) => {
-              const answers = await inquirer.prompt(questions);
-              return answers;
-            },
-            conflictsSolver: async (data) => {
-              return await conflictsSolver(data, async (message) => {
-                infoLogger.log(message);
-                return Promise.resolve();
-              });
-            },
-            setCache: (url: string, data: Buffer) => {
-              setCacheToFilesystem(url, data);
-            },
-            getCache: async (url) => {
-              return getCacheFromFilesystem(url);
-            },
-          },
-          onMessage: (message: string) => infoLogger.log(message),
-        });
+    command
+      .description('init a project with an appropriate template')
+      .arguments('[name]')
+      .requiredOption('-t, --template <id>', 'a template ID that can be understood by selected origin handler')
+      .action(async (name: string) => {
+        const { template } = command.opts();
+        console.log(figlet.textSync('dollie.js'));
+        try {
+          const errorLogger = new ErrorLogger();
+          const infoLogger = new InfoLogger();
 
-        const result = await context.generate();
+          const context = new Context(template, {
+            type: 'project',
+            generator: {
+              origin: originConfig.origin || {},
+              loader: _.get(cliConfig, 'loader'),
+              onError: (error) => {
+                errorLogger.log(error.message);
+                process.exit(1);
+              },
+              originHandler,
+              getTemplateProps: async (questions: Question[]) => {
+                const answers = await inquirer.prompt(questions);
+                return answers;
+              },
+              conflictsSolver: async (data) => {
+                return await conflictsSolver(data, async (message) => {
+                  infoLogger.log(message);
+                  return Promise.resolve();
+                });
+              },
+              setCache: (url: string, data: Buffer) => {
+                setCacheToFilesystem(url, data);
+              },
+              getCache: async (url) => {
+                return getCacheFromFilesystem(url);
+              },
+            },
+            onMessage: (message: string) => infoLogger.log(message),
+          });
 
-        if (result) {
-          writeGeneratedFiles(result, name);
-        }
+          const result = await context.generate();
 
-        if (_.isArray(result.conflicts) && result.conflicts.length > 0) {
-          infoLogger.log(
-            'Generated template files with ' +
+          if (result) {
+            writeGeneratedFiles(result, name);
+          }
+
+          if (_.isArray(result.conflicts) && result.conflicts.length > 0) {
+            infoLogger.log(
+              'Generated template files with ' +
             result.conflicts.length +
             ' ignored conflicted file(s):\n' +
             result.conflicts.map((conflict) => {
               return chalk.yellow(` - ${conflict}`);
             }).join('\n'),
-          );
-        }
-      } catch {}
-    });
+            );
+          }
+        } catch {}
+      });
 
-  return command;
-};
+    return command;
+  }
+}
+
+export default InitCommand;

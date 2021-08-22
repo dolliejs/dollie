@@ -12,16 +12,16 @@ import {
   GeneratorResult,
   BaseGeneratorConfig,
   ErrorHandler,
-} from '../interfaces';
+} from './interfaces';
 import * as _ from 'lodash';
-import { createHttpInstance } from '../utils/http';
+import { createHttpInstance } from './utils/http';
 import decompress from 'decompress';
-import { loadRemoteTemplate } from '../utils/loader';
+import { loadRemoteTemplate } from './utils/loader';
 import {
   EXTEND_TEMPLATE_PREFIX,
   TEMPLATE_CACHE_PATHNAME_PREFIX,
   TEMPLATE_CONFIG_FILE_NAMES,
-} from '../constants';
+} from './constants';
 import path from 'path';
 import requireFromString from 'require-from-string';
 import { Volume } from 'memfs';
@@ -30,7 +30,7 @@ import {
   OriginHandlerNotSpecifiedError,
   URLParseError,
   TemplateFileNotFound,
-} from '../errors';
+} from './errors';
 
 abstract class Generator {
   // name of template that to be used
