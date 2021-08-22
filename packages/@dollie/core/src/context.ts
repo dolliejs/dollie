@@ -2,7 +2,7 @@ import _ from 'lodash';
 import {
   ContextError,
 } from './errors';
-import Generator from './generators/generator.abstract';
+import Generator from './generator.abstract';
 import ProjectGenerator from './generators/project.generator';
 import {
   Config,

@@ -35,7 +35,7 @@ import {
 import {
   GlobMatcher,
 } from '../utils/matchers';
-import Generator from './generator.abstract';
+import Generator from '../generator.abstract';
 
 class ProjectGenerator extends Generator implements Generator {
   protected config: ProjectGeneratorConfig;
