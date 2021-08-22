@@ -10,26 +10,46 @@ import {
 import fs from 'fs';
 import path from 'path';
 import {
+  OriginConfigSchema,
   readOriginConfig,
 } from './utils/origins';
+import {
+  loadOrigins,
+  Origin,
+} from '@dollie/origins';
 
 initialize();
-const config = readConfig();
-const originConfig = readOriginConfig();
+const cliConfig = readConfig();
+const originConfig = readOriginConfig() as OriginConfigSchema;
 
 const packageJsonContent =
   fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf-8') || '{}';
 const packageJson = JSON.parse(packageJsonContent);
 
-const program = new commander.Command();
+loadOrigins(originConfig.origins).then((origins) => {
+  let selectedOrigin: Origin;
+  const selectedOriginHandlerId = originConfig.selectedOriginId || 'github';
 
-program.version(packageJson.version || 'unknown');
-
-for (const commandKey of Object.keys(commands)) {
-  const commandGenerator = commands[commandKey];
-  if (_.isFunction(commandGenerator)) {
-    program.addCommand(commandGenerator(config, originConfig));
+  if (selectedOriginHandlerId) {
+    selectedOrigin = origins.find((origin) => origin.name === selectedOriginHandlerId);
   }
-}
 
-program.parse(process.argv);
+  return _.get(selectedOrigin, 'handler');
+}).then((originHandler) => {
+  const program = new commander.Command();
+
+  program.version(packageJson.version || 'unknown');
+
+  for (const commandKey of Object.keys(commands)) {
+    const commandGenerator = commands[commandKey];
+    if (_.isFunction(commandGenerator)) {
+      program.addCommand(commandGenerator({
+        cliConfig,
+        originConfig,
+        originHandler,
+      }));
+    }
+  }
+
+  program.parse(process.argv);
+});

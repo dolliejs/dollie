@@ -1,15 +1,17 @@
 import commander from 'commander';
 import _ from 'lodash';
 import {
-  CLIConfigSchema,
   writeConfig,
   readConfig,
 } from '../utils/config';
 import { CACHE_DIR } from '../constants';
 import fs from 'fs-extra';
 import path from 'path';
+import { CommandGeneratorContext } from '../interfaces';
 
-export default (config: CLIConfigSchema) => {
+export default ({
+  cliConfig,
+}: CommandGeneratorContext) => {
   const command = new commander.Command('config');
 
   command.description('manage CLI configurations');
@@ -39,7 +41,7 @@ export default (config: CLIConfigSchema) => {
     .description('get value from CLI configuration item')
     .arguments('[key]')
     .action((key: string) => {
-      console.log(_.get(config, key) || '');
+      console.log(_.get(cliConfig, key) || '');
     });
 
   command
@@ -49,7 +51,7 @@ export default (config: CLIConfigSchema) => {
     .action((key: string) => {
       const [configPath] = key.split('.').slice(-1);
       const parentConfigPath = key.split('.').slice(0, -1).join('.');
-      const configItem = _.get(config, key) || {};
+      const configItem = _.get(cliConfig, key) || {};
       const newConfigItem = Object.keys(configItem).reduce((result, currentKey) => {
         if (configPath !== currentKey) {
           result[configPath] = configItem[configPath];

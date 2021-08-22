@@ -1,8 +1,5 @@
 import commander from 'commander';
 import {
-  CLIConfigSchema,
-} from '../utils/config';
-import {
   Context,
   ConflictSolverData,
   ConflictSolveResult,
@@ -20,17 +17,10 @@ import inquirer, { Question } from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import {
-  loadOrigins,
-  Origin,
-} from '../../../origins/lib';
-import {
   getCacheFromFilesystem,
   setCacheToFilesystem,
 } from '../utils/cache';
-import {
-  OriginConfigSchema,
-  readOriginConfig,
-} from '../utils/origins';
+import { CommandGeneratorContext } from '../interfaces';
 
 export type ConflictSolveApproachType = 'simple' | 'select' | 'edit' | 'ignore';
 export type ManualResult = 'all' | 'none' | 'former' | 'current';
@@ -238,7 +228,11 @@ const conflictsSolver = async (
   }
 };
 
-export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
+export default ({
+  cliConfig,
+  originConfig,
+  originHandler,
+}: CommandGeneratorContext) => {
   const command = new commander.Command('init');
 
   command
@@ -252,24 +246,11 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
         const errorLogger = new ErrorLogger();
         const infoLogger = new InfoLogger();
 
-        infoLogger.log('Loading origins...');
-
-        const origins = await loadOrigins(originConfig.origins || {});
-
-        let selectedOrigin: Origin;
-        const selectedOriginHandlerId = readOriginConfig('selectedOriginId') || 'github';
-
-        if (selectedOriginHandlerId) {
-          selectedOrigin = origins.find((origin) => origin.name === selectedOriginHandlerId);
-        }
-
-        const originHandler = _.get(selectedOrigin, 'handler');
-
         const context = new Context(template, {
           type: 'project',
           generator: {
             origin: originConfig.origin || {},
-            loader: _.get(config, 'loader'),
+            loader: _.get(cliConfig, 'loader'),
             onError: (error) => {
               errorLogger.log(error.message);
               process.exit(1);

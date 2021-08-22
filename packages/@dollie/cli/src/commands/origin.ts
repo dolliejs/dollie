@@ -1,11 +1,7 @@
 import commander from 'commander';
 import _ from 'lodash';
-import {
-  CLIConfigSchema,
-} from '../utils/config';
 import Table from 'cli-table3';
 import {
-  OriginConfigSchema,
   registerOrigin,
   deleteRegisteredOrigin,
   switchSelectedOrigin,
@@ -13,8 +9,9 @@ import {
 import {
   DEFAULT_ORIGIN_ID,
 } from '../constants';
+import { CommandGeneratorContext } from '../interfaces';
 
-export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
+export default ({ originConfig }: CommandGeneratorContext) => {
   const command = new commander.Command('origin');
 
   command.description('manage template origins');

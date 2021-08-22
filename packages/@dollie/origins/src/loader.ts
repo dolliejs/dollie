@@ -19,11 +19,11 @@ const isUrl = (url: string) => {
   return /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#.*)?$/.test(url);
 };
 
-const loadOrigins = async (config: OriginMap): Promise<Origin[]> => {
+const loadOrigins = async (originMap: OriginMap = {}): Promise<Origin[]> => {
   const result: Origin[] = [];
 
-  for (const name of Object.keys(config)) {
-    const pathnameOrHandler = config[name];
+  for (const name of Object.keys(originMap)) {
+    const pathnameOrHandler = originMap[name];
 
     if (_.isFunction(pathnameOrHandler)) {
       result.push({
