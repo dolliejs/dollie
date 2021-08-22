@@ -8,7 +8,7 @@ import {
 } from '../errors';
 import fs from 'fs';
 import {
-  TEMPLATE_CACHE_PATHNAME_PREFIX,
+  TEMPLATE_CACHE_PATHNAME_PREFIX, TEMPLATE_FILE_PREFIX,
 } from '../constants';
 import {
   FileSystem,
@@ -104,20 +104,44 @@ const readTemplateEntities = (
       const fileContent = stat.isFile()
         ? fileSystem.readFileSync(currentEntityPathname)
         : null;
-      const relativePathname = path.relative(pathname, currentEntityPathname);
+
+      let relativePathname = path.relative(pathname, currentEntityPathname);
+      let absolutePathname = currentEntityPathname;
+      const relativeOriginalPathname = relativePathname;
+      const absoluteOriginalPathname = currentEntityPathname;
+
+      const relativeDirectoryPathname = relativePathname
+        .split(path.sep)
+        .slice(0, -1)
+        .join(path.sep);
+      const absoluteDirectoryPathname = currentEntityPathname
+        .split(path.sep)
+        .slice(0, -1)
+        .join(path.sep);
+
+      let entityName = currentEntityPathname.split('/').pop();
+      let isTemplateFile = false;
+
+      if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
+        isTemplateFile = true;
+        entityName = entityName.slice(TEMPLATE_FILE_PREFIX.length);
+        relativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${entityName}`;
+        absolutePathname = `${absoluteDirectoryPathname ? `${absoluteDirectoryPathname}/` : ''}${entityName}`;
+      }
 
       currentResult.push({
-        absolutePathname: currentEntityPathname,
+        entityName,
+        isTemplateFile,
+        absoluteOriginalPathname,
+        absolutePathname,
+        relativeOriginalPathname,
         relativePathname,
-        entityName: currentEntityPathname.split('/').pop(),
+        absoluteDirectoryPathname,
+        relativeDirectoryPathname,
         isBinary: (stat.isFile() && fileContent)
           ? isBinaryFileSync(fileContent, fileContent.length)
           : false,
         isDirectory: stat.isDirectory(),
-        relativeDirectoryPathname: relativePathname
-          .split(path.sep)
-          .slice(0, -1)
-          .join(path.sep),
       });
 
       if (stat.isDirectory()) {

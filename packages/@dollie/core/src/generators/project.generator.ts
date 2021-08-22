@@ -16,7 +16,6 @@ import {
   EXTEND_TEMPLATE_PATHNAME_PREFIX,
   MAIN_TEMPLATE_PATHNAME_PREFIX,
   TEMPLATE_CACHE_PATHNAME_PREFIX,
-  TEMPLATE_FILE_PREFIX,
 } from '../constants';
 import {
   answersParser,
@@ -147,51 +146,46 @@ class ProjectGenerator extends Generator implements Generator {
 
       for (const entity of entities) {
         const {
-          absolutePathname,
-          entityName,
+          absoluteOriginalPathname,
           isBinary,
           isDirectory,
-          relativeDirectoryPathname: relativePathname,
+          isTemplateFile,
+          relativePathname,
         } = entity;
 
         if (isDirectory) { continue; }
 
         if (isBinary) {
-          this.binaryTable[`${relativePathname}/${entityName}`]
-            = this.volume.readFileSync(absolutePathname) as Buffer;
+          this.binaryTable[relativePathname] = this.volume.readFileSync(absoluteOriginalPathname) as Buffer;
         } else {
-          const fileRawContent = this.volume.readFileSync(absolutePathname).toString();
+          const fileRawContent = this.volume.readFileSync(absoluteOriginalPathname).toString();
           let currentFileContent: string;
 
           // detect if current file is a template file
-          if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
+          if (isTemplateFile) {
             currentFileContent = ejs.render(fileRawContent, _.merge(mainTemplateProps, props));
           } else {
             currentFileContent = fileRawContent;
           }
 
-          const currentFileName = entityName.startsWith(TEMPLATE_FILE_PREFIX)
-            ? entityName.slice(TEMPLATE_FILE_PREFIX.length)
-            : entityName;
-          const currentFileRelativePathname = `${relativePathname ? `${relativePathname}/` : ''}${currentFileName}`;
-
           let currentFileDiffChanges: DiffChange[];
+
           if (
-            !this.cacheTable[currentFileRelativePathname] ||
-            this.cacheTable[currentFileRelativePathname].length === 0 ||
-            !_.isArray(this.cacheTable[currentFileRelativePathname])
+            !this.cacheTable[relativePathname] ||
+            this.cacheTable[relativePathname].length === 0 ||
+            !_.isArray(this.cacheTable[relativePathname])
           ) {
             // if cacheTable does not have a record for current file
-            this.cacheTable[currentFileRelativePathname] = [];
+            this.cacheTable[relativePathname] = [];
             // set initial diff changes
             currentFileDiffChanges = diff(currentFileContent);
           } else {
-            const originalFileDiffChanges = this.cacheTable[currentFileRelativePathname][0];
+            const originalFileDiffChanges = this.cacheTable[relativePathname][0];
             const originalFileContent = originalFileDiffChanges.map((diffItem) => diffItem.value).join('');
             currentFileDiffChanges = diff(originalFileContent, currentFileContent);
           }
 
-          this.cacheTable[currentFileRelativePathname].push(currentFileDiffChanges);
+          this.cacheTable[relativePathname].push(currentFileDiffChanges);
         }
       }
     }
