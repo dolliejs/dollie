@@ -43,9 +43,6 @@ class ProjectGenerator extends Generator implements Generator {
   private targetedExtendTemplateIds: string[] = [];
   // glob pathname matcher
   private matcher: GlobMatcher;
-  // the table who stores all files
-  // key is relative pathname, value is the diff changes
-  private cacheTable: CacheTable = {};
 
   /**
    * Generator constructor

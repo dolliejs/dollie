@@ -1,8 +1,13 @@
 import {
+  ComponentDeleteConfigHandler,
+  ComponentProps,
   DeleteConfigHandler,
   TemplateConfig,
 } from '../interfaces';
 import _ from 'lodash';
+import {
+  Answers as InquirerAnswers,
+} from 'inquirer';
 
 /**
  * read config file and accumulate all file patterns
@@ -54,8 +59,37 @@ const getProjectFileConfigGlobs = async (
   ) as string[];
 };
 
-// TODO: getComponentFileConfigGlobs
+const getComponentFileConfigGlobs = async (
+  config: TemplateConfig,
+  componentConfig: ComponentProps,
+  componentProps: InquirerAnswers,
+) => {
+  const patterns: (string | ComponentDeleteConfigHandler)[] = _.get(componentConfig, 'files.delete') || [];
+
+  const result: string[] = [];
+
+  for (const pattern of patterns) {
+    if (_.isString(pattern)) {
+      result.push(pattern);
+    } else if (_.isFunction(pattern)) {
+      const returnValue = await pattern(config, componentProps);
+
+      if (_.isArray(returnValue) && returnValue.length > 0) {
+        for (const value of returnValue) {
+          if (_.isString(value)) {
+            result.push(value);
+          }
+        }
+      } else if (_.isString(returnValue)) {
+        result.push(returnValue);
+      }
+    }
+  }
+
+  return _.uniq(result);
+};
 
 export {
   getProjectFileConfigGlobs,
+  getComponentFileConfigGlobs,
 };

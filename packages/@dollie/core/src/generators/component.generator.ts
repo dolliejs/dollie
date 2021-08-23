@@ -1,7 +1,6 @@
 import {
   ComponentGeneratorConfig,
   FileTable,
-  DiffChange,
   TemplateEntity,
   ComponentProps,
 } from '../interfaces';
@@ -25,13 +24,15 @@ import {
   readTemplateEntities,
 } from '../utils/loader';
 import mustache from 'mustache';
+import { getComponentFileConfigGlobs } from '../utils/files';
+import { GlobMatcher } from '../utils/matchers';
 
 class ComponentGenerator extends Generator implements Generator {
-  private cacheTable: Record<string, DiffChange[]>;
   private componentPathname: string;
   private entities: TemplateEntity[] = [];
   private componentTemplateConfig: ComponentProps = {};
   private componentProps: InquirerAnswers = {};
+  private matcher: GlobMatcher;
 
   public constructor(
     templateId: string,
@@ -118,13 +119,20 @@ class ComponentGenerator extends Generator implements Generator {
     if (_.isFunction(getTemplateProps) && questions.length > 0) {
       this.componentProps = await getTemplateProps(questions);
     }
+
+    const patterns = await this.generateFilePatterns();
+    this.matcher = new GlobMatcher(patterns);
+
+    return _.clone(this.componentProps);
   }
 
   public copyTemplateFileToCacheTable() {}
   public deleteFiles() {}
   public mergeTemplateFiles() {}
+
   public resolveConflicts() {}
   public runCleanups() {}
+
   public getResult() {
     return null;
   }
@@ -136,7 +144,7 @@ class ComponentGenerator extends Generator implements Generator {
     for (const entryPathname of entries) {
       const entryContent = fileTable[entryPathname];
       if (_.isString(entryContent)) {
-        this.cacheTable[entryPathname] = diff(entryContent);
+        this.cacheTable[entryPathname] = [diff(entryContent)];
       }
     }
   }
@@ -179,6 +187,13 @@ class ComponentGenerator extends Generator implements Generator {
   }
 
   private async generateFilePatterns() {
+    return {
+      delete: await getComponentFileConfigGlobs(
+        this.templateConfig,
+        this.componentTemplateConfig,
+        this.componentProps,
+      ),
+    };
   }
 }
 

@@ -12,6 +12,7 @@ import {
   GeneratorResult,
   BaseGeneratorConfig,
   ErrorHandler,
+  CacheTable,
 } from './interfaces';
 import * as _ from 'lodash';
 import { createHttpInstance } from './utils/http';
@@ -41,6 +42,9 @@ abstract class Generator {
   // template config, read from `dollie.js` or `dollie.json`
   protected templateConfig: TemplateConfig = {};
   protected mergeTable: MergeTable = {};
+  // the table who stores all files
+  // key is relative pathname, value is the diff changes
+  protected cacheTable: CacheTable = {};
   // store binary pathname in virtual file system
   protected binaryTable: BinaryTable = {};
   // origins list
