@@ -29,7 +29,7 @@ import {
 } from '../diff';
 import ejs from 'ejs';
 import {
-  getFileConfigGlobs,
+  getProjectFileConfigGlobs,
 } from '../utils/files';
 import {
   GlobMatcher,
@@ -387,7 +387,7 @@ class ProjectGenerator extends Generator implements Generator {
     const patterns = {};
 
     for (const type of ['merge', 'delete']) {
-      patterns[type] = await getFileConfigGlobs(
+      patterns[type] = await getProjectFileConfigGlobs(
         this.templateConfig,
         this.targetedExtendTemplateIds,
         type,

@@ -11,7 +11,7 @@ import _ from 'lodash';
  * @param {string} type
  * @returns
  */
-const getFileConfigGlobs = async (
+const getProjectFileConfigGlobs = async (
   config: TemplateConfig,
   // targeted extend templates
   targets: string[],
@@ -54,6 +54,8 @@ const getFileConfigGlobs = async (
   ) as string[];
 };
 
+// TODO: getComponentFileConfigGlobs
+
 export {
-  getFileConfigGlobs,
+  getProjectFileConfigGlobs,
 };

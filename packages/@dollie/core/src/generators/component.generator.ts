@@ -3,8 +3,11 @@ import {
   FileTable,
   DiffChange,
   TemplateEntity,
-  Question,
+  ComponentProps,
 } from '../interfaces';
+import {
+  Answers as InquirerAnswers,
+} from 'inquirer';
 import Generator from '../generator.abstract';
 import _ from 'lodash';
 import {
@@ -27,6 +30,8 @@ class ComponentGenerator extends Generator implements Generator {
   private cacheTable: Record<string, DiffChange[]>;
   private componentPathname: string;
   private entities: TemplateEntity[] = [];
+  private componentTemplateConfig: ComponentProps = {};
+  private componentProps: InquirerAnswers = {};
 
   public constructor(
     templateId: string,
@@ -53,8 +58,6 @@ class ComponentGenerator extends Generator implements Generator {
   public initialize() {
     this.messageHandler('Parsing project files...');
     this.parseFileTable();
-    this.messageHandler('Parse component entities...');
-    this.entities = readTemplateEntities(this.volume, this.componentPathname);
     this.messageHandler('Initialization finished successfully');
   }
 
@@ -70,7 +73,53 @@ class ComponentGenerator extends Generator implements Generator {
     }
   }
 
-  public queryAllTemplateProps() {}
+  public async loadTemplate() {
+    const duration = await super.loadTemplate();
+
+    this.componentTemplateConfig = _.get(this.templateConfig, `components.${this.componentId}`) || {};
+    const {
+      alias = {},
+    } = this.componentTemplateConfig;
+
+    this.messageHandler('Parsing component entities...');
+    this.entities = readTemplateEntities(this.volume, this.componentPathname).map((entity) => {
+      const {
+        relativePathname,
+      } = entity;
+
+      if (/\{\{.*\}\}/g.test(relativePathname)) {
+        return entity;
+      }
+
+      const targetAliasPathname = alias[relativePathname];
+
+      if (!_.isString(targetAliasPathname)) {
+        return entity;
+      }
+
+      return {
+        ...entity,
+        relativePathname: targetAliasPathname,
+      };
+    });
+
+    this.validateComponentProps();
+
+    return duration;
+  }
+
+  public async queryAllTemplateProps() {
+    const {
+      questions = [],
+    } = this.componentTemplateConfig;
+
+    const { getTemplateProps } = this.config;
+
+    if (_.isFunction(getTemplateProps) && questions.length > 0) {
+      this.componentProps = await getTemplateProps(questions);
+    }
+  }
+
   public copyTemplateFileToCacheTable() {}
   public deleteFiles() {}
   public mergeTemplateFiles() {}
@@ -93,6 +142,10 @@ class ComponentGenerator extends Generator implements Generator {
   }
 
   private validateComponentProps() {
+    const {
+      questions = [],
+    } = this.componentTemplateConfig;
+
     const dependedProps = this.entities.reduce((tempResult, currentEntity) => {
       const {
         relativePathname,
@@ -110,9 +163,6 @@ class ComponentGenerator extends Generator implements Generator {
       return currentResult;
     }, []);
 
-    const componentConfig = _.get(this.templateConfig, `components.${this.componentId}`) || {};
-    const questions = (componentConfig.questions || []) as Question[];
-
     const providedProps = questions.map((question) => question.name);
 
     if (providedProps.length < dependedProps.length) {
@@ -126,6 +176,9 @@ class ComponentGenerator extends Generator implements Generator {
     }
 
     return true;
+  }
+
+  private async generateFilePatterns() {
   }
 }
 

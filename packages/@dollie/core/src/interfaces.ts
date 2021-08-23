@@ -111,9 +111,17 @@ export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTe
 
 export type ComponentEntityAlias = Record<string, string>;
 
+export type ComponentDeleteConfigHandler = (
+  templateConfig: TemplateConfig,
+  props: InquirerAnswers,
+) => Promise<string | string[]>;
+
 export interface ComponentProps {
   questions?: Question[];
   alias?: ComponentEntityAlias;
+  files?: {
+    delete?: (string | ComponentDeleteConfigHandler)[];
+  };
 }
 
 export interface TemplateConfig {
