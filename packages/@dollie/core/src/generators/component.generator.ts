@@ -1,7 +1,6 @@
 import {
   ComponentGeneratorConfig,
   FileTable,
-  TemplateEntity,
   ComponentProps,
 } from '../interfaces';
 import {
@@ -26,6 +25,9 @@ import {
 import mustache from 'mustache';
 import { getComponentFileConfigGlobs } from '../utils/files';
 import { GlobMatcher } from '../utils/matchers';
+import {
+  TemplateEntity,
+} from '@dollie/utils';
 
 class ComponentGenerator extends Generator implements Generator {
   private componentPathname: string;
@@ -126,7 +128,22 @@ class ComponentGenerator extends Generator implements Generator {
     return _.clone(this.componentProps);
   }
 
-  public copyTemplateFileToCacheTable() {}
+  public copyTemplateFileToCacheTable() {
+    for (const entity of this.entities) {
+      const {
+        relativePathname,
+      } = entity;
+
+      const entityPathname = mustache.render(relativePathname, this.componentProps);
+
+      if (!_.isArray(this.cacheTable[entityPathname])) {
+        // this.cacheTable[entityPathname] = [diff()];
+      } else {
+        this.cacheTable[entityPathname].push();
+      }
+    }
+  }
+
   public deleteFiles() {}
   public mergeTemplateFiles() {}
 

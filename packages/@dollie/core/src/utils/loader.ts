@@ -2,25 +2,24 @@ import {
   Options as GotOptions,
 } from 'got';
 import _ from 'lodash';
-import path from 'path';
 import {
   HTTPError,
 } from '../errors';
 import fs from 'fs';
 import {
-  TEMPLATE_CACHE_PATHNAME_PREFIX, TEMPLATE_FILE_PREFIX,
+  TEMPLATE_CACHE_PATHNAME_PREFIX,
+  TEMPLATE_FILE_PREFIX,
 } from '../constants';
 import {
-  FileSystem,
   LoaderConfig,
-  TemplateEntity,
 } from '../interfaces';
-import {
-  isBinaryFileSync,
-} from 'isbinaryfile';
 import {
   createHttpInstance,
 } from './http';
+import {
+  FileSystem,
+  readEntities,
+} from '@dollie/utils';
 
 /**
  * download file from remote origin
@@ -85,81 +84,36 @@ const readTemplateEntities = (
   fileSystem: FileSystem = fs,
   pathname = TEMPLATE_CACHE_PATHNAME_PREFIX,
 ) => {
-  /**
-   * traverse from template root dir
-   * @param {FileSystem} fileSystem
-   * @param {string} currentEntityPathname
-   * @param {TemplateEntity[]} result
-   * @returns {TemplateEntity[]}
-   */
-  const traverse = (
-    fileSystem: FileSystem = fs,
-    currentEntityPathname: string,
-    result: TemplateEntity[] = [],
-  ) => {
-    let currentResult = Array.from(result);
+  const entities = readEntities(fileSystem, pathname).map((entity) => {
+    const {
+      relativeDirectoryPathname,
+      absoluteDirectoryPathname,
+      entityName: initialEntityName,
+      relativePathname: initialRelativePathname,
+      absolutePathname: initialAbsolutePathname,
+    } = entity;
 
-    if (fileSystem.existsSync(currentEntityPathname)) {
-      const stat = fileSystem.statSync(currentEntityPathname);
-      const fileContent = stat.isFile()
-        ? fileSystem.readFileSync(currentEntityPathname)
-        : null;
+    let isTemplateFile = false;
+    let entityName = initialEntityName;
+    let relativePathname = initialRelativePathname;
+    let absolutePathname = initialAbsolutePathname;
 
-      let relativePathname = path.relative(pathname, currentEntityPathname);
-      let absolutePathname = currentEntityPathname;
-      const relativeOriginalPathname = relativePathname;
-      const absoluteOriginalPathname = currentEntityPathname;
-
-      const relativeDirectoryPathname = relativePathname
-        .split(path.sep)
-        .slice(0, -1)
-        .join(path.sep);
-      const absoluteDirectoryPathname = currentEntityPathname
-        .split(path.sep)
-        .slice(0, -1)
-        .join(path.sep);
-
-      let entityName = currentEntityPathname.split('/').pop();
-      let isTemplateFile = false;
-
-      if (entityName.startsWith(TEMPLATE_FILE_PREFIX)) {
-        isTemplateFile = true;
-        entityName = entityName.slice(TEMPLATE_FILE_PREFIX.length);
-        relativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${entityName}`;
-        absolutePathname = `${absoluteDirectoryPathname ? `${absoluteDirectoryPathname}/` : ''}${entityName}`;
-      }
-
-      currentResult.push({
-        entityName,
-        isTemplateFile,
-        absoluteOriginalPathname,
-        absolutePathname,
-        relativeOriginalPathname,
-        relativePathname,
-        absoluteDirectoryPathname,
-        relativeDirectoryPathname,
-        isBinary: (stat.isFile() && fileContent)
-          ? isBinaryFileSync(fileContent, fileContent.length)
-          : false,
-        isDirectory: stat.isDirectory(),
-      });
-
-      if (stat.isDirectory()) {
-        const entities = fileSystem.readdirSync(currentEntityPathname);
-        for (const entity of entities) {
-          currentResult = traverse(
-            fileSystem,
-            `${currentEntityPathname}/${entity}`,
-            currentResult,
-          );
-        }
-      }
+    if (initialEntityName.startsWith(TEMPLATE_FILE_PREFIX)) {
+      isTemplateFile = true;
+      entityName = initialEntityName.slice(TEMPLATE_FILE_PREFIX.length);
+      relativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${entityName}`;
+      absolutePathname = `${absoluteDirectoryPathname ? `${absoluteDirectoryPathname}/` : ''}${entityName}`;
     }
 
-    return currentResult;
-  };
+    return {
+      ...entity,
+      isTemplateFile,
+      relativePathname,
+      absolutePathname,
+    };
+  });
 
-  return traverse(fileSystem, pathname);
+  return entities;
 };
 
 export {

@@ -1,10 +1,17 @@
 {
   "private": true,
   "scripts": {
+    "watch:utils": "cd packages/@dollie/utils && npm run build:watch",
     "watch:cli": "cd packages/@dollie/cli && npm run build:watch",
     "watch:core": "cd packages/@dollie/core && npm run build:watch",
     "watch:origins": "cd packages/@dollie/origins && npm run build:watch",
+    "init-watch": "npm run build",
     "watch": "concurrently \"npm:watch:*\"",
+    "build:utils": "cd packages/@dollie/utils && npm run build",
+    "build:cli": "cd packages/@dollie/cli && npm run build",
+    "build:core": "cd packages/@dollie/core && npm run build",
+    "build:origins": "cd packages/@dollie/origins && npm run build",
+    "build": "npm-run-all -s build:utils build:origins build:core build:cli",
     "docs:start": "dumi dev",
     "docs:build": "dumi build",
     "docs:deploy": "node scripts/docs.js",
@@ -26,6 +33,7 @@
     "jest": "^27.0.4",
     "lerna": "^4.0.0",
     "md5-file": "^5.0.0",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "typescript": "^3.7.7"
   }

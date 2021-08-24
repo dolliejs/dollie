@@ -1,5 +1,5 @@
 import commander from 'commander';
-import { OriginHandler } from '../../origins/lib';
+import { OriginHandler } from '@dollie/origins';
 import { CLIConfigSchema } from './utils/config';
 import { OriginConfigSchema } from './utils/origins';
 import _ from 'lodash';
