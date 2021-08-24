@@ -2,6 +2,7 @@ import {
   ComponentGeneratorConfig,
   FileTable,
   ComponentProps,
+  TemplateFileItem,
 } from '../interfaces';
 import {
   Answers as InquirerAnswers,
@@ -28,18 +29,19 @@ import { GlobMatcher } from '../utils/matchers';
 import {
   TemplateEntity,
 } from '@dollie/utils';
+import ejs from 'ejs';
 
 class ComponentGenerator extends Generator implements Generator {
   private componentPathname: string;
   private entities: TemplateEntity[] = [];
   private componentTemplateConfig: ComponentProps = {};
   private componentProps: InquirerAnswers = {};
-  private matcher: GlobMatcher;
+  private fileTable: FileTable = {};
 
   public constructor(
     templateId: string,
     private componentId: string,
-    private fileTable: FileTable = {},
+    private files: TemplateFileItem[],
     config: ComponentGeneratorConfig = {},
   ) {
     super(templateId, config);
@@ -60,7 +62,7 @@ class ComponentGenerator extends Generator implements Generator {
 
   public initialize() {
     this.messageHandler('Parsing project files...');
-    this.parseFileTable();
+    this.parseProjectFiles();
     this.messageHandler('Initialization finished successfully');
   }
 
@@ -132,36 +134,66 @@ class ComponentGenerator extends Generator implements Generator {
     for (const entity of this.entities) {
       const {
         relativePathname,
+        absoluteOriginalPathname,
+        isBinary,
+        isDirectory,
       } = entity;
 
+      if (isDirectory) {
+        continue;
+      }
+
       const entityPathname = mustache.render(relativePathname, this.componentProps);
+      const contentBuffer = this.volume.readFileSync(absoluteOriginalPathname);
+
+      if (isBinary) {
+        this.binaryTable[entityPathname] = contentBuffer as Buffer;
+        continue;
+      }
+
+      const content = ejs.render(contentBuffer.toString(), this.componentProps);
 
       if (!_.isArray(this.cacheTable[entityPathname])) {
-        // this.cacheTable[entityPathname] = [diff()];
+        this.cacheTable[entityPathname] = [diff(content)];
       } else {
-        this.cacheTable[entityPathname].push();
+        const originalContent = this.fileTable[entityPathname];
+        const diffChange = _.isString(originalContent)
+          ? diff(originalContent, content)
+          : diff(content);
+        this.cacheTable[entityPathname].push(diffChange);
       }
     }
   }
 
-  public deleteFiles() {}
-  public mergeTemplateFiles() {}
-
   public resolveConflicts() {}
+
   public runCleanups() {}
 
   public getResult() {
     return null;
   }
 
-  private parseFileTable() {
-    const fileTable = this.fileTable;
-    const entries = Object.keys(fileTable);
+  private parseProjectFiles() {
+    for (const fileItem of this.files) {
+      const {
+        relativePathname,
+        isBinary,
+        isDirectory,
+        content,
+      } = fileItem;
 
-    for (const entryPathname of entries) {
-      const entryContent = fileTable[entryPathname];
-      if (_.isString(entryContent)) {
-        this.cacheTable[entryPathname] = [diff(entryContent)];
+      if (isDirectory) {
+        continue;
+      }
+
+      if (isBinary && _.isBuffer(content)) {
+        this.binaryTable[relativePathname] = content as Buffer;
+        continue;
+      }
+
+      if (!isBinary && _.isString(content)) {
+        this.fileTable[relativePathname] = content;
+        continue;
       }
     }
   }

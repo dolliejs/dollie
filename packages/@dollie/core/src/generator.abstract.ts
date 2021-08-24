@@ -34,6 +34,8 @@ import {
 import {
   FileSystem,
 } from '@dollie/utils';
+import { GlobMatcher } from './utils/matchers';
+import { merge, parseDiffToMergeBlocks } from './diff';
 
 abstract class Generator {
   // name of template that to be used
@@ -54,6 +56,8 @@ abstract class Generator {
   protected messageHandler: MessageHandler;
   protected errorHandler: ErrorHandler;
   protected originHandler: OriginHandler;
+  // glob pathname matcher
+  protected matcher: GlobMatcher;
 
   public constructor(
     protected genericId: string,
@@ -176,6 +180,44 @@ abstract class Generator {
     return duration;
   }
 
+  public mergeTemplateFiles() {
+    for (const entityPathname of Object.keys(this.cacheTable)) {
+      const diffs = this.cacheTable[entityPathname];
+      if (!diffs || !_.isArray(diffs) || diffs.length === 0) {
+        continue;
+      }
+      if (this.matcher.match(entityPathname, 'merge')) {
+        if (diffs.length === 1) {
+          this.mergeTable[entityPathname] = parseDiffToMergeBlocks(diffs[0]);
+        } else {
+          const originalDiffChanges = diffs[0];
+          const forwardDiffChangesGroup = diffs.slice(1);
+          // merge diff changes if current file is written more than once
+          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
+          this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
+        }
+      } else {
+        // if current file does not match patterns in `merge`
+        // then get the content from the last diff changes
+        this.mergeTable[entityPathname] = parseDiffToMergeBlocks(_.last(diffs));
+      }
+    }
+  }
+
+  public deleteFiles() {
+    this.cacheTable = this.handleDeleteFiles<CacheTable>(this.cacheTable, 'delete');
+    this.binaryTable = this.handleDeleteFiles<BinaryTable>(this.binaryTable, 'delete');
+  }
+
+  protected handleDeleteFiles = <T extends Object>(table: T, type: string) => {
+    return Object.keys(table).reduce((result, currentPathname) => {
+      if (!this.matcher.match(currentPathname, type)) {
+        result[currentPathname] = table[currentPathname];
+      }
+      return result;
+    }, {} as T);
+  };
+
   private parseTemplateConfig() {
     const postfixes: string[] = [];
 
@@ -271,8 +313,6 @@ abstract class Generator {
   public abstract initialize(): void;
   public abstract queryAllTemplateProps(): void;
   public abstract copyTemplateFileToCacheTable(): void;
-  public abstract deleteFiles(): void;
-  public abstract mergeTemplateFiles(): void;
   public abstract resolveConflicts(): void;
   public abstract runCleanups(): void;
   public abstract getResult(): GeneratorResult;

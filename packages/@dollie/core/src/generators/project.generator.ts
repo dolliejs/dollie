@@ -6,6 +6,7 @@ import {
   GeneratorResult,
   TemplateCleanUpFunction,
   TemplatePropsItem,
+  BinaryTable,
 } from '../interfaces';
 import * as _ from 'lodash';
 import {
@@ -22,8 +23,6 @@ import {
 } from '../utils/props';
 import {
   diff,
-  merge,
-  parseDiffToMergeBlocks,
   parseFileTextToMergeBlocks,
   parseMergeBlocksToText,
 } from '../diff';
@@ -41,8 +40,6 @@ class ProjectGenerator extends Generator implements Generator {
   private templatePropsList: TemplatePropsItem[] = [];
   private pendingTemplateLabels: string[] = [];
   private targetedExtendTemplateIds: string[] = [];
-  // glob pathname matcher
-  private matcher: GlobMatcher;
 
   /**
    * Generator constructor
@@ -184,39 +181,6 @@ class ProjectGenerator extends Generator implements Generator {
 
           this.cacheTable[relativePathname].push(currentFileDiffChanges);
         }
-      }
-    }
-  }
-
-  public deleteFiles() {
-    this.cacheTable = Object.keys(this.cacheTable).reduce((result, pathname) => {
-      if (!this.matcher.match(pathname, 'delete')) {
-        result[pathname] = this.cacheTable[pathname];
-      }
-      return result;
-    }, {} as CacheTable);
-  }
-
-  public mergeTemplateFiles() {
-    for (const entityPathname of Object.keys(this.cacheTable)) {
-      const diffs = this.cacheTable[entityPathname];
-      if (!diffs || !_.isArray(diffs) || diffs.length === 0) {
-        continue;
-      }
-      if (this.matcher.match(entityPathname, 'merge')) {
-        if (diffs.length === 1) {
-          this.mergeTable[entityPathname] = parseDiffToMergeBlocks(diffs[0]);
-        } else {
-          const originalDiffChanges = diffs[0];
-          const forwardDiffChangesGroup = diffs.slice(1);
-          // merge diff changes if current file is written more than once
-          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
-          this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
-        }
-      } else {
-        // if current file does not match patterns in `merge`
-        // then get the content from the last diff changes
-        this.mergeTable[entityPathname] = parseDiffToMergeBlocks(_.last(diffs));
       }
     }
   }

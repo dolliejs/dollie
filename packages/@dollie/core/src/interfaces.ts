@@ -16,6 +16,9 @@ import {
   ContextError,
   HTTPError,
 } from './errors';
+import {
+  TemplateEntity,
+} from '@dollie/utils';
 
 export type ErrorHandler = (error: ContextError | HTTPError) => void;
 
@@ -151,7 +154,7 @@ export interface ConflictSolverData extends ConflictBlockMetadata {
   total: number;
 }
 
-export type FileTable = Record<string, string | Buffer>;
+export type FileTable = Record<string, string>;
 
 export interface GeneratorResult {
   files: FileTable;
@@ -175,4 +178,8 @@ export interface Config {
   generator?: ProjectGeneratorConfig | ComponentGeneratorConfig;
   onStatusChange?: StatusChangeHandler;
   onMessage?: MessageHandler;
+}
+
+export interface TemplateFileItem extends TemplateEntity {
+  content: string | Buffer;
 }
