@@ -3,7 +3,6 @@ import {
 } from '@dollie/origins';
 import {
   BinaryTable,
-  FileSystem,
   MergeTable,
   MessageHandler,
   TemplateConfig,
@@ -32,6 +31,9 @@ import {
   URLParseError,
   TemplateFileNotFound,
 } from './errors';
+import {
+  FileSystem,
+} from '@dollie/utils';
 
 abstract class Generator {
   // name of template that to be used
