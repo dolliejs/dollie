@@ -11,7 +11,7 @@ import {
 import Generator from '../generator.abstract';
 import _ from 'lodash';
 import {
-  diff,
+  diff, parseMergeBlocksToText,
 } from '../diff';
 import {
   ParameterInvalidError,
@@ -200,7 +200,23 @@ class ComponentGenerator extends Generator implements Generator {
   public runCleanups() {}
 
   public getResult() {
-    return null;
+    const currentFileTable = _.merge(this.binaryTable, Object.keys(this.mergeTable).reduce((result, pathname) => {
+      result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
+      return result;
+    }, {} as FileTable));
+
+    const files = Object.keys(currentFileTable).reduce((result, pathname) => {
+      if (this.checkFileChanged(this.fileTable[pathname], currentFileTable[pathname])) {
+        result[pathname] = currentFileTable[pathname];
+      }
+
+      return result;
+    }, {} as FileTable);
+
+    return {
+      files,
+      conflicts: [],
+    };
   }
 
   private parseProjectFiles() {
@@ -273,6 +289,25 @@ class ComponentGenerator extends Generator implements Generator {
         this.componentProps,
       ),
     };
+  }
+
+  private checkFileChanged(
+    originalContent: string | Buffer,
+    currentContent: string | Buffer,
+  ) {
+    if (
+      _.isBuffer(originalContent) ||
+      (
+        _.isString(originalContent) &&
+        _.isString(currentContent) &&
+        diff(originalContent, currentContent).filter((change) => !change.added && !change.removed).length > 0
+      ) ||
+      !originalContent
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }
 
