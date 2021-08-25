@@ -53,11 +53,11 @@ class ComponentGenerator extends Generator implements Generator {
     super.checkInputs();
 
     if (!this.fileTable || !_.isObjectLike(this.fileTable)) {
-      throw new ParameterInvalidError('fileTable');
+      this.errorHandler(new ParameterInvalidError('fileTable'));
     }
 
     if (!this.componentId || !_.isString(this.componentId)) {
-      throw new ParameterInvalidError('componentId');
+      this.errorHandler(new ParameterInvalidError('componentId'));
     }
   }
 
@@ -71,11 +71,11 @@ class ComponentGenerator extends Generator implements Generator {
     await super.checkContext();
 
     if (!this.volume.existsSync(this.componentPathname)) {
-      throw new ComponentNotFoundError(this.componentId);
+      this.errorHandler(new ComponentNotFoundError(this.componentId));
     }
 
     if (!this.volume.statSync(this.componentPathname).isDirectory()) {
-      throw new ComponentInvalidError(this.componentId);
+      this.errorHandler(new ComponentInvalidError(this.componentId));
     }
   }
 
