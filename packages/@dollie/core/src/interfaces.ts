@@ -154,7 +154,7 @@ export interface ConflictSolverData extends ConflictBlockMetadata {
   total: number;
 }
 
-export type FileTable = Record<string, string>;
+export type FileTable = Record<string, string | Buffer>;
 
 export interface GeneratorResult {
   files: FileTable;

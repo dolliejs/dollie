@@ -1,12 +1,11 @@
 import {
-  CacheTable,
   ConflictBlockMetadata,
   DiffChange,
   ProjectGeneratorConfig,
   GeneratorResult,
   TemplateCleanUpFunction,
   TemplatePropsItem,
-  BinaryTable,
+  FileTable,
 } from '../interfaces';
 import * as _ from 'lodash';
 import {
@@ -316,7 +315,7 @@ class ProjectGenerator extends Generator implements Generator {
     let files = Object.keys(this.mergeTable).reduce((result, pathname) => {
       result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
       return result;
-    }, {});
+    }, {} as FileTable);
     files = _.merge(this.binaryTable, files);
     const conflicts = this.getIgnoredConflictedFilePathnameList();
     this.messageHandler('Generator finished successfully');

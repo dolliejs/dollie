@@ -3,6 +3,7 @@ import {
   FileTable,
   ComponentProps,
   TemplateFileItem,
+  MergeTable,
 } from '../interfaces';
 import {
   Answers as InquirerAnswers,
@@ -165,7 +166,36 @@ class ComponentGenerator extends Generator implements Generator {
     }
   }
 
-  public resolveConflicts() {}
+  public resolveConflicts() {
+    const solvedMergeTable = Object.keys(this.mergeTable).reduce((result, pathname) => {
+      const mergeBlocks = this.mergeTable[pathname];
+      const solvedMergeBlocks = mergeBlocks.map((mergeBlock) => {
+        const {
+          status,
+          values,
+        } = mergeBlock;
+
+        if (status === 'OK') {
+          return mergeBlock;
+        }
+
+        const {
+          former = [],
+          current = [],
+        } = values;
+
+        const solvedMergeBlock = _.clone(mergeBlock);
+
+        return _.set(solvedMergeBlock, 'values.current', Array.from(former).concat(current));
+      });
+
+      result[pathname] = solvedMergeBlocks;
+
+      return result;
+    }, {} as MergeTable);
+
+    this.mergeTable = solvedMergeTable;
+  }
 
   public runCleanups() {}
 
