@@ -173,9 +173,15 @@ export type GetCacheHandler = (label: string) => Promise<Buffer>;
 
 export type ContextType = 'project' | 'module';
 
+export type ProjectContextConfig = ProjectGeneratorConfig;
+export interface ModuleContextConfig extends ModuleGeneratorConfig {
+  files?: TemplateFileItem[];
+  moduleId?: string;
+}
+
 export interface Config {
   type?: ContextType;
-  generator?: ProjectGeneratorConfig | ModuleGeneratorConfig;
+  generator?: ProjectContextConfig | ModuleContextConfig;
   onStatusChange?: StatusChangeHandler;
   onMessage?: MessageHandler;
 }

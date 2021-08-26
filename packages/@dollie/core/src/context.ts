@@ -3,14 +3,17 @@ import {
   ContextError,
 } from './errors';
 import Generator from './generator.abstract';
-import ProjectGenerator from './generators/project.generator';
 import {
   Config,
   ContextStatusMap,
   ErrorHandler,
   MessageHandler,
   StatusChangeHandler,
+  ModuleContextConfig,
 } from './interfaces';
+
+import ProjectGenerator from './generators/project.generator';
+import ModuleGenerator from './generators/module.generator';
 
 class Context {
     protected generator: Generator;
@@ -57,6 +60,18 @@ class Context {
         case 'project': {
           this.generator = new ProjectGenerator(genericId, {
             ...(config.generator || {}),
+            onMessage: this.messageHandler,
+          });
+          break;
+        }
+        case 'module': {
+          const {
+            files = [],
+            moduleId,
+            ...restConfig
+          } = (config.generator || {}) as ModuleContextConfig;
+          this.generator = new ModuleGenerator(genericId, moduleId, files, {
+            ...(restConfig),
             onMessage: this.messageHandler,
           });
           break;
