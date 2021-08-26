@@ -1,5 +1,23 @@
 version: 2
 
+aliases: [
+  &dependency-paths [
+    "node_modules",
+    "packages/dollie-cli/node_modules",
+    "packages/dollie-utils/node_modules",
+    "packages/dollie-core/node_modules",
+    "packages/dollie-origins/node_modules",
+    "checksum.txt",
+  ],
+  &output-paths [
+    "packages/dollie-cli/lib",
+    "packages/dollie-utils/lib",
+    "packages/dollie-core/lib",
+    "packages/dollie-origins/lib",
+    "checksum.txt",
+  ],
+]
+
 defaults: &defaults
   working_directory: ~/repo
   docker:
@@ -14,13 +32,7 @@ jobs:
       - run: npx lerna bootstrap
       - run: npm run checksum
       - save_cache:
-          paths:
-            - packages/dollie-cli/node_modules
-            - packages/dollie-utils/node_modules
-            - packages/dollie-core/node_modules
-            - packages/dollie-origins/node_modules
-            - node_modules
-            - checksum.txt
+          paths: *dependency-paths
           key: v1-dependencies-{{ checksum "checksum.txt" }}
       - persist_to_workspace:
           root: ~/repo
@@ -33,22 +45,11 @@ jobs:
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "checksum.txt" }}
-            - v1-dependencies-
       - run: ls -al packages/dollie-core
       - run: npm run build
       - run: ls -al packages/dollie-core
       - save_cache:
-          paths:
-            - node_modules
-            - checksum.txt
-          key: v1-dependencies-{{ checksum "checksum.txt" }}
-      - save_cache:
-          paths:
-            - packages/dollie-cli/lib
-            - packages/dollie-utils/lib
-            - packages/dollie-core/lib
-            - packages/dollie-origins/lib
-            - checksum.txt
+          paths: *output-paths
           key: v1-dist-{{ checksum "checksum.txt" }}
 
   deploy:
@@ -59,9 +60,7 @@ jobs:
       - restore_cache:
           keys:
             - v1-dist-{{ checksum "checksum.txt" }}
-            - v1-dist-
             - v1-dependencies-{{ checksum "checksum.txt" }}
-            - v1-dependencies-
       - run: ls -al
       - run: npm run publish
 
