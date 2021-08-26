@@ -1,7 +1,7 @@
 import {
-  ComponentGeneratorConfig,
+  ModuleGeneratorConfig,
   FileTable,
-  ComponentProps,
+  ModuleTemplateConfig,
   TemplateFileItem,
   MergeTable,
 } from '../interfaces';
@@ -15,8 +15,8 @@ import {
 } from '../diff';
 import {
   ParameterInvalidError,
-  ComponentInvalidError,
-  ComponentNotFoundError,
+  ModuleInvalidError,
+  ModuleNotFoundError,
 } from '../errors';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
@@ -25,28 +25,32 @@ import {
   readTemplateEntities,
 } from '../utils/loader';
 import mustache from 'mustache';
-import { getComponentFileConfigGlobs } from '../utils/files';
-import { GlobMatcher } from '../utils/matchers';
+import {
+  getModuleFileConfigGlobs,
+} from '../utils/files';
+import {
+  GlobMatcher,
+} from '../utils/matchers';
 import {
   TemplateEntity,
 } from '@dollie/utils';
 import ejs from 'ejs';
 
-class ComponentGenerator extends Generator implements Generator {
-  private componentPathname: string;
+class ModuleGenerator extends Generator implements Generator {
+  private modulePathname: string;
   private entities: TemplateEntity[] = [];
-  private componentTemplateConfig: ComponentProps = {};
-  private componentProps: InquirerAnswers = {};
+  private moduleTemplateConfig: ModuleTemplateConfig = {};
+  private moduleProps: InquirerAnswers = {};
   private fileTable: FileTable = {};
 
   public constructor(
     templateId: string,
-    private componentId: string,
+    private moduleId: string,
     private files: TemplateFileItem[],
-    config: ComponentGeneratorConfig = {},
+    config: ModuleGeneratorConfig = {},
   ) {
     super(templateId, config);
-    this.componentPathname = TEMPLATE_CACHE_PATHNAME_PREFIX + '/components/' + this.componentId;
+    this.modulePathname = TEMPLATE_CACHE_PATHNAME_PREFIX + '/modules/' + this.moduleId;
   }
 
   public checkInputs() {
@@ -56,8 +60,8 @@ class ComponentGenerator extends Generator implements Generator {
       this.errorHandler(new ParameterInvalidError('fileTable'));
     }
 
-    if (!this.componentId || !_.isString(this.componentId)) {
-      this.errorHandler(new ParameterInvalidError('componentId'));
+    if (!this.moduleId || !_.isString(this.moduleId)) {
+      this.errorHandler(new ParameterInvalidError('moduleId'));
     }
   }
 
@@ -70,25 +74,25 @@ class ComponentGenerator extends Generator implements Generator {
   public async checkContext() {
     await super.checkContext();
 
-    if (!this.volume.existsSync(this.componentPathname)) {
-      this.errorHandler(new ComponentNotFoundError(this.componentId));
+    if (!this.volume.existsSync(this.modulePathname)) {
+      this.errorHandler(new ModuleNotFoundError(this.moduleId));
     }
 
-    if (!this.volume.statSync(this.componentPathname).isDirectory()) {
-      this.errorHandler(new ComponentInvalidError(this.componentId));
+    if (!this.volume.statSync(this.modulePathname).isDirectory()) {
+      this.errorHandler(new ModuleInvalidError(this.moduleId));
     }
   }
 
   public async loadTemplate() {
     const duration = await super.loadTemplate();
 
-    this.componentTemplateConfig = _.get(this.templateConfig, `components.${this.componentId}`) || {};
+    this.moduleTemplateConfig = _.get(this.templateConfig, `modules.${this.moduleId}`) || {};
     const {
       alias = {},
-    } = this.componentTemplateConfig;
+    } = this.moduleTemplateConfig;
 
-    this.messageHandler('Parsing component entities...');
-    this.entities = readTemplateEntities(this.volume, this.componentPathname).map((entity) => {
+    this.messageHandler('Parsing module entities...');
+    this.entities = readTemplateEntities(this.volume, this.modulePathname).map((entity) => {
       const {
         relativePathname,
       } = entity;
@@ -109,7 +113,7 @@ class ComponentGenerator extends Generator implements Generator {
       };
     });
 
-    this.validateComponentProps();
+    this.validateModuleProps();
 
     return duration;
   }
@@ -117,18 +121,18 @@ class ComponentGenerator extends Generator implements Generator {
   public async queryAllTemplateProps() {
     const {
       questions = [],
-    } = this.componentTemplateConfig;
+    } = this.moduleTemplateConfig;
 
     const { getTemplateProps } = this.config;
 
     if (_.isFunction(getTemplateProps) && questions.length > 0) {
-      this.componentProps = await getTemplateProps(questions);
+      this.moduleProps = await getTemplateProps(questions);
     }
 
     const patterns = await this.generateFilePatterns();
     this.matcher = new GlobMatcher(patterns);
 
-    return _.clone(this.componentProps);
+    return _.clone(this.moduleProps);
   }
 
   public copyTemplateFileToCacheTable() {
@@ -144,7 +148,7 @@ class ComponentGenerator extends Generator implements Generator {
         continue;
       }
 
-      const entityPathname = mustache.render(relativePathname, this.componentProps);
+      const entityPathname = mustache.render(relativePathname, this.moduleProps);
       const contentBuffer = this.volume.readFileSync(absoluteOriginalPathname);
 
       if (isBinary) {
@@ -152,7 +156,7 @@ class ComponentGenerator extends Generator implements Generator {
         continue;
       }
 
-      const content = ejs.render(contentBuffer.toString(), this.componentProps);
+      const content = ejs.render(contentBuffer.toString(), this.moduleProps);
 
       if (!_.isArray(this.cacheTable[entityPathname])) {
         this.cacheTable[entityPathname] = [diff(content)];
@@ -244,10 +248,10 @@ class ComponentGenerator extends Generator implements Generator {
     }
   }
 
-  private validateComponentProps() {
+  private validateModuleProps() {
     const {
       questions = [],
-    } = this.componentTemplateConfig;
+    } = this.moduleTemplateConfig;
 
     const dependedProps = this.entities.reduce((tempResult, currentEntity) => {
       const {
@@ -283,10 +287,10 @@ class ComponentGenerator extends Generator implements Generator {
 
   private async generateFilePatterns() {
     return {
-      delete: await getComponentFileConfigGlobs(
+      delete: await getModuleFileConfigGlobs(
         this.templateConfig,
-        this.componentTemplateConfig,
-        this.componentProps,
+        this.moduleTemplateConfig,
+        this.moduleProps,
       ),
     };
   }
@@ -311,4 +315,4 @@ class ComponentGenerator extends Generator implements Generator {
   }
 }
 
-export default ComponentGenerator;
+export default ModuleGenerator;

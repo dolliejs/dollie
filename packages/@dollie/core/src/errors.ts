@@ -7,8 +7,8 @@ const errorCodeMap = {
   ERR_TEMPLATE_FILE_NOT_FOUND: 'ERR_TEMPLATE_FILE_NOT_FOUND',
   ERR_TEMPLATE_ENTRY_ILLEGAL: 'ERR_TEMPLATE_ENTRY_ILLEGAL',
   ERR_HTTP: 'ERR_HTTP',
-  ERR_COMPONENT_NOT_FOUND: 'ERR_COMPONENT_NOT_FOUND',
-  ERR_COMPONENT_INVALID: 'ERR_COMPONENT_INVALID',
+  ERR_MODULE_NOT_FOUND: 'ERR_MODULE_NOT_FOUND',
+  ERR_MODULE_INVALID: 'ERR_MODULE_INVALID',
 };
 
 class BaseError extends Error {
@@ -63,20 +63,20 @@ export class TemplateFileNotFound extends ContextError {
   }
 }
 
-export class ComponentNotFoundError extends ContextError {
-  public constructor(componentId: string) {
+export class ModuleNotFoundError extends ContextError {
+  public constructor(moduleId: string) {
     super(
-      errorCodeMap.ERR_COMPONENT_NOT_FOUND,
-      `Component ${componentId} not found`,
+      errorCodeMap.ERR_MODULE_NOT_FOUND,
+      `Module ${moduleId} not found`,
     );
   }
 }
 
-export class ComponentInvalidError extends ContextError {
-  public constructor(componentId: string) {
+export class ModuleInvalidError extends ContextError {
+  public constructor(moduleId: string) {
     super(
-      errorCodeMap.ERR_COMPONENT_INVALID,
-      `Component ${componentId} is in a wrong format`,
+      errorCodeMap.ERR_MODULE_INVALID,
+      `Module ${moduleId} is in a wrong format`,
     );
   }
 }

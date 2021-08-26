@@ -1,6 +1,6 @@
 import {
-  ComponentDeleteConfigHandler,
-  ComponentProps,
+  ModuleDeleteConfigHandler,
+  ModuleTemplateConfig,
   DeleteConfigHandler,
   TemplateConfig,
 } from '../interfaces';
@@ -59,12 +59,12 @@ const getProjectFileConfigGlobs = async (
   ) as string[];
 };
 
-const getComponentFileConfigGlobs = async (
+const getModuleFileConfigGlobs = async (
   config: TemplateConfig,
-  componentConfig: ComponentProps,
-  componentProps: InquirerAnswers,
+  moduleConfig: ModuleTemplateConfig,
+  moduleProps: InquirerAnswers,
 ) => {
-  const patterns: (string | ComponentDeleteConfigHandler)[] = _.get(componentConfig, 'files.delete') || [];
+  const patterns: (string | ModuleDeleteConfigHandler)[] = _.get(moduleConfig, 'files.delete') || [];
 
   const result: string[] = [];
 
@@ -72,7 +72,7 @@ const getComponentFileConfigGlobs = async (
     if (_.isString(pattern)) {
       result.push(pattern);
     } else if (_.isFunction(pattern)) {
-      const returnValue = await pattern(config, componentProps);
+      const returnValue = await pattern(config, moduleProps);
 
       if (_.isArray(returnValue) && returnValue.length > 0) {
         for (const value of returnValue) {
@@ -91,5 +91,5 @@ const getComponentFileConfigGlobs = async (
 
 export {
   getProjectFileConfigGlobs,
-  getComponentFileConfigGlobs,
+  getModuleFileConfigGlobs,
 };

@@ -61,7 +61,7 @@ export interface ProjectGeneratorConfig extends BaseGeneratorConfig {
   conflictsSolver?: (data: ConflictSolverData) => Promise<ConflictSolveResult>;
 }
 
-export type ComponentGeneratorConfig = BaseGeneratorConfig;
+export type ModuleGeneratorConfig = BaseGeneratorConfig;
 
 export interface PatchTableItem {
   changes: DiffChange[];
@@ -92,18 +92,18 @@ export interface TemplateCleanupData {
 export type TemplateCleanUpFunction = (data: TemplateCleanupData) => MergeTable;
 export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
 
-export type ComponentEntityAlias = Record<string, string>;
+export type ModuleEntityAlias = Record<string, string>;
 
-export type ComponentDeleteConfigHandler = (
+export type ModuleDeleteConfigHandler = (
   templateConfig: TemplateConfig,
   props: InquirerAnswers,
 ) => Promise<string | string[]>;
 
-export interface ComponentProps {
+export interface ModuleTemplateConfig {
   questions?: Question[];
-  alias?: ComponentEntityAlias;
+  alias?: ModuleEntityAlias;
   files?: {
-    delete?: (string | ComponentDeleteConfigHandler)[];
+    delete?: (string | ModuleDeleteConfigHandler)[];
   };
 }
 
@@ -112,7 +112,7 @@ export interface TemplateConfig {
   files?: TemplateFileConfig;
   cleanups?: TemplateCleanUpFunction[];
   extendTemplates?: ExtendTemplateConfig;
-  components?: Record<string, ComponentProps>;
+  modules?: Record<string, ModuleTemplateConfig>;
 }
 
 export interface ParsedProps {
@@ -171,11 +171,11 @@ export type MessageHandler = (message: string) => void;
 export type SetCacheHandler = (label: string, data: Buffer) => void;
 export type GetCacheHandler = (label: string) => Promise<Buffer>;
 
-export type ContextType = 'project' | 'component';
+export type ContextType = 'project' | 'module';
 
 export interface Config {
   type?: ContextType;
-  generator?: ProjectGeneratorConfig | ComponentGeneratorConfig;
+  generator?: ProjectGeneratorConfig | ModuleGeneratorConfig;
   onStatusChange?: StatusChangeHandler;
   onMessage?: MessageHandler;
 }
