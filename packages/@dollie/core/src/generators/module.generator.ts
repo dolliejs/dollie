@@ -170,6 +170,10 @@ class ModuleGenerator extends Generator implements Generator {
     }
   }
 
+  public mergeTemplateFiles(removeLine = false) {
+    super.mergeTemplateFiles(removeLine);
+  }
+
   public resolveConflicts() {
     const solvedMergeTable = Object.keys(this.mergeTable).reduce((result, pathname) => {
       const mergeBlocks = this.mergeTable[pathname];

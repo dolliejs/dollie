@@ -35,7 +35,10 @@ import {
   FileSystem,
 } from '@dollie/utils';
 import { GlobMatcher } from './utils/matchers';
-import { merge, parseDiffToMergeBlocks } from './diff';
+import {
+  merge,
+  parseDiffToMergeBlocks,
+} from './diff';
 
 abstract class Generator {
   // name of template that to be used
@@ -180,7 +183,7 @@ abstract class Generator {
     return duration;
   }
 
-  public mergeTemplateFiles() {
+  public mergeTemplateFiles(removeLine = true) {
     for (const entityPathname of Object.keys(this.cacheTable)) {
       const diffs = this.cacheTable[entityPathname];
       if (!diffs || !_.isArray(diffs) || diffs.length === 0) {
@@ -193,7 +196,7 @@ abstract class Generator {
           const originalDiffChanges = diffs[0];
           const forwardDiffChangesGroup = diffs.slice(1);
           // merge diff changes if current file is written more than once
-          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup);
+          const mergedDiffChanges = merge(originalDiffChanges, forwardDiffChangesGroup, removeLine);
           this.mergeTable[entityPathname] = parseDiffToMergeBlocks(mergedDiffChanges);
         }
       } else {

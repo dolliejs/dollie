@@ -46,7 +46,7 @@ const diff = (originalContent: string, currentContent?: string): DiffChange[] =>
  * @param {DiffChange[][]} diffList
  * @returns {DiffChange[]}
  */
-const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffChange[] => {
+const merge = (originalChanges: DiffChange[], diffList: DiffChange[][], removeLine = true): DiffChange[] => {
   if (!originalChanges) {
     return [];
   }
@@ -72,7 +72,7 @@ const merge = (originalChanges: DiffChange[], diffList: DiffChange[][]): DiffCha
       } else {
         // if current line is removed, then ADD THE REMOVE TAG
         // to the same line in `originalDiff`
-        if (change.removed) {
+        if (change.removed && removeLine) {
           originalDiff = _.set(originalDiff, [change.lineNumber, 'removed'], true);
         }
       }
