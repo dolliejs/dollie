@@ -15,9 +15,10 @@ jobs:
       - run: npm run checksum
       - save_cache:
           paths:
-            - packages/@dollie/cli/node_modules
-            - packages/@dollie/core/node_modules
-            - packages/@dollie/origins/node_modules
+            - packages/dollie-cli/node_modules
+            - packages/dollie-utils/node_modules
+            - packages/dollie-core/node_modules
+            - packages/dollie-origins/node_modules
             - node_modules
             - checksum.txt
           key: v1-dependencies-{{ checksum "checksum.txt" }}
@@ -33,9 +34,9 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "checksum.txt" }}
             - v1-dependencies-
-      - run: ls -al packages/@dollie/core
+      - run: ls -al packages/dollie-core
       - run: npm run build
-      - run: ls -al packages/@dollie/core
+      - run: ls -al packages/dollie-core
       - save_cache:
           paths:
             - node_modules
@@ -43,9 +44,10 @@ jobs:
           key: v1-dependencies-{{ checksum "checksum.txt" }}
       - save_cache:
           paths:
-            - packages/@dollie/cli/lib
-            - packages/@dollie/core/lib
-            - packages/@dollie/origins/lib
+            - packages/dollie-cli/lib
+            - packages/dollie-utils/lib
+            - packages/dollie-core/lib
+            - packages/dollie-origins/lib
             - checksum.txt
           key: v1-dist-{{ checksum "checksum.txt" }}
 
