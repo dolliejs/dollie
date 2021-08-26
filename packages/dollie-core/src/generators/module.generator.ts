@@ -4,6 +4,7 @@ import {
   ModuleTemplateConfig,
   TemplateFileItem,
   MergeTable,
+  GeneratorResult,
 } from '../interfaces';
 import {
   Answers as InquirerAnswers,
@@ -207,7 +208,7 @@ class ModuleGenerator extends Generator implements Generator {
 
   public runCleanups() {}
 
-  public getResult() {
+  public getResult(): GeneratorResult {
     const currentFileTable = _.merge(this.binaryTable, Object.keys(this.mergeTable).reduce((result, pathname) => {
       result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
       return result;
