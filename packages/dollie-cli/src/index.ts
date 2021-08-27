@@ -15,8 +15,10 @@ import {
 } from './utils/origins';
 import {
   loadOrigins,
-  Origin,
 } from '@dollie/origins';
+import {
+  Origin,
+} from '@dollie/origins/lib/interfaces';
 
 initialize();
 const cliConfig = readConfig();

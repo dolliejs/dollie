@@ -22,6 +22,8 @@ import {
 
 export type ErrorHandler = (error: ContextError | HTTPError) => void;
 
+export type FileContent = string | Buffer;
+
 export type Question<T extends InquirerAnswers = InquirerAnswers> = DistinctQuestion<T>;
 
 export interface DiffChange extends Change {
@@ -93,11 +95,16 @@ export type TemplateCleanUpFunction = (data: TemplateCleanupData) => MergeTable;
 export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
 
 export type ModuleEntityAlias = Record<string, string>;
+export type EntityExistenceChecker = (pathname: string) => Promise<boolean>;
+export type EntityReader = (pathname: string) => Promise<TemplateFileItem>;
 
-export type ModuleDeleteConfigHandler = (
-  templateConfig: TemplateConfig,
-  props: InquirerAnswers,
-) => Promise<string | string[]>;
+export interface ModuleDeleteConfigHandlerData {
+  props: InquirerAnswers;
+  exists: EntityExistenceChecker;
+  getEntity: EntityReader;
+}
+
+export type ModuleDeleteConfigHandler = (data: ModuleDeleteConfigHandlerData) => Promise<string | string[]>;
 
 export interface ModuleTemplateConfig {
   questions?: Question[];
@@ -154,7 +161,7 @@ export interface ConflictSolverData extends ConflictBlockMetadata {
   total: number;
 }
 
-export type FileTable = Record<string, string | Buffer>;
+export type FileTable = Record<string, FileContent>;
 
 export interface GeneratorResult {
   files: FileTable;
@@ -187,5 +194,5 @@ export interface Config {
 }
 
 export interface TemplateFileItem extends TemplateEntity {
-  content: string | Buffer;
+  content: FileContent;
 }

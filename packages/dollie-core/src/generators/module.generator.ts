@@ -5,6 +5,8 @@ import {
   TemplateFileItem,
   MergeTable,
   GeneratorResult,
+  FileContent,
+  ModuleDeleteConfigHandlerData,
 } from '../interfaces';
 import {
   Answers as InquirerAnswers,
@@ -291,18 +293,27 @@ class ModuleGenerator extends Generator implements Generator {
   }
 
   private async generateFilePatterns() {
+    const data: ModuleDeleteConfigHandlerData = {
+      props: this.moduleProps,
+      exists: async (pathname: string) => {
+        return this.files.findIndex((file) => file.relativeOriginalPathname === pathname) !== -1;
+      },
+      getEntity: async (pathname: string) => {
+        return this.files.find((file) => file.absoluteOriginalPathname === pathname);
+      },
+    };
+
     return {
       delete: await getModuleFileConfigGlobs(
-        this.templateConfig,
         this.moduleTemplateConfig,
-        this.moduleProps,
+        data,
       ),
     };
   }
 
   private checkFileChanged(
-    originalContent: string | Buffer,
-    currentContent: string | Buffer,
+    originalContent: FileContent,
+    currentContent: FileContent,
   ) {
     if (
       _.isBuffer(originalContent) ||

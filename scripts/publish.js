@@ -6,7 +6,7 @@ const path = require('path');
 const execSync = require('child_process').execSync;
 
 function publish(pkg, directory) {
-  console.log('[PUBLISH]', pkg);
+  console.log('[PUBLISH] ', pkg);
 
   execSync('npm publish --access public', {
     cwd: directory,

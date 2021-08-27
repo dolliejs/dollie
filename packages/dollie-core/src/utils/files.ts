@@ -3,6 +3,7 @@ import {
   ModuleTemplateConfig,
   DeleteConfigHandler,
   TemplateConfig,
+  ModuleDeleteConfigHandlerData,
 } from '../interfaces';
 import _ from 'lodash';
 import {
@@ -60,9 +61,8 @@ const getProjectFileConfigGlobs = async (
 };
 
 const getModuleFileConfigGlobs = async (
-  config: TemplateConfig,
   moduleConfig: ModuleTemplateConfig,
-  moduleProps: InquirerAnswers,
+  data: ModuleDeleteConfigHandlerData,
 ) => {
   const patterns: (string | ModuleDeleteConfigHandler)[] = _.get(moduleConfig, 'files.delete') || [];
 
@@ -72,7 +72,7 @@ const getModuleFileConfigGlobs = async (
     if (_.isString(pattern)) {
       result.push(pattern);
     } else if (_.isFunction(pattern)) {
-      const returnValue = await pattern(config, moduleProps);
+      const returnValue = await pattern(data);
 
       if (_.isArray(returnValue) && returnValue.length > 0) {
         for (const value of returnValue) {

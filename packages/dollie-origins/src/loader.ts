@@ -9,7 +9,7 @@ import requireFromString from 'require-from-string';
 import {
   githubOrigin,
   gitlabOrigin,
-} from '../src';
+} from './index';
 import path from 'path';
 import {
   validateOriginHandlerSource,

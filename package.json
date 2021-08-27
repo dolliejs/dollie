@@ -16,7 +16,8 @@
     "docs:build": "dumi build",
     "docs:deploy": "node scripts/docs.js",
     "checksum": "node scripts/check.js",
-    "publish": "node scripts/publish.js"
+    "publish": "node scripts/publish.js",
+    "clean": "node scripts/clean.js"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
@@ -30,6 +31,8 @@
     "dumi": "^1.1.22",
     "eslint": "^7.28.0",
     "eslint-config-alloy": "^4.1.0",
+    "fs-extra": "^10.0.0",
+    "glob": "^7.1.7",
     "jest": "^27.0.4",
     "lerna": "^4.0.0",
     "md5-file": "^5.0.0",
