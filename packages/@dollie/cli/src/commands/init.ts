@@ -21,7 +21,7 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import {
   loadOrigins, OriginHandler, Origin,
-} from '../../../origins/lib';
+} from '@dollie/origin';
 import {
   getCacheFromFilesystem,
   setCacheToFilesystem,
@@ -250,7 +250,7 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
 
         infoLogger.log('Loading origins...');
 
-        const origins = await loadOrigins(originConfig.origins || {});
+        const origins = await loadOrigins(originConfig.origins || { });
 
         let selectedOrigin: Origin;
         const selectedOriginHandlerId = readOriginConfig('selectedOriginId');
@@ -266,9 +266,9 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
             ...(
               !originHandler || !_.isFunction(originHandler)
                 ? { origins }
-                : {}
+                : { }
             ),
-            origin: originConfig.origin || {},
+            origin: originConfig.origin || { },
             loader: _.get(config, 'loader'),
             originHandler: _.get(selectedOrigin, 'handler'),
             getTemplateProps: async (questions) => {
@@ -311,7 +311,7 @@ export default (config: CLIConfigSchema, originConfig: OriginConfigSchema) => {
             }).join('\n'),
           );
         }
-      } catch {}
+      } catch { }
     });
 
   return command;
