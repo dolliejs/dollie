@@ -43,10 +43,10 @@ export default (async (id, config = {}, request, deps) => {
         }
       }
     }
+  }
 
-    if (sha.length > 0) {
-      cache = true;
-    }
+  if (sha.length > 0) {
+    cache = true;
   }
 
   const token = config.token || '';

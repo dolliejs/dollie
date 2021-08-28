@@ -1,16 +1,15 @@
 import commander from 'commander';
 import _ from 'lodash';
 import {
-  writeConfig,
-  readConfig,
   CLIConfigSchema,
 } from '../utils/config';
+import Table from 'cli-table3';
 import fs from 'fs-extra';
 import path from 'path';
 import { OriginHandler } from '@dollie/origins';
 import { OriginConfigSchema } from '../utils/origins';
 import Command from '../command.abstract';
-import { CACHE_DIR } from '../constants';
+import { getCacheDir } from '../utils/cache';
 
 class OriginCommand extends Command implements Command {
   public constructor(
@@ -23,56 +22,63 @@ class OriginCommand extends Command implements Command {
   }
 
   protected createCommand(command: commander.Command) {
-    const {
-      cliConfig,
-    } = this;
+    const cacheDir = getCacheDir();
 
-    command.description('manage CLI configurations');
+    command.description('manage CLI cache');
 
     command
-      .command('set')
-      .description('set value to CLI configuration item')
-      .arguments('[key] [value]')
-      .action((key: string, value: string) => {
-        const relativePathKeyList = ['cache.dir'];
-        let configValue: string = value;
+      .command('list')
+      .description('list all cache items')
+      .action(() => {
+        let cachedTemplateLabels: string[] = [];
 
-        if (relativePathKeyList.indexOf(key) !== -1) {
-          configValue = path.resolve(process.cwd(), value);
+        try {
+          cachedTemplateLabels = fs.readdirSync(cacheDir);
+        } catch {}
+
+        if (cachedTemplateLabels.length > 0) {
+          const table = new Table({
+            head: ['Index', 'URL'],
+          });
+
+          for (const [index, cachedTemplateLabel] of cachedTemplateLabels.entries()) {
+            table.push([index, Buffer.from(cachedTemplateLabel, 'base64').toString()]);
+          }
+
+          console.log(table.toString());
         }
-
-        if (key === 'cache.dir') {
-          const cacheDir = readConfig('cache.dir') || CACHE_DIR;
-          fs.removeSync(cacheDir);
-        }
-
-        writeConfig(key, configValue);
-      });
-
-    command
-      .command('get')
-      .description('get value from CLI configuration item')
-      .arguments('[key]')
-      .action((key: string) => {
-        console.log(_.get(cliConfig, key) || '');
       });
 
     command
       .command('delete')
-      .description('delete value from CLI configuration item')
-      .arguments('[key]')
-      .action((key: string) => {
-        const [configPath] = key.split('.').slice(-1);
-        const parentConfigPath = key.split('.').slice(0, -1).join('.');
-        const configItem = _.get(cliConfig, key) || {};
-        const newConfigItem = Object.keys(configItem).reduce((result, currentKey) => {
-          if (configPath !== currentKey) {
-            result[configPath] = configItem[configPath];
-          }
-          return result;
-        }, {});
+      .description('delete a cache item by index')
+      .arguments('[index]')
+      .action((index: string) => {
+        let cachedTemplateLabels: string[] = [];
 
-        writeConfig(parentConfigPath, newConfigItem);
+        try {
+          cachedTemplateLabels = fs.readdirSync(cacheDir);
+        } catch {}
+
+        const templateLabel = cachedTemplateLabels[index];
+
+        if (!templateLabel || !_.isString(templateLabel)) {
+          return;
+        }
+
+        fs.removeSync(path.resolve(cacheDir, templateLabel));
+      });
+
+    command
+      .command('clear')
+      .description('clear all cached templates')
+      .action(() => {
+        if (!fs.existsSync(cacheDir)) {
+          return;
+        }
+
+        fs.removeSync(cacheDir);
+        fs.mkdirpSync(cacheDir);
       });
 
     return command;
