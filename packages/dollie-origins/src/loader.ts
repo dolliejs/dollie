@@ -12,8 +12,8 @@ import {
 } from './index';
 import path from 'path';
 import {
-  validateOriginHandlerSource,
-} from './validators';
+  validate,
+} from '@dollie/utils';
 
 const isUrl = (url: string) => {
   return /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#.*)?$/.test(url);
@@ -47,7 +47,7 @@ const loadOrigins = async (originMap: OriginMap = {}): Promise<Origin[]> => {
           }
         }
 
-        if (!source || !_.isString(source) || !validateOriginHandlerSource(source)) {
+        if (!source || !_.isString(source) || !validate(source)) {
           continue;
         }
 

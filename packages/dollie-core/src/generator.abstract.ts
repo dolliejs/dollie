@@ -33,9 +33,11 @@ import {
   OriginHandlerNotSpecifiedError,
   URLParseError,
   TemplateFileNotFound,
+  IllegalTemplateConfigError,
 } from './errors';
 import {
   FileSystem,
+  validate,
 } from '@dollie/utils';
 import { GlobMatcher } from './utils/matchers';
 import {
@@ -297,6 +299,7 @@ abstract class Generator {
         return {} as TemplateConfig;
       }
     } else if (configFileName.endsWith('.js')) {
+      this.validateTemplateJSConfig(dollieConfigFileContent);
       return (requireFromString(dollieConfigFileContent) || {}) as TemplateConfig;
     } else {
       return {} as TemplateConfig;
@@ -316,6 +319,12 @@ abstract class Generator {
       TEMPLATE_CACHE_PATHNAME_PREFIX,
       pathname,
     )) as Buffer;
+  }
+
+  private validateTemplateJSConfig(source: string) {
+    if (!validate(source)) {
+      this.errorHandler(new IllegalTemplateConfigError());
+    }
   }
 
   public abstract initialize(): void;

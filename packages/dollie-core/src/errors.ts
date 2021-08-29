@@ -90,3 +90,9 @@ export class ModuleValidateError extends ContextError {
     );
   }
 }
+
+export class IllegalTemplateConfigError extends ContextError {
+  public constructor() {
+    super('Validation for template config failed due to security issues');
+  }
+}

@@ -3,6 +3,10 @@ export {
 } from './entities';
 
 export {
+  validate,
+} from './validator';
+
+export {
   FileSystem,
   MemFS,
   TemplateEntity,
