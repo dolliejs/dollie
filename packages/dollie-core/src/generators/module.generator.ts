@@ -12,7 +12,7 @@ import {
   Answers as InquirerAnswers,
 } from 'inquirer';
 import Generator from '../generator.abstract';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import {
   diff, parseMergeBlocksToText,
 } from '../diff';
@@ -295,6 +295,10 @@ class ModuleGenerator extends Generator implements Generator {
   private async generateFilePatterns() {
     const data: ModuleDeleteConfigHandlerData = {
       props: this.moduleProps,
+      context: {
+        request: this.request,
+        lodash: _,
+      },
       exists: async (pathname: string) => {
         return this.files.findIndex((file) => file.relativeOriginalPathname === pathname) !== -1;
       },

@@ -17,6 +17,7 @@ import {
   HTTPError,
 } from './errors';
 import {
+  GeneralHandlerContext,
   TemplateEntity,
 } from '@dollie/utils';
 
@@ -100,6 +101,7 @@ export type EntityReader = (pathname: string) => Promise<TemplateFileItem>;
 
 export interface ModuleDeleteConfigHandlerData {
   props: InquirerAnswers;
+  context: GeneralHandlerContext;
   exists: EntityExistenceChecker;
   getEntity: EntityReader;
 }

@@ -1,7 +1,6 @@
 import {
-  Got,
-} from 'got';
-import * as lodash from 'lodash';
+  GeneralHandlerContext,
+} from '@dollie/utils';
 
 export type OriginConfig = Record<string, any>;
 export type OriginHeaders = Record<string, any>;
@@ -13,15 +12,10 @@ export interface OriginInfo {
   cache?: boolean;
 }
 
-export interface OriginHandlerDependencies {
-  lodash: typeof lodash;
-}
-
 export type OriginHandler = (
   id: string,
   config: OriginConfig,
-  request: Got,
-  deps: OriginHandlerDependencies,
+  context: GeneralHandlerContext,
 ) => Promise<OriginInfo>;
 
 export interface Origin {

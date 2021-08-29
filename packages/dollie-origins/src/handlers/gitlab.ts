@@ -1,13 +1,14 @@
 import { OriginHandler } from '../interfaces';
 
-export default (async (id, config = {}, request, deps) => {
+export default (async (id, config = {}, context) => {
   if (!id) {
     return null;
   }
 
   const {
     lodash: _,
-  } = deps;
+    request,
+  } = context;
 
   let cache = false;
   let sha = '';

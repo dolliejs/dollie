@@ -14,6 +14,9 @@ import {
   CacheTable,
 } from './interfaces';
 import * as _ from 'lodash';
+import {
+  Got,
+} from 'got';
 import { createHttpInstance } from './utils/http';
 import decompress from 'decompress';
 import { loadRemoteTemplate } from './utils/loader';
@@ -61,6 +64,7 @@ abstract class Generator {
   protected originHandler: OriginHandler;
   // glob pathname matcher
   protected matcher: GlobMatcher;
+  protected request: Got;
 
   public constructor(
     protected genericId: string,
@@ -76,6 +80,7 @@ abstract class Generator {
     this.errorHandler = errorHandler;
     this.messageHandler = messageHandler;
     this.originHandler = originHandler;
+    this.request = createHttpInstance(_.get(this.config, 'loader') || {});
   }
 
   public checkInputs() {
@@ -105,9 +110,9 @@ abstract class Generator {
     const { url, headers, cache = true } = await this.originHandler(
       this.templateName,
       _.get(this.config, 'origin') || {},
-      createHttpInstance(_.get(this.config, 'loader') || {}),
       {
         lodash: _,
+        request: this.request,
       },
     );
 

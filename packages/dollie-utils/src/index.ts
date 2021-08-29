@@ -6,4 +6,5 @@ export {
   FileSystem,
   MemFS,
   TemplateEntity,
+  GeneralHandlerContext,
 } from './interfaces';
