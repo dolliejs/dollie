@@ -6,7 +6,7 @@ import {
   MergeTable,
   GeneratorResult,
   FileContent,
-  ModuleDeleteConfigHandlerData,
+  ModuleConfigHandlerContext,
 } from '../interfaces';
 import {
   Answers as InquirerAnswers,
@@ -20,6 +20,7 @@ import {
   ParameterInvalidError,
   ModuleInvalidError,
   ModuleNotFoundError,
+  ModuleValidateError,
 } from '../errors';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
@@ -124,6 +125,7 @@ class ModuleGenerator extends Generator implements Generator {
   public async queryAllTemplateProps() {
     const {
       questions = [],
+      validate,
     } = this.moduleTemplateConfig;
 
     const { getTemplateProps } = this.config;
@@ -134,6 +136,22 @@ class ModuleGenerator extends Generator implements Generator {
 
     const patterns = await this.generateFilePatterns();
     this.matcher = new GlobMatcher(patterns);
+
+    if (_.isFunction(validate)) {
+      const result = await validate({
+        props: this.moduleProps,
+        context: {
+          request: this.request,
+          lodash: _,
+        },
+        exists: this.exists,
+        getEntity: this.getEntity,
+      });
+
+      if (_.isBoolean(result) && !result) {
+        this.errorHandler(new ModuleValidateError(this.moduleId));
+      }
+    }
 
     return _.clone(this.moduleProps);
   }
@@ -293,18 +311,14 @@ class ModuleGenerator extends Generator implements Generator {
   }
 
   private async generateFilePatterns() {
-    const data: ModuleDeleteConfigHandlerData = {
+    const data: ModuleConfigHandlerContext = {
       props: this.moduleProps,
       context: {
         request: this.request,
         lodash: _,
       },
-      exists: async (pathname: string) => {
-        return this.files.findIndex((file) => file.relativeOriginalPathname === pathname) !== -1;
-      },
-      getEntity: async (pathname: string) => {
-        return this.files.find((file) => file.absoluteOriginalPathname === pathname);
-      },
+      exists: this.exists,
+      getEntity: this.getEntity,
     };
 
     return {
@@ -332,6 +346,14 @@ class ModuleGenerator extends Generator implements Generator {
     }
 
     return false;
+  }
+
+  private async exists(pathname: string) {
+    return this.files.findIndex((file) => file.relativeOriginalPathname === pathname) !== -1;
+  }
+
+  private async getEntity(pathname: string) {
+    return this.files.find((file) => file.absoluteOriginalPathname === pathname);
   }
 }
 

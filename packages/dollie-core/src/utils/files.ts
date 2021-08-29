@@ -1,14 +1,10 @@
 import {
-  ModuleDeleteConfigHandler,
   ModuleTemplateConfig,
   DeleteConfigHandler,
   TemplateConfig,
-  ModuleDeleteConfigHandlerData,
+  ModuleConfigHandlerContext,
 } from '../interfaces';
 import _ from 'lodash';
-import {
-  Answers as InquirerAnswers,
-} from 'inquirer';
 
 /**
  * read config file and accumulate all file patterns
@@ -62,9 +58,9 @@ const getProjectFileConfigGlobs = async (
 
 const getModuleFileConfigGlobs = async (
   moduleConfig: ModuleTemplateConfig,
-  data: ModuleDeleteConfigHandlerData,
+  data: ModuleConfigHandlerContext,
 ) => {
-  const patterns: (string | ModuleDeleteConfigHandler)[] = _.get(moduleConfig, 'files.delete') || [];
+  const patterns: (string | ModuleConfigHandlerContext)[] = _.get(moduleConfig, 'files.delete') || [];
 
   const result: string[] = [];
 

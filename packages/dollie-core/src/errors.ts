@@ -9,6 +9,7 @@ const errorCodeMap = {
   ERR_HTTP: 'ERR_HTTP',
   ERR_MODULE_NOT_FOUND: 'ERR_MODULE_NOT_FOUND',
   ERR_MODULE_INVALID: 'ERR_MODULE_INVALID',
+  ERR_MODULE_VALIDATE_FAILED: 'ERR_MODULE_VALIDATE_FAILED',
 };
 
 class BaseError extends Error {
@@ -77,6 +78,15 @@ export class ModuleInvalidError extends ContextError {
     super(
       errorCodeMap.ERR_MODULE_INVALID,
       `Module ${moduleId} is in a wrong format`,
+    );
+  }
+}
+
+export class ModuleValidateError extends ContextError {
+  public constructor(moduleId: string) {
+    super(
+      errorCodeMap.ERR_MODULE_VALIDATE_FAILED,
+      `Validation for module ${moduleId} failed due to template author's config`,
     );
   }
 }

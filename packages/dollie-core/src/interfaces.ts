@@ -99,14 +99,14 @@ export type ModuleEntityAlias = Record<string, string>;
 export type EntityExistenceChecker = (pathname: string) => Promise<boolean>;
 export type EntityReader = (pathname: string) => Promise<TemplateFileItem>;
 
-export interface ModuleDeleteConfigHandlerData {
+export interface ModuleConfigHandlerContext {
   props: InquirerAnswers;
   context: GeneralHandlerContext;
   exists: EntityExistenceChecker;
   getEntity: EntityReader;
 }
 
-export type ModuleDeleteConfigHandler = (data: ModuleDeleteConfigHandlerData) => Promise<string | string[]>;
+export type ModuleDeleteConfigHandler = (data: ModuleConfigHandlerContext) => Promise<string | string[]>;
 
 export interface ModuleTemplateConfig {
   questions?: Question[];
@@ -114,6 +114,7 @@ export interface ModuleTemplateConfig {
   files?: {
     delete?: (string | ModuleDeleteConfigHandler)[];
   };
+  validate?: (context: ModuleConfigHandlerContext) => Promise<boolean>;
 }
 
 export interface TemplateConfig {
