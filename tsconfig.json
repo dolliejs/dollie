@@ -3,14 +3,18 @@
   "compilerOptions": {
     "allowJs": true
   },
-  "references": [{
-      "path": "packages/@dollie/cli"
+  "references": [
+    {
+      "path": "packages/dollie-cli"
     },
     {
-      "path": "packages/@dollie/core"
+      "path": "packages/dollie-core"
     },
     {
-      "path": "packages/@dollie/origins"
+      "path": "packages/dollie-origins"
+    },
+    {
+      "path": "packages/dollie-utils"
     }
   ]
 }
