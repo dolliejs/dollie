@@ -58,7 +58,9 @@ class OriginCommand extends Command implements Command {
         const internalOrigins = {
           github: '<internal>',
           gitlab: '<internal>',
+          dev: '<internal>',
         } as Record<string, string>;
+
         const { origins: customOrigins = {} } = originConfig;
 
         const table = new Table({

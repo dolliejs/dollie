@@ -3,7 +3,7 @@ import _ from 'lodash';
 const errorCodeMap = {
   ERR_PARAMETER_INVALID: 'ERR_PARAMETER_INVALID',
   ERR_ORIGIN_HANDLER_NOT_SPECIFIED: 'ERR_ORIGIN_HANDLER_NOT_SPECIFIED',
-  ERR_URL_PARSE: 'ERR_URL_PARSE',
+  ERR_ORIGIN_HANDLER_INVALID_RETURN_VALUE: 'ERR_ORIGIN_HANDLER_INVALID_RETURN_VALUE',
   ERR_TEMPLATE_FILE_NOT_FOUND: 'ERR_TEMPLATE_FILE_NOT_FOUND',
   ERR_TEMPLATE_ENTRY_ILLEGAL: 'ERR_TEMPLATE_ENTRY_ILLEGAL',
   ERR_HTTP: 'ERR_HTTP',
@@ -52,9 +52,9 @@ export class OriginHandlerNotSpecifiedError extends ContextError {
   }
 }
 
-export class URLParseError extends ContextError {
+export class OriginHandlerError extends ContextError {
   public constructor() {
-    super(errorCodeMap.ERR_URL_PARSE, 'Url parse error');
+    super(errorCodeMap.ERR_ORIGIN_HANDLER_INVALID_RETURN_VALUE, 'Origin handler returned a wrong value');
   }
 }
 

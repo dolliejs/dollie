@@ -7,9 +7,10 @@ export type OriginHeaders = Record<string, any>;
 export type OriginMap = Record<string, string | OriginHandler>;
 
 export interface OriginInfo {
-  url: string;
+  url?: string;
   headers?: OriginHeaders;
   cache?: boolean;
+  buffer?: Buffer;
 }
 
 export type OriginHandler = (

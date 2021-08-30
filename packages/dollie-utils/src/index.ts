@@ -7,6 +7,10 @@ export {
 } from './validator';
 
 export {
+  readDirToZipBuffer,
+} from './reader';
+
+export {
   FileSystem,
   MemFS,
   TemplateEntity,

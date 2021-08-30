@@ -25,7 +25,12 @@ class OriginCommand extends Command implements Command {
   protected createCommand(command: commander.Command) {
     const {
       cliConfig,
+      originConfig,
     } = this;
+
+    const {
+      selectedOriginId,
+    } = originConfig;
 
     command.description('manage CLI configurations');
 
@@ -35,6 +40,11 @@ class OriginCommand extends Command implements Command {
       .arguments('[key] [value]')
       .action((key: string, value: string) => {
         const relativePathKeyList = ['cache.dir'];
+
+        if (selectedOriginId === 'dev') {
+          relativePathKeyList.push('origin.path');
+        }
+
         let configValue: string = value;
 
         if (relativePathKeyList.indexOf(key) !== -1) {

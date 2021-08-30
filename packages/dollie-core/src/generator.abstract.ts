@@ -31,7 +31,7 @@ import { Volume } from 'memfs';
 import {
   ParameterInvalidError,
   OriginHandlerNotSpecifiedError,
-  URLParseError,
+  OriginHandlerError,
   TemplateFileNotFound,
   IllegalTemplateConfigError,
 } from './errors';
@@ -108,86 +108,99 @@ abstract class Generator {
   public async loadTemplate() {
     this.messageHandler(`Start downloading template ${this.templateName}`);
 
-    // get url and headers from origin handler
-    const { url, headers, cache = true } = await this.originHandler(
-      this.templateName,
-      _.get(this.config, 'origin') || {},
-      {
-        lodash: _,
-        request: this.request,
-      },
-    );
-
-    if (!_.isString(url) || !url) {
-      this.errorHandler(new URLParseError());
-    }
-
-    this.messageHandler(`Template URL parsed: ${url}`);
-
-    const startTimestamp = Date.now();
-
-    let data: Buffer;
-
-    const {
-      getCache,
-      setCache = _.noop,
-    } = this.config;
-
-    if (_.isFunction(getCache)) {
-      data = await getCache(url);
-    }
-
-    if (_.isBuffer(data)) {
-      this.messageHandler('Hit cache for current template');
-    } else {
-      data = await loadRemoteTemplate(url, {
+    try {
+      // get url and headers from origin handler
+      const {
+        url,
         headers,
-        ...({
-          timeout: 90000,
-        }),
-        ...this.config.loader,
-      });
-    }
+        cache = true,
+        buffer,
+      } = await this.originHandler(
+        this.templateName,
+        _.get(this.config, 'origin') || {},
+        {
+          lodash: _,
+          request: this.request,
+        },
+      );
 
-    if (!data || !_.isBuffer(data)) {
-      this.errorHandler(new TemplateFileNotFound());
-    }
+      if (!_.isString(url) || !url || !buffer || !_.isBuffer(buffer)) {
+        this.errorHandler(new OriginHandlerError());
+      }
 
-    if (cache) {
-      setCache(url, data);
-    }
+      this.messageHandler(`Template URL parsed: ${url}`);
 
-    const endTimestamp = Date.now();
+      const startTimestamp = Date.now();
 
-    await new Promise<void>((resolve) => {
-      decompress(data).then((files) => {
-        for (const file of files) {
-          const { type, path: filePath, data } = file;
-          if (type === 'directory') {
-            this.volume.mkdirSync(this.getAbsolutePath(filePath), {
-              recursive: true,
-            });
-          } else if (type === 'file') {
-            this.volume.writeFileSync(this.getAbsolutePath(filePath), data, {
-              encoding: 'utf8',
-            });
-          }
+      let data: Buffer;
+
+      const {
+        getCache,
+        setCache = _.noop,
+      } = this.config;
+
+      if (buffer && _.isBuffer(buffer)) {
+        data = buffer;
+      } else {
+        if (_.isFunction(getCache)) {
+          data = await getCache(url);
         }
 
-        resolve();
+        if (_.isBuffer(data)) {
+          this.messageHandler('Hit cache for current template');
+        } else {
+          data = await loadRemoteTemplate(url, {
+            headers,
+            ...({
+              timeout: 90000,
+            }),
+            ...this.config.loader,
+          });
+        }
+      }
+
+      if (!data || !_.isBuffer(data)) {
+        this.errorHandler(new TemplateFileNotFound());
+      }
+
+      if (cache) {
+        setCache(url, data);
+      }
+
+      const endTimestamp = Date.now();
+
+      await new Promise<void>((resolve) => {
+        decompress(data).then((files) => {
+          for (const file of files) {
+            const { type, path: filePath, data } = file;
+            if (type === 'directory') {
+              this.volume.mkdirSync(this.getAbsolutePath(filePath), {
+                recursive: true,
+              });
+            } else if (type === 'file') {
+              this.volume.writeFileSync(this.getAbsolutePath(filePath), data, {
+                encoding: 'utf8',
+              });
+            }
+          }
+
+          resolve();
+        });
       });
-    });
 
-    const duration = endTimestamp - startTimestamp;
+      const duration = endTimestamp - startTimestamp;
 
-    this.messageHandler(`Template downloaded in ${duration}ms`);
-    this.messageHandler('Parsing template config...');
+      this.messageHandler(`Template downloaded in ${duration}ms`);
+      this.messageHandler('Parsing template config...');
 
-    this.templateConfig = this.parseTemplateConfig();
+      this.templateConfig = this.parseTemplateConfig();
 
-    this.messageHandler('Template config parsed successfully');
+      this.messageHandler('Template config parsed successfully');
 
-    return duration;
+      return duration;
+    } catch (e) {
+      this.errorHandler(e);
+    }
   }
 
   public mergeTemplateFiles(removeLine = true) {
