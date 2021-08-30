@@ -100,6 +100,7 @@ export type EntityExistenceChecker = (pathname: string) => Promise<boolean>;
 export type EntityReader = (pathname: string) => Promise<TemplateFileItem>;
 
 export interface ModuleConfigHandlerContext {
+  moduleId: string;
   props: InquirerAnswers;
   context: GeneralHandlerContext;
   exists: EntityExistenceChecker;

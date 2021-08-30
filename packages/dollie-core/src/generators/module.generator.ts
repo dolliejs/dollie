@@ -139,6 +139,7 @@ class ModuleGenerator extends Generator implements Generator {
 
     if (_.isFunction(validate)) {
       const result = await validate({
+        moduleId: this.moduleId,
         props: this.moduleProps,
         context: {
           request: this.request,
@@ -312,6 +313,7 @@ class ModuleGenerator extends Generator implements Generator {
 
   private async generateFilePatterns() {
     const data: ModuleConfigHandlerContext = {
+      moduleId: this.moduleId,
       props: this.moduleProps,
       context: {
         request: this.request,
