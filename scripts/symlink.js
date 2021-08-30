@@ -9,6 +9,7 @@ const _ = require('lodash');
 const symlink = () => {
   const BASE_DIR = path.resolve(__dirname, '..');
   const PROCESS_DIR = path.dirname(process.execPath);
+  const action = process.argv[2] || 'create';
 
   const packagePaths = packages.reduce((result, currentPattern) => {
     return result.concat(glob.sync(currentPattern, {
@@ -24,12 +25,18 @@ const symlink = () => {
       const targetPathname = path.resolve(packagePath, bin[binName]);
       const symlinkPathname = path.resolve(PROCESS_DIR, binName);
 
-      if (fs.existsSync(symlinkPathname)) {
-        continue;
-      }
+      if (action === 'create') {
+        if (fs.existsSync(symlinkPathname)) {
+          console.log('[SYMLINK][CREATE] skip', `${targetPathname} -> ${symlinkPathname}`);
+          continue;
+        }
 
-      console.log('[SYMLINK] ', `${targetPathname} -> ${symlinkPathname}`);
-      fs.symlinkSync(targetPathname, symlinkPathname);
+        console.log('[SYMLINK][CREATE]', `${targetPathname} -> ${symlinkPathname}`);
+        fs.symlinkSync(targetPathname, symlinkPathname);
+      } else if (action === 'remove') {
+        console.log('[SYMLINK][REMOVE]', symlinkPathname);
+        fs.removeSync(symlinkPathname);
+      }
     }
   }
 };

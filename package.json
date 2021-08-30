@@ -18,6 +18,7 @@
     "checksum": "node scripts/check.js",
     "publish": "node scripts/publish.js",
     "symlink": "node scripts/symlink.js",
+    "symlink:remove": "node scripts/symlink.js remove",
     "clean": "node scripts/clean.js"
   },
   "devDependencies": {
