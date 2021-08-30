@@ -198,5 +198,5 @@ export interface Config {
 }
 
 export interface TemplateFileItem extends TemplateEntity {
-  content: FileContent;
+  content?: FileContent;
 }

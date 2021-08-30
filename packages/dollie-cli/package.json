@@ -33,6 +33,7 @@
   "dependencies": {
     "@dollie/core": "^4.0.0",
     "@dollie/origins": "^4.0.0",
+    "@dollie/utils": "^4.0.0",
     "chalk": "^4.1.1",
     "cli-table3": "^0.6.0",
     "commander": "^7.2.0",

@@ -7,6 +7,8 @@ import {
 import {
   isBinaryFileSync,
 } from 'isbinaryfile';
+import gitIgnoreParser from 'gitignore-parser';
+import _ from 'lodash';
 
 /**
  * read template directory tree and flatten them to an array
@@ -17,7 +19,14 @@ import {
 const readEntities = (
   fileSystem: FileSystem = fs,
   pathname = '',
+  gitIgnoreFileContent?: string,
 ) => {
+  let rule: ReturnType<typeof gitIgnoreParser.compile>;
+
+  if (gitIgnoreFileContent && _.isString(gitIgnoreFileContent)) {
+    rule = gitIgnoreParser.compile(gitIgnoreFileContent);
+  }
+
   /**
    * traverse from template root dir
    * @param {FileSystem} fileSystem
@@ -54,6 +63,10 @@ const readEntities = (
 
       let entityName = currentEntityPathname.split('/').pop();
       let isTemplateFile = false;
+
+      if (rule?.denies(relativeOriginalPathname) || rule?.denies(relativePathname)) {
+        return currentResult;
+      }
 
       currentResult.push({
         entityName,

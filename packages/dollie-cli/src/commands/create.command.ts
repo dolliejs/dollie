@@ -18,7 +18,16 @@ import {
 import { OriginHandler } from '@dollie/origins';
 import { CLIConfigSchema } from '../utils/config';
 import { OriginConfigSchema } from '../utils/origins';
-import { ModuleContextConfig } from '@dollie/core/lib/interfaces';
+import {
+  ModuleContextConfig,
+  TemplateFileItem,
+  FileContent,
+} from '@dollie/core/lib/interfaces';
+import {
+  readEntities,
+} from '@dollie/utils';
+import fs from 'fs';
+import path from 'path';
 
 class CreateCommand extends Command implements Command {
   public constructor(
@@ -43,12 +52,45 @@ class CreateCommand extends Command implements Command {
       .requiredOption('-t, --template <id>', 'a template ID that can be understood by selected origin handler')
       .requiredOption('-m, --module <id>', 'the ID of a module to be used by current lifecycle')
       .action(async (name: string) => {
+        console.log(figlet.textSync('dollie.js'));
+
+        const projectBasePathname = process.cwd();
+        const gitIgnoreFilePathname = path.resolve(projectBasePathname, '.gitignore');
+        let gitIgnoreFileContent: string;
+
+        if (fs.existsSync(gitIgnoreFilePathname)) {
+          gitIgnoreFileContent = fs.readFileSync(gitIgnoreFilePathname).toString();
+        }
+
+        const files = readEntities(fs, projectBasePathname, gitIgnoreFileContent).map((entity) => {
+          const {
+            absoluteOriginalPathname,
+            isBinary,
+            isDirectory,
+          } = entity;
+
+          let content: FileContent;
+
+          if (isDirectory) {
+            return entity as TemplateFileItem;
+          }
+
+          content = fs.readFileSync(absoluteOriginalPathname);
+
+          if (!isBinary) {
+            content = content.toString();
+          }
+
+          return {
+            ...entity,
+            content,
+          } as TemplateFileItem;
+        });
+
         const {
           template: templateId,
           module: moduleId,
         } = command.opts();
-
-        console.log(figlet.textSync('dollie.js'));
 
         try {
           const errorLogger = new ErrorLogger();
@@ -60,6 +102,7 @@ class CreateCommand extends Command implements Command {
               moduleId,
               origin: originConfig.origin || {},
               loader: _.get(cliConfig, 'loader'),
+              files,
               onError: (error) => {
                 errorLogger.log(error.message);
                 process.exit(1);

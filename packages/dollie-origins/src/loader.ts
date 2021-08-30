@@ -47,7 +47,11 @@ const loadOrigins = async (originMap: OriginMap = {}): Promise<Origin[]> => {
           }
         }
 
-        if (!source || !_.isString(source) || !validate(source)) {
+        if (
+          !source ||
+          !_.isString(source) ||
+          (process.env.NODE_ENV !== 'development' && !validate(source))
+        ) {
           continue;
         }
 
