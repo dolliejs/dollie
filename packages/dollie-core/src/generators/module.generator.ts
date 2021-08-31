@@ -5,7 +5,6 @@ import {
   TemplateFileItem,
   MergeTable,
   GeneratorResult,
-  FileContent,
   ModuleConfigHandlerContext,
 } from '../interfaces';
 import {
@@ -37,6 +36,7 @@ import {
 } from '../utils/matchers';
 import {
   TemplateEntity,
+  FileContent,
 } from '@dollie/utils';
 import ejs from 'ejs';
 

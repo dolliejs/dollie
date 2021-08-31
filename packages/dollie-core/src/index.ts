@@ -18,6 +18,8 @@ export {
   MergeBlock,
   ConflictSolverData,
   LoaderConfig,
+  ModuleContextConfig,
+  TemplateFileItem,
 } from './interfaces';
 
 export default {

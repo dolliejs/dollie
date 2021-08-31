@@ -27,3 +27,5 @@ export interface GeneralHandlerContext {
   lodash: typeof lodash;
   request: Got;
 }
+
+export type FileContent = string | Buffer;

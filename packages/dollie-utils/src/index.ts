@@ -15,4 +15,5 @@ export {
   MemFS,
   TemplateEntity,
   GeneralHandlerContext,
+  FileContent,
 } from './interfaces';

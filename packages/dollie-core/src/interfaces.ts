@@ -19,11 +19,10 @@ import {
 import {
   GeneralHandlerContext,
   TemplateEntity,
+  FileContent,
 } from '@dollie/utils';
 
 export type ErrorHandler = (error: ContextError | HTTPError) => void;
-
-export type FileContent = string | Buffer;
 
 export type Question<T extends InquirerAnswers = InquirerAnswers> = DistinctQuestion<T>;
 

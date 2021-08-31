@@ -10,6 +10,8 @@ import {
 import inquirer, { Question } from 'inquirer';
 import {
   Context,
+  ModuleContextConfig,
+  TemplateFileItem,
 } from '@dollie/core';
 import {
   ErrorLogger,
@@ -19,12 +21,8 @@ import { OriginHandler } from '@dollie/origins';
 import { CLIConfigSchema } from '../utils/config';
 import { OriginConfigSchema } from '../utils/origins';
 import {
-  ModuleContextConfig,
-  TemplateFileItem,
-  FileContent,
-} from '@dollie/core/lib/interfaces';
-import {
   readEntities,
+  FileContent,
 } from '@dollie/utils';
 import fs from 'fs';
 import path from 'path';

@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import fs from 'fs-extra';
 import fileSystem from 'fs';
 import { readEntities } from './entities';
+import { FileContent } from './interfaces';
 
 const readDirToZipBuffer = async (pathname: string): Promise<Buffer> => {
   if (!pathname || !fs.existsSync(pathname) || !fs.statSync(pathname).isDirectory()) {
@@ -24,7 +25,7 @@ const readDirToZipBuffer = async (pathname: string): Promise<Buffer> => {
       continue;
     }
 
-    let fileContent: string | Buffer = fs.readFileSync(absoluteOriginalPathname) as Buffer;
+    let fileContent: FileContent = fs.readFileSync(absoluteOriginalPathname) as Buffer;
 
     if (!isBinary) {
       fileContent = fileContent.toString();
