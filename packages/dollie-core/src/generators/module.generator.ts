@@ -348,8 +348,8 @@ class ModuleGenerator extends Generator implements Generator {
         request: this.request,
         lodash: _,
       },
-      exists: this.exists,
-      getEntity: this.getEntity,
+      exists: this.exists.bind(this),
+      getEntity: this.getEntity.bind(this),
     };
 
     return {
