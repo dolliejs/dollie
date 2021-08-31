@@ -20,6 +20,7 @@ import {
   ModuleInvalidError,
   ModuleNotFoundError,
   ModuleValidateError,
+  ModulePropsIncompatibleError,
 } from '../errors';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
@@ -78,6 +79,10 @@ class ModuleGenerator extends Generator implements Generator {
 
   public async checkContext() {
     await super.checkContext();
+  }
+
+  public async loadTemplate() {
+    const duration = await super.loadTemplate();
 
     if (!this.volume.existsSync(this.modulePathname)) {
       this.errorHandler(new ModuleNotFoundError(this.moduleId));
@@ -86,10 +91,6 @@ class ModuleGenerator extends Generator implements Generator {
     if (!this.volume.statSync(this.modulePathname).isDirectory()) {
       this.errorHandler(new ModuleInvalidError(this.moduleId));
     }
-  }
-
-  public async loadTemplate() {
-    const duration = await super.loadTemplate();
 
     this.moduleTemplateConfig = _.get(this.templateConfig, `modules.${this.moduleId}`) || {};
     const {
@@ -118,7 +119,10 @@ class ModuleGenerator extends Generator implements Generator {
       };
     });
 
-    this.validateModuleProps();
+    this.messageHandler('Validating module props...');
+    if (!this.validateModuleProps()) {
+      this.errorHandler(new ModulePropsIncompatibleError());
+    }
 
     return duration;
   }
@@ -159,6 +163,8 @@ class ModuleGenerator extends Generator implements Generator {
   }
 
   public copyTemplateFileToCacheTable() {
+    this.messageHandler('Generating module files...');
+
     for (const entity of this.entities) {
       const {
         relativePathname,
@@ -193,11 +199,13 @@ class ModuleGenerator extends Generator implements Generator {
     }
   }
 
-  public mergeTemplateFiles(removeLine = false) {
-    super.mergeTemplateFiles(removeLine);
+  public mergeTemplateFiles() {
+    super.mergeTemplateFiles(false);
   }
 
   public resolveConflicts() {
+    this.messageHandler('Resolving conflicts...');
+
     const solvedMergeTable = Object.keys(this.mergeTable).reduce((result, pathname) => {
       const mergeBlocks = this.mergeTable[pathname];
       const solvedMergeBlocks = mergeBlocks.map((mergeBlock) => {
@@ -228,8 +236,6 @@ class ModuleGenerator extends Generator implements Generator {
     this.mergeTable = solvedMergeTable;
   }
 
-  public runCleanups() {}
-
   public getResult(): GeneratorResult {
     const currentFileTable = _.merge(this.binaryTable, Object.keys(this.mergeTable).reduce((result, pathname) => {
       result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
@@ -244,10 +250,19 @@ class ModuleGenerator extends Generator implements Generator {
       return result;
     }, {} as FileTable);
 
+    this.messageHandler('Generator finished successfully');
+
     return {
       files,
       conflicts: [],
     };
+  }
+
+  protected getCleanupFunctions() {
+    const {
+      cleanups = [],
+    } = this.moduleTemplateConfig;
+    return cleanups;
   }
 
   private parseProjectFiles() {
@@ -280,22 +295,24 @@ class ModuleGenerator extends Generator implements Generator {
       questions = [],
     } = this.moduleTemplateConfig;
 
-    const dependedProps = this.entities.reduce((tempResult, currentEntity) => {
-      const {
-        relativePathname,
-      } = currentEntity;
-      const currentResult = Array.from(tempResult);
-      const spans = mustache.parse(relativePathname);
+    const dependedProps = _.uniq(
+      this.entities.reduce((tempResult, currentEntity) => {
+        const {
+          relativePathname,
+        } = currentEntity;
+        const currentResult = Array.from(tempResult);
+        const spans = mustache.parse(relativePathname);
 
-      for (const span of spans) {
-        const [type, name] = span;
-        if (type === 'name') {
-          currentResult.push(name);
+        for (const span of spans) {
+          const [type, name] = span;
+          if (type === 'name') {
+            currentResult.push(name);
+          }
         }
-      }
 
-      return currentResult;
-    }, []);
+        return currentResult;
+      }, []),
+    );
 
     const providedProps = questions.map((question) => question.name);
 

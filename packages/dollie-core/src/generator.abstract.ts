@@ -12,6 +12,7 @@ import {
   BaseGeneratorConfig,
   ErrorHandler,
   CacheTable,
+  TemplateCleanUpFunction,
 } from './interfaces';
 import * as _ from 'lodash';
 import {
@@ -43,6 +44,8 @@ import { GlobMatcher } from './utils/matchers';
 import {
   merge,
   parseDiffToMergeBlocks,
+  parseFileTextToMergeBlocks,
+  parseMergeBlocksToText,
 } from './diff';
 
 abstract class Generator {
@@ -67,6 +70,7 @@ abstract class Generator {
   // glob pathname matcher
   protected matcher: GlobMatcher;
   protected request: Got;
+  protected cleanups: TemplateCleanUpFunction[];
 
   public constructor(
     protected genericId: string,
@@ -238,6 +242,85 @@ abstract class Generator {
     this.binaryTable = this.handleDeleteFiles<BinaryTable>(this.binaryTable, 'delete');
   }
 
+  public async runCleanups() {
+    this.messageHandler('Running cleanup functions...');
+
+    this.cleanups = this.getCleanupFunctions();
+
+    const clonedTables = {
+      mergeTable: _.clone(this.mergeTable),
+      binaryTable: _.clone(this.binaryTable),
+    };
+
+    const addFile = (pathname: string, content: string) => {
+      if (!clonedTables.mergeTable[pathname]) {
+        clonedTables.mergeTable[pathname] = parseFileTextToMergeBlocks(content);
+      }
+    };
+
+    const addTextFile = addFile;
+
+    const addBinaryFile = (pathname: string, content: Buffer) => {
+      if (!clonedTables.binaryTable[pathname]) {
+        clonedTables.binaryTable[pathname] = content;
+      }
+    };
+
+    const deleteFiles = (patternsList: string[]) => {
+      const matcher = new GlobMatcher({
+        current: patternsList,
+      });
+
+      clonedTables.mergeTable = Object.keys(clonedTables.mergeTable).reduce((result, currentPathname) => {
+        if (!matcher.match(currentPathname, 'current')) {
+          result[currentPathname] = clonedTables.mergeTable[currentPathname];
+        }
+        return result;
+      }, {} as MergeTable);
+
+      clonedTables.binaryTable = Object.keys(clonedTables.binaryTable).reduce((result, currentPathname) => {
+        if (!matcher.match(currentPathname, 'current')) {
+          result[currentPathname] = clonedTables.binaryTable[currentPathname];
+        }
+        return result;
+      }, {} as BinaryTable);
+    };
+
+    const exists = (pathname: string): boolean => {
+      return Boolean(this.mergeTable[pathname]);
+    };
+
+    const getTextFileContent = (pathname: string) => {
+      return parseMergeBlocksToText(this.mergeTable[pathname]);
+    };
+
+    const getBinaryFileBuffer = (pathname: string) => {
+      return this.binaryTable[pathname];
+    };
+
+    for (const cleanup of this.cleanups) {
+      await cleanup({
+        addFile,
+        addTextFile,
+        addBinaryFile,
+        deleteFiles,
+        exists,
+        getTextFileContent,
+        getBinaryFileBuffer,
+      });
+    }
+
+    Object.keys(clonedTables).forEach((tableName) => {
+      this[tableName] = Object.keys(clonedTables[tableName]).reduce((result, pathname) => {
+        const content = clonedTables[tableName][pathname];
+        if (!_.isNull(content)) {
+          result[pathname] = content;
+        }
+        return result;
+      }, {});
+    });
+  }
+
   protected handleDeleteFiles = <T extends Object>(table: T, type: string) => {
     return Object.keys(table).reduce((result, currentPathname) => {
       if (!this.matcher.match(currentPathname, type)) {
@@ -350,8 +433,8 @@ abstract class Generator {
   public abstract queryAllTemplateProps(): void;
   public abstract copyTemplateFileToCacheTable(): void;
   public abstract resolveConflicts(): void;
-  public abstract runCleanups(): void;
   public abstract getResult(): GeneratorResult;
+  protected abstract getCleanupFunctions(): TemplateCleanUpFunction[];
 }
 
 export default Generator;

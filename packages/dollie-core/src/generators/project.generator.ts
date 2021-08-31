@@ -240,77 +240,6 @@ class ProjectGenerator extends Generator implements Generator {
     }
   }
 
-  public async runCleanups() {
-    this.messageHandler('Running cleanup functions...');
-
-    const clonedTables = {
-      mergeTable: _.clone(this.mergeTable),
-      binaryTable: _.clone(this.binaryTable),
-    };
-
-    const cleanups = (_.get(this.templateConfig, 'cleanups') || [])
-      .concat(this.targetedExtendTemplateIds.reduce((result, templateId) => {
-        const currentCleanups = _.get(this.templateConfig, `extendTemplates.${templateId}.cleanups`) || [];
-        return result.concat(currentCleanups);
-      }, []))
-      .filter((cleanup) => _.isFunction(cleanup)) as TemplateCleanUpFunction[];
-
-    const addFile = (pathname: string, content: string) => {
-      if (!clonedTables.mergeTable[pathname]) {
-        clonedTables.mergeTable[pathname] = parseFileTextToMergeBlocks(content);
-      }
-    };
-
-    const addTextFile = addFile;
-
-    const addBinaryFile = (pathname: string, content: Buffer) => {
-      if (!clonedTables.binaryTable[pathname]) {
-        clonedTables.binaryTable[pathname] = content;
-      }
-    };
-
-    const deleteFiles = (pathnameList: string[]) => {
-      for (const pathname of pathnameList) {
-        clonedTables.mergeTable[pathname] = null;
-        clonedTables.binaryTable[pathname] = null;
-      }
-    };
-
-    const exists = (pathname: string): boolean => {
-      return Boolean(this.mergeTable[pathname]);
-    };
-
-    const getTextFileContent = (pathname: string) => {
-      return parseMergeBlocksToText(this.mergeTable[pathname]);
-    };
-
-    const getBinaryFileBuffer = (pathname: string) => {
-      return this.binaryTable[pathname];
-    };
-
-    for (const cleanup of cleanups) {
-      await cleanup({
-        addFile,
-        addTextFile,
-        addBinaryFile,
-        deleteFiles,
-        exists,
-        getTextFileContent,
-        getBinaryFileBuffer,
-      });
-    }
-
-    Object.keys(clonedTables).forEach((tableName) => {
-      this[tableName] = Object.keys(clonedTables[tableName]).reduce((result, pathname) => {
-        const content = clonedTables[tableName][pathname];
-        if (!_.isNull(content)) {
-          result[pathname] = content;
-        }
-        return result;
-      }, {});
-    });
-  }
-
   public getResult(): GeneratorResult {
     let files = Object.keys(this.mergeTable).reduce((result, pathname) => {
       result[pathname] = parseMergeBlocksToText(this.mergeTable[pathname]);
@@ -341,6 +270,15 @@ class ProjectGenerator extends Generator implements Generator {
       '/' +
       templateId +
       (pathname ? `/${pathname}` : '');
+  }
+
+  protected getCleanupFunctions() {
+    return (_.get(this.templateConfig, 'cleanups') || [])
+      .concat(this.targetedExtendTemplateIds.reduce((result, templateId) => {
+        const currentCleanups = _.get(this.templateConfig, `extendTemplates.${templateId}.cleanups`) || [];
+        return result.concat(currentCleanups);
+      }, []))
+      .filter((cleanup) => _.isFunction(cleanup)) as TemplateCleanUpFunction[];
   }
 
   private async generateFilePatterns() {

@@ -10,6 +10,7 @@ const errorCodeMap = {
   ERR_MODULE_NOT_FOUND: 'ERR_MODULE_NOT_FOUND',
   ERR_MODULE_INVALID: 'ERR_MODULE_INVALID',
   ERR_MODULE_VALIDATE_FAILED: 'ERR_MODULE_VALIDATE_FAILED',
+  ERR_MODULE_PROPS_INCOMPATIBLE: 'ERR_MODULE_PROPS_INCOMPATIBLE',
 };
 
 class BaseError extends Error {
@@ -88,6 +89,12 @@ export class ModuleValidateError extends ContextError {
       errorCodeMap.ERR_MODULE_VALIDATE_FAILED,
       `Validation for module ${moduleId} failed due to template author's config`,
     );
+  }
+}
+
+export class ModulePropsIncompatibleError extends ContextError {
+  public constructor() {
+    super(errorCodeMap.ERR_MODULE_PROPS_INCOMPATIBLE, 'Module props incompatible');
   }
 }
 

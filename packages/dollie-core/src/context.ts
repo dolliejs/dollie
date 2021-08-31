@@ -45,7 +45,8 @@ class Context {
           await lifecycleExecutor.call(this);
         }
       }
-      return this.generator.getResult();
+      const result = this.generator.getResult();
+      return result;
     }
 
     protected async bootstrap() {

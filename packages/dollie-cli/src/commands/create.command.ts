@@ -45,10 +45,9 @@ class CreateCommand extends Command implements Command {
 
     command
       .description('create a module in an exist project')
-      .arguments('[name]')
       .requiredOption('-t, --template <id>', 'a template ID that can be understood by selected origin handler')
       .requiredOption('-m, --module <id>', 'the ID of a module to be used by current lifecycle')
-      .action(async (name: string) => {
+      .action(async () => {
         console.log(figlet.textSync('dollie.js'));
 
         const projectBasePathname = process.cwd();
@@ -122,7 +121,7 @@ class CreateCommand extends Command implements Command {
           const result = await context.generate();
 
           if (result) {
-            writeGeneratedFiles(result, name);
+            writeGeneratedFiles(result);
           }
         } catch {}
       });

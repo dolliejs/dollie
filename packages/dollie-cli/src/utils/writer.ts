@@ -4,9 +4,9 @@ import {
 import fs from 'fs-extra';
 import path from 'path';
 
-const writeGeneratedFiles = (data: GeneratorResult, projectName: string) => {
-  const { files = { } } = data;
-  const destinationPathname = path.resolve(process.cwd(), projectName);
+const writeGeneratedFiles = (data: GeneratorResult, generalName = '') => {
+  const { files = {} } = data;
+  const destinationPathname = path.resolve(process.cwd(), generalName);
 
   if (
     fs.existsSync(destinationPathname) &&

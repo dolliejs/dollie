@@ -91,7 +91,7 @@ export interface TemplateCleanupData {
   getBinaryFileBuffer: (pathname: string) => Buffer;
 }
 
-export type TemplateCleanUpFunction = (data: TemplateCleanupData) => MergeTable;
+export type TemplateCleanUpFunction = (data: TemplateCleanupData) => void;
 export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
 
 export type ModuleEntityAlias = Record<string, string>;
@@ -114,6 +114,7 @@ export interface ModuleTemplateConfig {
   files?: {
     delete?: (string | ModuleDeleteConfigHandler)[];
   };
+  cleanups?: TemplateCleanUpFunction[];
   validate?: (context: ModuleConfigHandlerContext) => Promise<boolean>;
 }
 
