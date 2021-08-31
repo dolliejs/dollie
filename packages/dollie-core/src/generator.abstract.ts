@@ -13,6 +13,7 @@ import {
   ErrorHandler,
   CacheTable,
   TemplateCleanUpFunction,
+  TemplateCleanupData,
 } from './interfaces';
 import * as _ from 'lodash';
 import {
@@ -71,6 +72,7 @@ abstract class Generator {
   protected matcher: GlobMatcher;
   protected request: Got;
   protected cleanups: TemplateCleanUpFunction[];
+  // protected customTemplateCleanupData: Partial<TemplateCleanupData> = {};
 
   public constructor(
     protected genericId: string,
@@ -435,6 +437,7 @@ abstract class Generator {
   public abstract resolveConflicts(): void;
   public abstract getResult(): GeneratorResult;
   protected abstract getCleanupFunctions(): TemplateCleanUpFunction[];
+  // protected abstract getClonedTables(): ClonedTables;
 }
 
 export default Generator;

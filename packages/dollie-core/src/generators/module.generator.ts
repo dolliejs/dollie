@@ -285,6 +285,7 @@ class ModuleGenerator extends Generator implements Generator {
 
       if (!isBinary && _.isString(content)) {
         this.fileTable[relativePathname] = content;
+        this.cacheTable[relativePathname] = [diff(content)];
         continue;
       }
     }
