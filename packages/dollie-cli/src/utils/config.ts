@@ -13,6 +13,7 @@ import {
 interface CLIConfigSchema {
   loader?: LoaderConfig;
   cache?: CacheConfig;
+  origin?: Record<string, string>;
 }
 
 interface CacheConfig {

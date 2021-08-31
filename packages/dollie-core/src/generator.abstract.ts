@@ -124,7 +124,7 @@ abstract class Generator {
         },
       );
 
-      if (!_.isString(url) || !url || !buffer || !_.isBuffer(buffer)) {
+      if ((!_.isString(url) || !url) && (!buffer || !_.isBuffer(buffer))) {
         this.errorHandler(new OriginHandlerError());
       }
 
@@ -173,12 +173,18 @@ abstract class Generator {
         decompress(data).then((files) => {
           for (const file of files) {
             const { type, path: filePath, data } = file;
+            const currentAbsolutePathname = this.getAbsolutePath(filePath);
+
+            if (currentAbsolutePathname === TEMPLATE_CACHE_PATHNAME_PREFIX) {
+              continue;
+            }
+
             if (type === 'directory') {
-              this.volume.mkdirSync(this.getAbsolutePath(filePath), {
+              this.volume.mkdirSync(currentAbsolutePathname, {
                 recursive: true,
               });
             } else if (type === 'file') {
-              this.volume.writeFileSync(this.getAbsolutePath(filePath), data, {
+              this.volume.writeFileSync(currentAbsolutePathname, data, {
                 encoding: 'utf8',
               });
             }
@@ -285,7 +291,7 @@ abstract class Generator {
   }
 
   private getAbsolutePath(pathname: string) {
-    const relativePathname = pathname.split('/').slice(1).join('/');
+    const relativePathname = pathname.split(path.sep).slice(1).join(path.sep);
     return path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, relativePathname);
   }
 

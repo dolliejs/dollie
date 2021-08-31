@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import fs from 'fs-extra';
 import fileSystem from 'fs';
+import path from 'path';
 import { readEntities } from './entities';
 import { FileContent } from './interfaces';
 
@@ -9,7 +10,14 @@ const readDirToZipBuffer = async (pathname: string): Promise<Buffer> => {
     throw new Error('There is no files to read');
   }
 
-  const entities = readEntities(fileSystem, pathname);
+  const gitIgnoreFilePathname = path.resolve(pathname, '.gitignore');
+  let gitIgnoreFileContent = '';
+
+  if (fs.existsSync(gitIgnoreFilePathname)) {
+    gitIgnoreFileContent = fs.readFileSync(gitIgnoreFilePathname).toString();
+  }
+
+  const entities = readEntities(fileSystem, pathname, `.git\n${gitIgnoreFileContent}`);
 
   const zipFile = new JSZip();
 
@@ -31,7 +39,7 @@ const readDirToZipBuffer = async (pathname: string): Promise<Buffer> => {
       fileContent = fileContent.toString();
     }
 
-    zipFile.file(relativeOriginalPathname, fileContent, {
+    zipFile.file(`local_dev_template/${relativeOriginalPathname}`, fileContent, {
       binary: isBinary,
     });
   }

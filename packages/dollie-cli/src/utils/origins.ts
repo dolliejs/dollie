@@ -9,13 +9,12 @@ import {
 } from './read-json';
 
 export interface OriginConfigSchema {
-  origin?: Record<string, string>;
   origins?: Record<string, string>;
   selectedOriginId?: string;
 }
 
 export const readOriginConfig = (key?: string): any => {
-  return readJson(ORIGIN_CONFIG_PATHNAME, key);
+  return readJson(ORIGIN_CONFIG_PATHNAME, key) || {};
 };
 
 const writeOriginConfig = (key: string, value: any) => {
@@ -45,7 +44,7 @@ export const switchSelectedOrigin = (newOriginId: string) => {
     return;
   }
 
-  const internalOriginHandlerIdList = ['github', 'gitlab'];
+  const internalOriginHandlerIdList = ['github', 'gitlab', 'dev'];
 
   const origins = readOriginConfig('origins');
 

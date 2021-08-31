@@ -9,6 +9,7 @@ import requireFromString from 'require-from-string';
 import {
   githubOrigin,
   gitlabOrigin,
+  devOrigin,
 } from './index';
 import path from 'path';
 import {
@@ -79,6 +80,10 @@ const loadOrigins = async (originMap: OriginMap = {}): Promise<Origin[]> => {
     {
       name: 'gitlab',
       handler: gitlabOrigin,
+    },
+    {
+      name: 'dev',
+      handler: devOrigin,
     },
   ].concat(result);
 };

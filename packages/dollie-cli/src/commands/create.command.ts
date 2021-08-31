@@ -40,7 +40,6 @@ class CreateCommand extends Command implements Command {
   protected createCommand(command: commander.Command) {
     const {
       cliConfig,
-      originConfig,
       originHandler,
     } = this;
 
@@ -98,7 +97,7 @@ class CreateCommand extends Command implements Command {
             type: 'module',
             generator: {
               moduleId,
-              origin: originConfig.origin || {},
+              origin: cliConfig.origin || {},
               loader: _.get(cliConfig, 'loader'),
               files,
               onError: (error) => {

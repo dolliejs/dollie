@@ -70,6 +70,7 @@ class ModuleGenerator extends Generator implements Generator {
   }
 
   public initialize() {
+    this.volume.mkdirSync(TEMPLATE_CACHE_PATHNAME_PREFIX, { recursive: true });
     this.messageHandler('Parsing project files...');
     this.parseProjectFiles();
     this.messageHandler('Initialization finished successfully');

@@ -243,7 +243,6 @@ class InitCommand extends Command implements Command {
   protected createCommand(command: commander.Command) {
     const {
       cliConfig,
-      originConfig,
       originHandler,
     } = this;
 
@@ -261,7 +260,7 @@ class InitCommand extends Command implements Command {
           const context = new Context(template, {
             type: 'project',
             generator: {
-              origin: originConfig.origin || {},
+              origin: cliConfig.origin || {},
               loader: _.get(cliConfig, 'loader'),
               onError: (error) => {
                 errorLogger.log(error.message);

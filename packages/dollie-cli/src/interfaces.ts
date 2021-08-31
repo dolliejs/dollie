@@ -1,6 +1,5 @@
 import { OriginHandler } from '@dollie/origins';
 import commander from 'commander';
-import Command from './command.abstract';
 import { CLIConfigSchema } from './utils/config';
 import { OriginConfigSchema } from './utils/origins';
 

@@ -1,6 +1,9 @@
 import fs from 'fs-extra';
 import { OriginHandler } from '../interfaces';
 import _ from 'lodash';
+import {
+  readDirToZipBuffer,
+} from '@dollie/utils';
 
 export default (async (id, config = {}, context) => {
   if (process.env.NODE_ENV !== 'development') {
@@ -29,10 +32,10 @@ export default (async (id, config = {}, context) => {
     );
   }
 
-  // TODO: read zip file
+  const buffer = await readDirToZipBuffer(templatePathname);
 
   return {
-    // buffer:
+    buffer,
     cache: false,
   };
 }) as OriginHandler;
