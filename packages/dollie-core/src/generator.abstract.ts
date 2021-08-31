@@ -13,7 +13,7 @@ import {
   ErrorHandler,
   CacheTable,
   TemplateCleanUpFunction,
-  TemplateCleanupData,
+  ClonedTables,
 } from './interfaces';
 import * as _ from 'lodash';
 import {
@@ -249,10 +249,7 @@ abstract class Generator {
 
     this.cleanups = this.getCleanupFunctions();
 
-    const clonedTables = {
-      mergeTable: _.clone(this.mergeTable),
-      binaryTable: _.clone(this.binaryTable),
-    };
+    const clonedTables = this.getClonedTables();
 
     const addFile = (pathname: string, content: string) => {
       if (!clonedTables.mergeTable[pathname]) {
@@ -289,7 +286,7 @@ abstract class Generator {
     };
 
     const exists = (pathname: string): boolean => {
-      return Boolean(this.mergeTable[pathname]);
+      return Boolean(clonedTables.projectMergeTable[pathname]);
     };
 
     const getTextFileContent = (pathname: string) => {
@@ -330,6 +327,15 @@ abstract class Generator {
       }
       return result;
     }, {} as T);
+  };
+
+  protected getClonedTables(): ClonedTables {
+    return {
+      mergeTable: _.clone(this.mergeTable),
+      cacheTable: _.clone(this.cacheTable),
+      binaryTable: _.clone(this.binaryTable),
+      projectMergeTable: _.clone(this.mergeTable),
+    };
   };
 
   private parseTemplateConfig() {
@@ -437,7 +443,6 @@ abstract class Generator {
   public abstract resolveConflicts(): void;
   public abstract getResult(): GeneratorResult;
   protected abstract getCleanupFunctions(): TemplateCleanUpFunction[];
-  // protected abstract getClonedTables(): ClonedTables;
 }
 
 export default Generator;

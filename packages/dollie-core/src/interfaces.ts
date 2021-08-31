@@ -200,3 +200,10 @@ export interface Config {
 export interface TemplateFileItem extends TemplateEntity {
   content?: FileContent;
 }
+
+export interface ClonedTables {
+  mergeTable: MergeTable;
+  cacheTable: CacheTable;
+  binaryTable: BinaryTable;
+  projectMergeTable: MergeTable;
+};

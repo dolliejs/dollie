@@ -22,7 +22,6 @@ import {
 } from '../utils/props';
 import {
   diff,
-  parseFileTextToMergeBlocks,
   parseMergeBlocksToText,
 } from '../diff';
 import ejs from 'ejs';

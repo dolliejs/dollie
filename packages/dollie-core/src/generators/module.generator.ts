@@ -13,7 +13,7 @@ import {
 import Generator from '../generator.abstract';
 import * as _ from 'lodash';
 import {
-  diff, parseMergeBlocksToText,
+  diff, parseFileTextToMergeBlocks, parseMergeBlocksToText,
 } from '../diff';
 import {
   ParameterInvalidError,
@@ -47,6 +47,7 @@ class ModuleGenerator extends Generator implements Generator {
   private moduleTemplateConfig: ModuleTemplateConfig = {};
   private moduleProps: InquirerAnswers = {};
   private fileTable: FileTable = {};
+  private projectMergeTable: MergeTable = {};
 
   public constructor(
     templateId: string,
@@ -265,6 +266,15 @@ class ModuleGenerator extends Generator implements Generator {
     return cleanups;
   }
 
+  protected getClonedTables() {
+    return {
+      cacheTable: _.clone(this.cacheTable),
+      binaryTable: _.clone(this.binaryTable),
+      mergeTable: _.clone(this.mergeTable),
+      projectMergeTable: _.clone(this.projectMergeTable),
+    };
+  }
+
   private parseProjectFiles() {
     for (const fileItem of this.files) {
       const {
@@ -285,7 +295,7 @@ class ModuleGenerator extends Generator implements Generator {
 
       if (!isBinary && _.isString(content)) {
         this.fileTable[relativePathname] = content;
-        this.cacheTable[relativePathname] = [diff(content)];
+        this.projectMergeTable[relativePathname] = parseFileTextToMergeBlocks(content);
         continue;
       }
     }
