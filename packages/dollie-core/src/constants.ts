@@ -4,10 +4,10 @@ const EXTEND_TEMPLATE_PATHNAME_PREFIX = '/extends';
 const MAIN_TEMPLATE_PATHNAME_PREFIX = '/main';
 const TEMPLATE_FILE_PREFIX = '__template.';
 const TEMPLATE_CONFIG_FILE_NAMES = [
-  'dollie.json',
   'dollie.js',
-  '.dollie.json',
   '.dollie.js',
+  'dollie.json',
+  '.dollie.json',
 ];
 const EXTEND_TEMPLATE_PREFIX = '$EXTEND';
 

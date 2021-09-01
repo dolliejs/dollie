@@ -39,7 +39,7 @@ const readDirToZipBuffer = async (pathname: string): Promise<Buffer> => {
       fileContent = fileContent.toString();
     }
 
-    zipFile.file(`local_dev_template/${relativeOriginalPathname}`, fileContent, {
+    zipFile.file(relativeOriginalPathname, fileContent, {
       binary: isBinary,
     });
   }

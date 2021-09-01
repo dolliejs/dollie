@@ -34,8 +34,9 @@ import {
   ParameterInvalidError,
   OriginHandlerNotSpecifiedError,
   OriginHandlerError,
-  TemplateFileNotFound,
+  TemplateFileNotFoundError,
   IllegalTemplateConfigError,
+  TemplateEntryIllegalError,
 } from './errors';
 import {
   FileSystem,
@@ -72,7 +73,7 @@ abstract class Generator {
   protected matcher: GlobMatcher;
   protected request: Got;
   protected cleanups: TemplateCleanUpFunction[];
-  // protected customTemplateCleanupData: Partial<TemplateCleanupData> = {};
+  private templateConfigFilename: string;
 
   public constructor(
     protected genericId: string,
@@ -170,7 +171,7 @@ abstract class Generator {
       }
 
       if (!data || !_.isBuffer(data)) {
-        this.errorHandler(new TemplateFileNotFound());
+        this.errorHandler(new TemplateFileNotFoundError());
       }
 
       if (cache) {
@@ -179,30 +180,47 @@ abstract class Generator {
 
       const endTimestamp = Date.now();
 
-      await new Promise<void>((resolve) => {
-        decompress(data).then((files) => {
-          for (const file of files) {
-            const { type, path: filePath, data } = file;
-            const currentAbsolutePathname = this.getAbsolutePath(filePath);
+      const templatePackageFiles = await decompress(data);
 
-            if (currentAbsolutePathname === TEMPLATE_CACHE_PATHNAME_PREFIX) {
-              continue;
-            }
+      const templateConfigFiles: Array<decompress.File & { priority: number }> = templatePackageFiles.map((file) => {
+        const { path: filePath } = file;
+        const filename = path.basename(filePath);
 
-            if (type === 'directory') {
-              this.volume.mkdirSync(currentAbsolutePathname, {
-                recursive: true,
-              });
-            } else if (type === 'file') {
-              this.volume.writeFileSync(currentAbsolutePathname, data, {
-                encoding: 'utf8',
-              });
-            }
-          }
+        return {
+          ...file,
+          priority: TEMPLATE_CONFIG_FILE_NAMES.indexOf(filename),
+        };
+      })
+        .filter((file) => file.priority !== -1)
+        .sort((previousFile, nextFile) => previousFile.priority - nextFile.priority);
 
-          resolve();
-        });
-      });
+      if (templateConfigFiles.length === 0) {
+        this.errorHandler(new TemplateEntryIllegalError());
+      }
+
+      const { path: templateConfigFilePathname } = templateConfigFiles[0];
+      const templatePackageBasePathname = path.dirname(templateConfigFilePathname);
+      this.templateConfigFilename = path.basename(templateConfigFilePathname);
+
+      for (const file of templatePackageFiles) {
+        const { type, path: filePath, data } = file;
+
+        const currentAbsolutePathname = this.getAbsolutePath(templatePackageBasePathname, filePath);
+
+        if (currentAbsolutePathname === TEMPLATE_CACHE_PATHNAME_PREFIX) {
+          continue;
+        }
+
+        if (type === 'directory') {
+          this.volume.mkdirSync(currentAbsolutePathname, {
+            recursive: true,
+          });
+        } else if (type === 'file') {
+          this.volume.writeFileSync(currentAbsolutePathname, data, {
+            encoding: 'utf8',
+          });
+        }
+      }
 
       const duration = endTimestamp - startTimestamp;
 
@@ -385,34 +403,24 @@ abstract class Generator {
     } as TemplateConfig;
   }
 
-  private getAbsolutePath(pathname: string) {
-    const relativePathname = pathname.split(path.sep).slice(1).join(path.sep);
+  private getAbsolutePath(basePathname: string, pathname: string) {
+    const relativePathname = path.relative(basePathname, pathname);
     return path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, relativePathname);
   }
 
   private getTemplateConfig() {
-    let configFileName: string;
+    const configFilename = this.templateConfigFilename;
 
-    for (const fileName of TEMPLATE_CONFIG_FILE_NAMES) {
-      if (this.checkFile(fileName)) {
-        configFileName = fileName;
-        break;
-      }
-    }
+    this.messageHandler(`Read template config from ${configFilename}`);
+    const dollieConfigFileContent = this.readTemplateFileBuffer(configFilename).toString();
 
-    if (!configFileName) {
-      return {} as TemplateConfig;
-    }
-
-    const dollieConfigFileContent = this.readTemplateFileBuffer(configFileName).toString();
-
-    if (configFileName.endsWith('.json')) {
+    if (configFilename.endsWith('.json')) {
       try {
         return JSON.parse(dollieConfigFileContent) as TemplateConfig;
       } catch {
         return {} as TemplateConfig;
       }
-    } else if (configFileName.endsWith('.js')) {
+    } else if (configFilename.endsWith('.js')) {
       this.validateTemplateJSConfig(dollieConfigFileContent);
       return (requireFromString(dollieConfigFileContent) || {}) as TemplateConfig;
     } else {

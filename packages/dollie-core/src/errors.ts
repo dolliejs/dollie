@@ -59,9 +59,15 @@ export class OriginHandlerError extends ContextError {
   }
 }
 
-export class TemplateFileNotFound extends ContextError {
+export class TemplateFileNotFoundError extends ContextError {
   public constructor() {
     super(errorCodeMap.ERR_TEMPLATE_FILE_NOT_FOUND, 'Template file not found');
+  }
+}
+
+export class TemplateEntryIllegalError extends ContextError {
+  public constructor() {
+    super(errorCodeMap.ERR_TEMPLATE_ENTRY_ILLEGAL, 'Template entry illegal, cannot find any configuration file');
   }
 }
 
