@@ -115,7 +115,7 @@ abstract class Generator {
     this.messageHandler(`Start downloading template ${this.templateName}`);
 
     try {
-      // get url and headers from origin handler
+      // get url and headers or a buffer from origin handler
       const {
         url,
         headers,
@@ -134,7 +134,11 @@ abstract class Generator {
         this.errorHandler(new OriginHandlerError());
       }
 
-      this.messageHandler(`Template URL parsed: ${url}`);
+      if (url && _.isString(url)) {
+        this.messageHandler(`Template URL parsed: ${url}`);
+      } else if (buffer && _.isBuffer(buffer)) {
+        this.messageHandler('Template package buffer received');
+      }
 
       const startTimestamp = Date.now();
 
