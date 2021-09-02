@@ -1,25 +1,30 @@
-const glob = require('glob');
 const path = require('path');
-const { packages = [] } = require(path.resolve(__dirname, '../lerna.json'));
 const fs = require('fs-extra');
+const getPaths = require('../utils/paths');
 
 const clean = () => {
+  const paths = getPaths();
   const cwd = path.resolve(__dirname, '..');
-  const paths = packages.reduce((result, pattern) => {
-    const paths = glob.sync(pattern, {
-      cwd,
-    });
-    return result.concat(paths);
-  }, []);
+
+  const fileMap = {
+    lib: './lib',
+    modules: './node_modules',
+    lock: './package-lock.json',
+  };
+
+  const types = process.argv[2]
+    ? process.argv[2].split(',')
+    : Object.keys(fileMap);
 
   for (const packagePath of paths) {
-    const libPath = path.resolve(cwd, packagePath, './lib');
-    const nodeModulesPath = path.resolve(cwd, packagePath, './node_modules');
-    const lockFilePath = path.resolve(cwd, packagePath, './package-lock.json');
-    console.log('[CLEAN] ', packagePath);
-    fs.removeSync(libPath);
-    fs.removeSync(nodeModulesPath);
-    fs.removeSync(lockFilePath);
+    for (const type of types) {
+      if (!fileMap[type]) {
+        continue;
+      }
+      const currentPath = path.resolve(cwd, packagePath, fileMap[type]);
+      console.log('[CLEAN]', currentPath);
+      fs.removeSync(currentPath);
+    }
   }
 };
 

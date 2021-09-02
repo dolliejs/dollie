@@ -5,16 +5,7 @@
   },
   "references": [
     {
-      "path": "packages/dollie-cli"
+      "path": "packages/*"
     },
-    {
-      "path": "packages/dollie-core"
-    },
-    {
-      "path": "packages/dollie-origins"
-    },
-    {
-      "path": "packages/dollie-utils"
-    }
   ]
 }
