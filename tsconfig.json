@@ -1,11 +1,6 @@
 {
-  "files": [],
   "compilerOptions": {
     "allowJs": true
   },
-  "references": [
-    {
-      "path": "packages/*"
-    },
-  ]
+  "include": ["packages/**/src/**/*.ts"]
 }
