@@ -1,7 +1,10 @@
 const getPaths = require('../utils/paths');
 const path = require('path');
 const { program } = require('commander');
-const { execSync } = require('child_process');
+const {
+  spawn,
+  spawnSync,
+} = require('child_process');
 const fs = require('fs-extra');
 
 const build = (watch = false, selectedPackages = []) => {
@@ -55,9 +58,16 @@ const build = (watch = false, selectedPackages = []) => {
     }
 
     console.log(`[BUILD]${watch ? '[WATCH]' : ''}`, name);
-    fs.removeSync(path.resolve(pathname, './lib'));
-    execSync(`tsc${watch ? '--watch' : ''}`, {
+
+    if (!watch) {
+      fs.removeSync(path.resolve(pathname, './lib'));
+    }
+
+    const execute = watch ? spawn : spawnSync;
+
+    execute('tsc', (watch ? ['--watch'] : []), {
       cwd: pathname,
+      stdio: 'inherit',
     });
   }
 };

@@ -1,12 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "watch:utils": "cd packages/dollie-utils && npm run build:watch",
-    "watch:cli": "cd packages/dollie-cli && npm run build:watch",
-    "watch:core": "cd packages/dollie-core && npm run build:watch",
-    "watch:origins": "cd packages/dollie-origins && npm run build:watch",
-    "init-watch": "npm run build",
-    "watch": "concurrently \"npm:watch:*\"",
+    "watch": "node scripts/build.js --watch",
     "build": "node scripts/build.js",
     "docs:start": "dumi dev",
     "docs:build": "dumi build",
