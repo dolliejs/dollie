@@ -113,6 +113,7 @@ export interface ModuleTemplateConfig {
   alias?: ModuleEntityAlias;
   files?: {
     delete?: (string | ModuleDeleteConfigHandler)[];
+    merge?: string[];
   };
   cleanups?: TemplateCleanUpFunction[];
   validate?: (context: ModuleConfigHandlerContext) => Promise<boolean>;

@@ -59,8 +59,9 @@ const getProjectFileConfigGlobs = async (
 const getModuleFileConfigGlobs = async (
   moduleConfig: ModuleTemplateConfig,
   data: ModuleConfigHandlerContext,
+  type: string,
 ) => {
-  const patterns: (string | ModuleConfigHandlerContext)[] = _.get(moduleConfig, 'files.delete') || [];
+  const patterns: (string | ModuleConfigHandlerContext)[] = _.get(moduleConfig, 'files.' + type) || [];
 
   const result: string[] = [];
 

@@ -295,6 +295,7 @@ class ModuleGenerator extends Generator implements Generator {
 
       if (!isBinary && _.isString(content)) {
         this.fileTable[relativePathname] = content;
+        this.cacheTable[relativePathname] = [diff(content)];
         this.projectMergeTable[relativePathname] = parseFileTextToMergeBlocks(content);
         continue;
       }
@@ -352,12 +353,17 @@ class ModuleGenerator extends Generator implements Generator {
       getEntity: this.getEntity.bind(this),
     };
 
-    return {
-      delete: await getModuleFileConfigGlobs(
+    const patterns = {};
+
+    for (const type of ['merge', 'delete']) {
+      patterns[type] = await getModuleFileConfigGlobs(
         this.moduleTemplateConfig,
         data,
-      ),
-    };
+        type,
+      );
+    }
+
+    return patterns;
   }
 
   private checkFileChanged(
