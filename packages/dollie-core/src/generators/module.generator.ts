@@ -13,7 +13,10 @@ import {
 import Generator from '../generator.abstract';
 import * as _ from 'lodash';
 import {
-  diff, parseFileTextToMergeBlocks, parseMergeBlocksToText,
+  diff,
+  parseFileTextToMergeBlocks,
+  parseMergeBlocksToText,
+  parseDiffToMergeBlocks,
 } from '../diff';
 import {
   ParameterInvalidError,
@@ -152,7 +155,7 @@ class ModuleGenerator extends Generator implements Generator {
           lodash: _,
         },
         exists: this.exists.bind(this),
-        getEntity: this.getEntity.bind(this),
+        getFileContent: this.getFileContent.bind(this),
       });
 
       if (_.isBoolean(result) && !result) {
@@ -350,7 +353,7 @@ class ModuleGenerator extends Generator implements Generator {
         lodash: _,
       },
       exists: this.exists.bind(this),
-      getEntity: this.getEntity.bind(this),
+      getFileContent: this.getFileContent.bind(this),
     };
 
     const patterns = {};
@@ -385,12 +388,17 @@ class ModuleGenerator extends Generator implements Generator {
     return false;
   }
 
-  private async exists(pathname: string) {
+  private exists(pathname: string) {
     return this.files.findIndex((file) => file.relativeOriginalPathname === pathname) !== -1;
   }
 
-  private async getEntity(pathname: string) {
-    return this.files.find((file) => file.absoluteOriginalPathname === pathname);
+  private getFileContent(pathname: string) {
+    const diffs = this.cacheTable[pathname];
+    if (!_.isArray(diffs) || diffs.length === 0) {
+      return '';
+    }
+    const currentFileDiff = diffs[0];
+    return parseMergeBlocksToText(parseDiffToMergeBlocks(currentFileDiff));
   }
 }
 

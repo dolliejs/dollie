@@ -95,15 +95,15 @@ export type TemplateCleanUpFunction = (data: TemplateCleanupData) => void;
 export type ExtendTemplateConfig = Record<string, Omit<TemplateConfig, 'extendTemplates'>>;
 
 export type ModuleEntityAlias = Record<string, string>;
-export type EntityExistenceChecker = (pathname: string) => Promise<boolean>;
-export type EntityReader = (pathname: string) => Promise<TemplateFileItem>;
+export type EntityExistenceChecker = (pathname: string) => boolean;
+export type EntityReader = (pathname: string) => FileContent;
 
 export interface ModuleConfigHandlerContext {
   moduleId: string;
   props: InquirerAnswers;
   context: GeneralHandlerContext;
   exists: EntityExistenceChecker;
-  getEntity: EntityReader;
+  getFileContent: EntityReader;
 }
 
 export type ModuleDeleteConfigHandler = (data: ModuleConfigHandlerContext) => Promise<string | string[]>;
