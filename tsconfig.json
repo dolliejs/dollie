@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "allowJs": true
+    "allowJs": true,
+    "paths": {
+      "@dollie/*": ["packages/*/src"]
+    }
   },
-  "include": ["packages/**/src/**/*.ts"]
 }
