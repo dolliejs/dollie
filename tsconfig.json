@@ -2,7 +2,10 @@
   "compilerOptions": {
     "allowJs": true,
     "paths": {
-      "@dollie/*": ["packages/*/src"]
+      "@dollie/*": ["packages/**/*/src"]
     }
   },
+  "exclude": [
+    "packages/**/*.js"
+  ]
 }
