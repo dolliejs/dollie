@@ -1,0 +1,164 @@
+@import './variables.less';
+
+.markdown blockquote {
+  border-radius: @border-radius;
+  background-color: lighten(@bg-primary, 60%);
+  color: @blockquote-text-primary;
+}
+
+pre[class*="language-"] {
+  border-radius: @border-radius;
+  border-color: lighten(@border-primary, 10%);
+}
+
+.__dumi-default-menu-inner {
+  ul.__dumi-default-menu-list {
+    > li {
+      margin: 0 15px;
+
+      > a {
+        border-radius: @border-radius;
+      }
+    }
+
+    li {
+      span {
+        color: @text-secondary;
+      }
+    }
+
+    a {
+      :hover {
+        color: @text-dark;
+        transition: all @transition-delay;
+      }
+
+      &.active {
+        color: @bg-primary;
+
+        > span {
+          color: @bg-primary;
+        }
+      }
+    }
+  }
+}
+
+.__dumi-default-menu {
+  &[data-mode='site'] {
+    .__dumi-default-menu-list {
+      > li {
+        margin-bottom: 10px;
+
+        > a.active, > a:hover {
+          background: lighten(@bg-primary, 60%);
+        }
+
+        > a:hover {
+          color: @blockquote-text-primary;
+        }
+
+        > a.active {
+          color: @bg-primary;
+        }
+      }
+    }
+
+    &[data-mobile-show] {
+      box-shadow: @box-shadow;
+    }
+
+    &::after {
+      display: none;
+    }
+  }
+}
+
+.__dumi-default-navbar {
+  background-color: white;
+
+
+  nav {
+    > span {
+      & + *:not(a) {
+        margin-left: 10px;
+      }
+
+      > a {
+        padding: 10px;
+        transition: all @transition-delay;
+
+        &:not(.active) {
+          color: rgba(@text-dark, .6);
+
+          &:hover {
+            background-color: lighten(@bg-primary, 60%);
+            color: @bg-primary;
+            border-radius: @border-radius;
+            transition: all @transition-delay;
+          }
+        }
+
+        &.active {
+          background-color: lighten(@bg-primary, 60%);
+          color: @bg-primary;
+          border-radius: @border-radius;
+
+          &::after {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+
+  &-logo {
+    font-size: 22px;
+    color: white;
+  }
+}
+
+.__dumi-default-search-input {
+  background-color: rgba(@blockquote-text-primary, 10%);
+  border-radius: @border-radius;
+}
+
+.__dumi-default-dark-switch {
+  display: none;
+}
+
+.__dumi-default-menu-nav-list {
+  > li {
+    margin: 0 15px;
+    margin-bottom: 10px;
+
+    > a {
+      &.active, &:hover {
+        background-color: lighten(@bg-primary, 60%);
+        color: @blockquote-text-primary;
+        border-radius: @border-radius;
+      }
+    }
+  }
+}
+
+pre {
+  color: #333 !important;
+}
+
+[data-prefers-color=dark] {
+  .markdown a {
+    color: #844d28 !important;
+  }
+}
+
+.__dumi-default-search {
+  > ul {
+    border: 0;
+    box-shadow: @box-shadow;
+  }
+}
+
+.__dumi-site-tree {
+  border-radius: @border-radius;
+}

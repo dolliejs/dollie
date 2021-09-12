@@ -1,9 +1,10 @@
 @import (reference) '~dumi-theme-default/src/style/variables.less';
+@import '../style/variables.less';
 
 .__dumi-site-tree {
   padding: 16px;
-  border: 1px solid @c-border;
-  border-radius: 2px;
+  border: 1px solid lighten(@border-primary, 10%);
+  border-radius: @border-radius;
   background-color: @c-light-bg;
 
   [data-prefers-color=dark] & {
