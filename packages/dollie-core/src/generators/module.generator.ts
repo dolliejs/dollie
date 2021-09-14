@@ -60,6 +60,7 @@ class ModuleGenerator extends Generator implements Generator {
   ) {
     super(templateId, config);
     this.modulePathname = TEMPLATE_CACHE_PATHNAME_PREFIX + '/modules/' + this.moduleId;
+    this.templateName = templateId;
   }
 
   public checkInputs() {
