@@ -24,7 +24,7 @@ const readEntities = (
   let rule: ReturnType<typeof gitIgnoreParser.compile>;
 
   if (gitIgnoreFileContent && _.isString(gitIgnoreFileContent)) {
-    rule = gitIgnoreParser.compile(gitIgnoreFileContent);
+    rule = gitIgnoreParser.compile(`${gitIgnoreFileContent}\n.git`);
   }
 
   /**
