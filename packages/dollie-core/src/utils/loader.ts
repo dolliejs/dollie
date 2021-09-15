@@ -8,7 +8,7 @@ import {
 import fs from 'fs';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
-  TEMPLATE_FILE_PREFIX,
+  TEMPLATE_FILE_IDENTITY,
 } from '../constants';
 import {
   LoaderConfig,
@@ -98,9 +98,9 @@ const readTemplateEntities = (
     let relativePathname = initialRelativePathname;
     let absolutePathname = initialAbsolutePathname;
 
-    if (initialEntityName.startsWith(TEMPLATE_FILE_PREFIX)) {
+    if (initialEntityName.startsWith(TEMPLATE_FILE_IDENTITY)) {
       isTemplateFile = true;
-      entityName = initialEntityName.slice(TEMPLATE_FILE_PREFIX.length);
+      entityName = initialEntityName.slice(TEMPLATE_FILE_IDENTITY.length);
       relativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${entityName}`;
       absolutePathname = `${absoluteDirectoryPathname ? `${absoluteDirectoryPathname}/` : ''}${entityName}`;
     }

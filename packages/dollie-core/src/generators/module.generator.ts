@@ -26,7 +26,7 @@ import {
   ModulePropsIncompatibleError,
 } from '../errors';
 import {
-  TEMPLATE_CACHE_PATHNAME_PREFIX, MAIN_TEMPLATE_PATHNAME_PREFIX,
+  TEMPLATE_CACHE_PATHNAME_PREFIX,
 } from '../constants';
 import {
   readTemplateEntities,
@@ -43,7 +43,6 @@ import {
   FileContent,
 } from '@dollie/utils';
 import ejs from 'ejs';
-import path from 'path';
 
 class ModuleGenerator extends Generator implements Generator {
   private modulePathname: string;
@@ -52,7 +51,6 @@ class ModuleGenerator extends Generator implements Generator {
   private moduleProps: InquirerAnswers = {};
   private fileTable: FileTable = {};
   private projectMergeTable: MergeTable = {};
-  private threeFactorCompareTable: FileTable = {};
 
   public constructor(
     templateId: string,
@@ -178,6 +176,7 @@ class ModuleGenerator extends Generator implements Generator {
         absoluteOriginalPathname,
         isBinary,
         isDirectory,
+        isTemplateFile,
       } = entity;
 
       if (isDirectory) {
@@ -192,8 +191,9 @@ class ModuleGenerator extends Generator implements Generator {
         continue;
       }
 
-      const content = ejs.render(contentBuffer.toString(), this.moduleProps);
-      this.threeFactorCompareTable[entityPathname] = content;
+      const content = isTemplateFile
+        ? ejs.render(contentBuffer.toString(), this.moduleProps)
+        : contentBuffer.toString();
 
       if (!_.isArray(this.cacheTable[entityPathname])) {
         this.cacheTable[entityPathname] = [diff(content)];
@@ -208,9 +208,7 @@ class ModuleGenerator extends Generator implements Generator {
   }
 
   public mergeTemplateFiles() {
-    for (const entityPathname of Object.keys(this.cacheTable)) {
-
-    }
+    super.mergeTemplateFiles(false);
   }
 
   public resolveConflicts() {
