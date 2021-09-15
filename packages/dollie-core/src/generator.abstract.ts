@@ -428,14 +428,6 @@ abstract class Generator {
     }
   }
 
-  private checkFile(pathname: string): boolean {
-    const absolutePathname = path.resolve(TEMPLATE_CACHE_PATHNAME_PREFIX, pathname);
-    return (
-      this.volume.existsSync(absolutePathname) &&
-      this.volume.statSync(absolutePathname).isFile()
-    );
-  }
-
   private readTemplateFileBuffer(pathname: string): Buffer {
     return this.volume.readFileSync(path.resolve(
       TEMPLATE_CACHE_PATHNAME_PREFIX,

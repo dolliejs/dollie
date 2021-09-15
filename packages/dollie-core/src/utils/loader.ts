@@ -8,6 +8,7 @@ import {
 import fs from 'fs';
 import {
   TEMPLATE_CACHE_PATHNAME_PREFIX,
+  TEMPLATE_FILE_IDENTITY_LEGACY,
   TEMPLATE_FILE_IDENTITY,
 } from '../constants';
 import {
@@ -98,9 +99,20 @@ const readTemplateEntities = (
     let relativePathname = initialRelativePathname;
     let absolutePathname = initialAbsolutePathname;
 
-    if (initialEntityName.startsWith(TEMPLATE_FILE_IDENTITY)) {
+    if (
+      initialEntityName.startsWith(TEMPLATE_FILE_IDENTITY_LEGACY) ||
+      initialEntityName.endsWith(TEMPLATE_FILE_IDENTITY)
+    ) {
       isTemplateFile = true;
-      entityName = initialEntityName.slice(TEMPLATE_FILE_IDENTITY.length);
+    }
+
+    if (initialEntityName.startsWith(TEMPLATE_FILE_IDENTITY_LEGACY)) {
+      entityName = initialEntityName.slice(TEMPLATE_FILE_IDENTITY_LEGACY.length);
+    } else if (initialEntityName.endsWith(TEMPLATE_FILE_IDENTITY)) {
+      entityName = initialEntityName.slice(0, initialEntityName.length - TEMPLATE_FILE_IDENTITY.length);
+    }
+
+    if (isTemplateFile) {
       relativePathname = `${relativeDirectoryPathname ? `${relativeDirectoryPathname}/` : ''}${entityName}`;
       absolutePathname = `${absoluteDirectoryPathname ? `${absoluteDirectoryPathname}/` : ''}${entityName}`;
     }
