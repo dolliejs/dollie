@@ -21,7 +21,7 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import {
   loadOrigins, OriginHandler, Origin,
-} from '@dollie/origin';
+} from '@dollie/origins';
 import {
   getCacheFromFilesystem,
   setCacheToFilesystem,
